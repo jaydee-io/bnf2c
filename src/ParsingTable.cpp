@@ -35,12 +35,53 @@
 #include <iterator>
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::generate(const Grammar & grammar)
+void ParsingTable::generateStates(const Grammar & grammar)
 {
-    generateItemSets(m_statesSet, grammar);
-    generateNewStates(m_statesSet);
+    ParserState startSet;
+    startSet.numState = 0;
+    startSet.addRule(grammar.getStartRule());
+    startSet.close(grammar);
+    m_statesSet.push_back(startSet);
 
-//    outputItemSets(std::cout, m_statesSet);
+    for(StatesSet::iterator it = m_statesSet.begin(); it != m_statesSet.end(); ++it)
+    {
+        ParserState & state = *it;
+        std::unordered_map<Dictionnary::Index, ParserState> newStates;
+
+        for(Item & item : state.items)
+        {
+            if(item.dot < item.rule.symbols.size())
+            {
+                ParserState & newState = newStates[item.rule.symbols[item.dot].name];
+                newState.addRule(item.rule, item.dot + 1);
+                item.nextState = &newState;
+            }
+        }
+
+        for(std::pair<const Dictionnary::Index, ParserState> & newStatePair : newStates)
+        {
+            ParserState & newState = newStatePair.second;
+
+            newState.numState = m_statesSet.size();
+            newState.close(grammar);
+
+            StatesSet::iterator it = std::find(m_statesSet.begin(), m_statesSet.end(), newState);
+            if(it == m_statesSet.end())
+            {
+                m_statesSet.push_back(std::move(newState));
+
+                for(Item & item : state.items)
+                    if(item.nextState == &newState)
+                        item.nextState = &m_statesSet.back();
+            }
+            else
+            {
+                for(Item & item : state.items)
+                    if(item.nextState == &newState)
+                        item.nextState = &(*it);
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,66 +100,9 @@ void ParsingTable::output(OutputFormatter & of, const Grammar & grammar) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::generateItemSets(StatesSet & itemSets, const Grammar & grammar)
+void ParsingTable::outputDebug(std::ostream & os) const
 {
-    ParserState startSet;
-    startSet.numState = 0;
-    startSet.addRule(grammar.getStartRule());
-    startSet.close(grammar);
-    itemSets.push_back(startSet);
-
-    for(StatesSet::iterator it = itemSets.begin(); it != itemSets.end(); ++it)
-    {
-        ParserState & state = *it;
-        std::unordered_map<Dictionnary::Index, ParserState> newStates;
-
-        for(Item & item : state.items)
-        {
-            if(item.dot < item.rule.symbols.size())
-                newStates[item.rule.symbols[item.dot].name].addRule(item.rule, item.dot + 1);
-        }
-
-        for(std::pair<const Dictionnary::Index, ParserState> & newState : newStates)
-        {
-            newState.second.numState = itemSets.size();
-            newState.second.close(grammar);
-
-            if(std::find(itemSets.begin(), itemSets.end(), newState.second) == itemSets.end())
-                itemSets.push_back(newState.second);
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::generateNewStates(StatesSet & itemSets)
-{
-    for(ParserState & set : itemSets)
-    {
-        for(Item & item : set.items)
-            if(item.getType() == Item::Type::SHIFT)
-                item.nextState = findSetContaining(itemSets, item);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-const ParserState * ParsingTable::findSetContaining(const StatesSet & itemSets, const Item & item)
-{
-    Item itemShifted = item;
-    itemShifted.dot++;
-
-    for(const ParserState & set : itemSets)
-    {
-        if(set.contains(itemShifted))
-            return &set;
-    }
-
-    return nullptr;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::outputItemSets(std::ostream & os, const StatesSet & itemSets) const
-{
-    for(const ParserState & itemSet : itemSets)
+    for(const ParserState & itemSet : m_statesSet)
     {
         os << "--------------------------------------------------" << std::endl;
         os << itemSet << std::endl;

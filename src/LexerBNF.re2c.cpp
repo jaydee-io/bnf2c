@@ -98,8 +98,8 @@ void LexerBNF::nextToken(Token & token)
         identifier = [a-zA-Z0-9_-]+;
         paramName  = [a-zA-Z0-9_-:]+;
 
-        [ ]+  { continue; }
-        [\t]+ { m_state.tabs++; continue; }
+        [ ]+ { continue; }
+        [\t] { m_state.tabs++; continue; }
 
         "\n\r"|"\r\n"|"\n"|"\r" { token.type = TokenType::NEW_LINE; m_state.line++; m_state.lastNewLine = m_state.input; m_state.tabs = 0; break; }
         "::="                   { token.type = TokenType::AFFECTATION; break; }
@@ -114,7 +114,7 @@ void LexerBNF::nextToken(Token & token)
         "bnf2c:"paramName { token.type = TokenType::PARAM_NAME;   break; }
         '"'[^"]*'"'       { token.type = TokenType::PARAM_VALUE;  break; }
 
-        "*\/"  {            token.type = TokenType::END_OF_INPUT; break; }
+        "*\/"  {                  token.type = TokenType::END_OF_INPUT; break; }
         "\000" { m_state.input--; token.type = TokenType::END_OF_INPUT; break; }
         [^]    { m_state.input--; token.type = TokenType::ERROR;        break; }
         */

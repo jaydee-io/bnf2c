@@ -53,9 +53,6 @@ enum class TokenType
 
 struct Token
 {
-    friend std::ostream & operator<<(std::ostream & os, const Token & token);
-
-
     TokenType    type;
     const char * value;
     const char * end;

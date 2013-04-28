@@ -26,10 +26,10 @@
 */
 
 typedef enum {
-    FOIS,
-    PLUS,
+    MULT,
+    ADD,
     ZERO,
-    UN,
+    ONE,
     EOI,
     ERROR
 } T_TOKEN;
@@ -55,7 +55,6 @@ T_TOKEN token;
 
 void nextToken(void)
 {
-    const char * marker;
     token = ERROR;
 
     for(;;)
@@ -70,10 +69,10 @@ void nextToken(void)
 
         [ \t]+ { continue; }
 
-        "*" { token = FOIS; break; }
-        "+" { token = PLUS; break; }
+        "*" { token = MULT; break; }
+        "+" { token = ADD;  break; }
         "0" { token = ZERO; break; }
-        "1" { token = UN;   break; }
+        "1" { token = ONE;  break; }
 
         "\000" { token = EOI;   break; }
         [^]    { token = ERROR; break; }
@@ -91,7 +90,7 @@ void pop(int nbStates)
     currentState -= nbStates;
 }
 
-void pushStates(int state)
+void pushState(int state)
 {
     stateStack[currentState++] = state;
 }
@@ -99,12 +98,12 @@ void pushStates(int state)
 /*!bnf2c
 <START> ::= <E>
 
-<E> ::= <E> FOIS <B> { printf("Multiply %d with %d\n", valueStack[currentValue - 2], valueStack[currentValue - 1]); valueStack[currentValue - 2] = valueStack[currentValue - 2] * valueStack[currentValue - 1]; currentValue--; }
-      | <E> PLUS <B> { printf("Add %d with %d\n",    valueStack[currentValue - 2], valueStack[currentValue - 1]); valueStack[currentValue - 2] = valueStack[currentValue - 2] + valueStack[currentValue - 1]; currentValue--; }
+<E> ::= <E> MULT <B> { printf("Multiply %d with %d\n", valueStack[currentValue - 2], valueStack[currentValue - 1]); valueStack[currentValue - 2] = valueStack[currentValue - 2] * valueStack[currentValue - 1]; currentValue--; }
+      | <E> ADD  <B> { printf("Add %d with %d\n",    valueStack[currentValue - 2], valueStack[currentValue - 1]); valueStack[currentValue - 2] = valueStack[currentValue - 2] + valueStack[currentValue - 1]; currentValue--; }
       | <B>
 
 <B> ::= ZERO { valueStack[currentValue++] = 0; }
-<B> ::= UN   { valueStack[currentValue++] = 1; }
+<B> ::= ONE  { valueStack[currentValue++] = 1; }
 */
 
 int main(int argc, char ** argv)
@@ -119,14 +118,14 @@ int main(int argc, char ** argv)
 
     while((state != STATE_ERROR) && (state != STATE_ACCEPT))
     {
-        pushStates(state);
+        pushState(state);
         state = parseFunction(token);
     }
 
     if(state == STATE_ERROR)
         printf("Error\n");
     else
-        printf("The result of \"%s\" = %d\n", argv[1], valueStack[currentValue]);
+        printf("The result of \"%s\" = %d\n", argv[1], valueStack[currentValue - 1]);
 
     return 0;
 }

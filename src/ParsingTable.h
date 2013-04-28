@@ -43,16 +43,12 @@ class ParsingTable
         typedef std::list<ParserState> StatesSet;
 
     public :
-        void generate(const Grammar & grammar);
+        void generateStates(const Grammar & grammar);
         void output(OutputFormatter & of, const Grammar & grammar) const;
 
+        void outputDebug(std::ostream & os) const;
+
     protected :
-        void generateItemSets(StatesSet & statesSet, const Grammar & grammar);
-        void generateNewStates(StatesSet & statesSet);
-
-        const ParserState * findSetContaining(const StatesSet & statesSet, const Item & item);
-
-        void outputItemSets(std::ostream & os, const StatesSet & statesSet) const;
         void outputActions(OutputFormatter & of, const Grammar & grammar) const;
         void outputBranchSwitch(OutputFormatter & of, const Grammar & grammar) const;
         void outputBranchTable(OutputFormatter & of, const Grammar & grammar) const;

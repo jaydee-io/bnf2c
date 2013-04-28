@@ -213,7 +213,7 @@ void ParserState::outputActionItems(OutputFormatter & of, const Grammar & gramma
         // Accept
         if((item.rule == grammar.getStartRule()) && (item.dot >= item.rule.symbols.size()))
         {
-            os << of.indent << "case " << of.endOfInputToken << " : return " << of.acceptState << "; break;" << std::endl;
+            os << of.indent << "case " << of.tokenPrefix << of.endOfInputToken << " : return " << of.acceptState << "; break;" << std::endl;
             outCases.insert(os.str());
             continue;
         }
@@ -280,16 +280,10 @@ std::ostream & operator <<(std::ostream & os, const Item & item)
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator <<(std::ostream & os, const ParserState & itemSet)
 {
-    ParserState::ItemList::const_iterator it = itemSet.items.begin();
-
     os << "Set " << itemSet.numState << std::endl;
-    if(it != itemSet.items.end())
-    {
-        os << *it << std::endl;
 
-        for(++it; it != itemSet.items.end(); ++it)
-            os << *it << std::endl;
-    }
+    for(Item item : itemSet.items)
+        os << item << std::endl;
 
     return os;
 }

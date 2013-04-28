@@ -3,20 +3,16 @@ include MakeNames.mk
 ###############################################################################
 # Global targets
 ###############################################################################
-.phony : clean
+.PHONY : clean test $(EXEC_BNF2C)
 
 all : $(EXEC_BNF2C)
 
 # bnf2c
-$(EXEC_BNF2C) : src/$(EXEC_BNF2C)
-
-src/$(EXEC_BNF2C) :
+$(EXEC_BNF2C) :
 	@(cd src; $(MAKE))
 
 # Test
-test : test/$(EXEC_TEST)
-
-test/$(EXEC_TEST) :
+test :
 	@(cd test; $(MAKE))
 
 

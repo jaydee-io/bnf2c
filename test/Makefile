@@ -4,16 +4,24 @@ include ../MakeNames.mk
 EXEC_DIR=../src
 INC_DIR=-I$(EXEC_DIR)
 
-OUTPUTS+= bnf_sample.c
+TESTS+= bnf_sample_test
 
 ###############################################################################
 # Global targets
 ###############################################################################
-all : $(OUTPUTS)
+all : $(TESTS)
+
+bnf_sample : bnf_sample.o
+	@echo "[ LINK] $@"
+	@$(LD) $(LD_FLAGS) -o $@ $^
+	
+bnf_sample_test : bnf_sample
+	@echo "[$@] 1+0+1*1+1+1+1+1+1*1"
+	@$^ 1+0+1*1+1+1+1+1+1*1
 
 clean :
-	rm -f $(EXEC_TEST)
-	rm -f $(OUTPUTS)
+	rm -f bnf_sample bnf_sample.o bnf_sample.c
+	rm -f $(TESTS)
 
 ###############################################################################
 # Rules

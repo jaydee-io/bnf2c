@@ -79,7 +79,7 @@ class ParserState
         int      numState;
 
     protected :
-        bool    m_isClosed = false;
+        bool m_isClosed = false;
 };
 
 std::ostream & operator <<(std::ostream & os, const Item & item);

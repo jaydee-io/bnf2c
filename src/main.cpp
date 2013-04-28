@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <cstring>
 
 int main(int argc, char ** argv)
 {
@@ -27,6 +28,7 @@ int main(int argc, char ** argv)
     ParsingTable    table;
     std::string     source;
 
+
     // Find each "bnf2c" block
     while(lexer.nextBnf2c(source))
     {
@@ -43,10 +45,22 @@ int main(int argc, char ** argv)
         }
     }
 
-    table.generate(parser.grammar);
-    table.output(parser.outputFormatter, parser.grammar);
+    if(!parser.grammar.rules.empty())
+    {
+        table.generateStates(parser.grammar);
+        table.output(parser.outputFormatter, parser.grammar);
+    }
 
     parser.outputFormatter.outputStream << source << std::endl;
+
+    // Verbose
+    if((argc == 3) && (std::strcmp(argv[2], "-v") == 0))
+    {
+        table.outputDebug(std::cerr);
+        std::cerr << "#Rules = "         << parser.grammar.rules.size()         << std::endl;
+        std::cerr << "#Terminals = "     << parser.grammar.terminals.size()     << std::endl;
+        std::cerr << "#Intermediates = " << parser.grammar.intermediates.size() << std::endl;
+    }
 
     return 0;
 }
