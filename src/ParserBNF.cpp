@@ -90,6 +90,7 @@ ParserBNF::ParserBNF(LexerBNF & lexer)
 
     m_stringParams["bnf2c:output:parseFunction"]    = &outputFormatter.parseFunctionName;
     m_stringParams["bnf2c:output:branchFunction"]   = &outputFormatter.branchFunctionName;
+    m_stringParams["bnf2c:output:exceptions"]       = &outputFormatter.throwedExceptions;
 
     m_stringParams["bnf2c:indent:string"]           = &outputFormatter.indent.string;
     m_uintParams  ["bnf2c:indent:top"]              = &outputFormatter.indent.top;

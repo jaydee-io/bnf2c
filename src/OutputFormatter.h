@@ -64,6 +64,7 @@ struct OutputFormatter
 
     std::string     parseFunctionName  = "parse";
     std::string     branchFunctionName = "branch";
+    std::string     throwedExceptions  = "";
 
     bool            defaultSwitchStatement = false;
     bool            useTableForBranches    = false;

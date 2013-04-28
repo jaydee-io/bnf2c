@@ -136,7 +136,10 @@ void ParsingTable::outputDebug(std::ostream & os) const
 ////////////////////////////////////////////////////////////////////////////////
 void ParsingTable::outputActions(OutputFormatter & of, const Grammar & grammar) const
 {
-    of.outputStream << of.indent << of.stateType << " " << of.parseFunctionName << "(" << of.tokenType << " token)" << std::endl;
+    if(of.throwedExceptions.empty())
+        of.outputStream << of.indent << of.stateType << " " << of.parseFunctionName << "(" << of.tokenType << " token)" << std::endl;
+    else
+        of.outputStream << of.indent << of.stateType << " " << of.parseFunctionName << "(" << of.tokenType << " token) throw(" << of.throwedExceptions << ")" << std::endl;
     of.outputStream << of.indent << '{' << std::endl;
     of.indent++;
     of.outputStream << of.indent << "switch(" << of.topState << ")" << std::endl;
