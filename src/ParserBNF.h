@@ -31,7 +31,7 @@
 #define __PARSERBNF_H__
 #include "LexerBNF.h"
 #include "Grammar.h"
-#include "OutputFormatter.h"
+#include "Options.h"
 #include "Rule.h"
 
 #include <string>
@@ -56,9 +56,9 @@ class ParserBNF
         typedef std::unordered_map<std::string, unsigned int *> UintParamMap;
 
     public :
-        ParserBNF(LexerBNF & lexer);
+        ParserBNF(LexerBNF & lexer, Options & output);
 
-        void parse(void) throw(ParsingError);
+        void parseBnf2cBlock(void) throw(ParsingError);
 
     protected :
         void parseRule(Rule & rule) throw(ParsingError);
@@ -66,9 +66,10 @@ class ParserBNF
 
     public :
         Grammar         grammar;
-        OutputFormatter outputFormatter;
 
     protected :
+        Options &       m_options;
+
         LexerBNF &      m_lexer;
         Token           m_token;
 

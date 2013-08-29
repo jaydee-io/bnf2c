@@ -20,3 +20,6 @@ test :
 clean :
 	@(cd src;  $(MAKE) $@)
 	@(cd test; $(MAKE) $@)
+	
+clean_test :
+	@(cd test; $(MAKE) clean)

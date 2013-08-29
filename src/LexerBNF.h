@@ -32,6 +32,7 @@
 #include "Token.h"
 
 #include <string>
+#include <ostream>
 
 class LexerBNF
 {
@@ -47,9 +48,9 @@ class LexerBNF
         static const std::string BNF2C_TOKEN;
 
     public :
-        LexerBNF(const char * input);
+        LexerBNF(const std::string & input, std::ostream & output);
 
-        bool nextBnf2c(std::string & source);
+        bool moveToNextBnf2cBlock(void);
         void nextToken(Token & token);
         bool readRuleAction(std::string & ruleAction);
 
@@ -63,7 +64,8 @@ class LexerBNF
         void restoreState(const State & state);
 
     protected :
-        State   m_state;
+        State           m_state;
+        std::ostream &  m_output;
 };
 
 #endif /* __LEXERBNF_H__ */

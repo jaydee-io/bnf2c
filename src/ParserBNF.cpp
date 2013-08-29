@@ -46,7 +46,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator <<(std::ostream & os, const ParsingError & error)
 {
-
     std::string currentLine = error.lexer.getCurrentLine();
 
     os << COLOR_RED "Parsing error" COLOR_RESET " at L" << error.token.line << ":C" << error.token.column << " : " << error.message << std::endl;
@@ -69,35 +68,35 @@ std::ostream & operator <<(std::ostream & os, const ParsingError & error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-ParserBNF::ParserBNF(LexerBNF & lexer)
-: m_lexer(lexer)
+ParserBNF::ParserBNF(LexerBNF & lexer, Options & options)
+: m_options(options), m_lexer(lexer)
 {
-    m_stringParams["bnf2c:state:top"]               = &outputFormatter.topState;
-    m_stringParams["bnf2c:state:pop"]               = &outputFormatter.popState;
-    m_stringParams["bnf2c:state:error"]             = &outputFormatter.errorState;
-    m_stringParams["bnf2c:state:accept"]            = &outputFormatter.acceptState;
+    m_stringParams["bnf2c:state:top"]               = &m_options.topState;
+    m_stringParams["bnf2c:state:pop"]               = &m_options.popState;
+    m_stringParams["bnf2c:state:error"]             = &m_options.errorState;
+    m_stringParams["bnf2c:state:accept"]            = &m_options.acceptState;
 
-    m_stringParams["bnf2c:type:state"]              = &outputFormatter.stateType;
-    m_stringParams["bnf2c:type:token"]              = &outputFormatter.tokenType;
-    m_stringParams["bnf2c:type:intermediate"]       = &outputFormatter.intermediateType;
+    m_stringParams["bnf2c:type:state"]              = &m_options.stateType;
+    m_stringParams["bnf2c:type:token"]              = &m_options.tokenType;
+    m_stringParams["bnf2c:type:intermediate"]       = &m_options.intermediateType;
 
-    m_stringParams["bnf2c:token:shift"]             = &outputFormatter.shiftToken;
-    m_stringParams["bnf2c:token:prefix"]            = &outputFormatter.tokenPrefix;
-    m_stringParams["bnf2c:token:endOfInput"]        = &outputFormatter.endOfInputToken;
+    m_stringParams["bnf2c:token:shift"]             = &m_options.shiftToken;
+    m_stringParams["bnf2c:token:prefix"]            = &m_options.tokenPrefix;
+    m_stringParams["bnf2c:token:endOfInput"]        = &m_options.endOfInputToken;
 
-    m_boolParams  ["bnf2c:generator:defaultSwitch"] = &outputFormatter.defaultSwitchStatement;
-    m_boolParams  ["bnf2c:generator:branchTable"]   = &outputFormatter.useTableForBranches;
+    m_boolParams  ["bnf2c:generator:defaultSwitch"] = &m_options.defaultSwitchStatement;
+    m_boolParams  ["bnf2c:generator:branchTable"]   = &m_options.useTableForBranches;
 
-    m_stringParams["bnf2c:output:parseFunction"]    = &outputFormatter.parseFunctionName;
-    m_stringParams["bnf2c:output:branchFunction"]   = &outputFormatter.branchFunctionName;
-    m_stringParams["bnf2c:output:exceptions"]       = &outputFormatter.throwedExceptions;
+    m_stringParams["bnf2c:output:parseFunction"]    = &m_options.parseFunctionName;
+    m_stringParams["bnf2c:output:branchFunction"]   = &m_options.branchFunctionName;
+    m_stringParams["bnf2c:output:exceptions"]       = &m_options.throwedExceptions;
 
-    m_stringParams["bnf2c:indent:string"]           = &outputFormatter.indent.string;
-    m_uintParams  ["bnf2c:indent:top"]              = &outputFormatter.indent.top;
+    m_stringParams["bnf2c:indent:string"]           = &m_options.indent.string;
+    m_uintParams  ["bnf2c:indent:top"]              = &m_options.indent.top;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserBNF::parse(void) throw(ParsingError)
+void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
 {
     m_lexer.nextToken(m_token);
 
@@ -254,8 +253,8 @@ void ParserBNF::parseParameter(void) throw(ParsingError)
         (*itString->second) = ss.str();
 
         // Check "popState" special parameter
-        if(outputFormatter.popState.find(OutputFormatter::VAR_NB_STATES) == std::string::npos)
-            THROW_PARSING_ERROR("Parameter \"" << paramName << "\" must contains the keyword " << OutputFormatter::VAR_NB_STATES << " to be replaced by the number of states to be poped");
+        if(m_options.popState.find(Options::VAR_NB_STATES) == std::string::npos)
+            THROW_PARSING_ERROR("Parameter \"" << paramName << "\" must contains the keyword " << Options::VAR_NB_STATES << " to be replaced by the number of states to be poped");
 
         return;
     }

@@ -27,11 +27,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __OUTPUTFORMATTER_H__
-#define __OUTPUTFORMATTER_H__
+#ifndef __OPTIONS_H__
+#define __OPTIONS_H__
 #include <string>
-#include <vector>
-#include <iostream>
+#include <ostream>
+#include <fstream>
+#include <getopt.h>
 
 struct Indenter
 {
@@ -45,40 +46,63 @@ struct Indenter
     Indenter & operator --(void);
 };
 
-struct OutputFormatter
+std::ostream & operator <<(std::ostream & os, const Indenter & indenter);
+
+struct CommandLineParsingError
 {
-    static const std::string VAR_NB_STATES;
-
-    std::string     topState           = "topState()";
-    std::string     popState           = "popStates(<NB_STATES>)";
-    std::string     errorState         = "-1";
-    std::string     acceptState        = "-2";
-
-    std::string     stateType          = "int";
-    std::string     tokenType          = "int";
-    std::string     intermediateType   = "int";
-
-    std::string     shiftToken         = "shiftToken()";
-    std::string     tokenPrefix        = "";
-    std::string     endOfInputToken    = "END_OF_INPUT";
-
-    std::string     parseFunctionName  = "parse";
-    std::string     branchFunctionName = "branch";
-    std::string     throwedExceptions  = "";
-
-    bool            defaultSwitchStatement = false;
-    bool            useTableForBranches    = false;
-
-    // Internal
-    std::string     tokenName        = "token";
-    std::string     intermediateName = "intermediate";
-
-    Indenter        indent;
-
-    std::ostream &  outputStream = std::cout;
+    std::string message;
+    int         exitCode;
 };
 
-std::ostream & operator <<(std::ostream & os, const Indenter & indenter);
-std::ostream & operator <<(std::ostream & os, const OutputFormatter & outputFormatter);
+struct Options
+{
+    public :
+        static const std::string VAR_NB_STATES;
 
-#endif /* __OUTPUTFORMATTER_H__ */
+        std::string     topState           = "topState()";
+        std::string     popState           = "popStates(<NB_STATES>)";
+        std::string     errorState         = "-1";
+        std::string     acceptState        = "-2";
+
+        std::string     stateType          = "int";
+        std::string     tokenType          = "int";
+        std::string     intermediateType   = "int";
+
+        std::string     shiftToken         = "shiftToken()";
+        std::string     tokenPrefix        = "";
+        std::string     endOfInputToken    = "END_OF_INPUT";
+
+        std::string     parseFunctionName  = "parse";
+        std::string     branchFunctionName = "branch";
+        std::string     throwedExceptions  = "";
+
+        bool            defaultSwitchStatement = false;
+        bool            useTableForBranches    = false;
+
+        // Internal
+        std::string     tokenName        = "token";
+        std::string     intermediateName = "intermediate";
+
+        Indenter        indent;
+
+    public :
+        void parseArguments(int argc, char ** argv) throw(CommandLineParsingError);
+        static void usage(void);
+
+        std::istream & inputStream(void) throw(CommandLineParsingError);
+        std::ostream & outputStream(void) throw(CommandLineParsingError);
+
+    protected :
+        static const struct option LONG_OPTIONS [];
+        static const char          SHORT_OPTIONS [];
+
+        std::string     m_inputFileName;
+        std::string     m_outputFileName;
+
+        std::ifstream   m_inputFileStream;
+        std::ofstream   m_outputFileStream;
+};
+
+std::ostream & operator <<(std::ostream & os, const Options & options);
+
+#endif /* __OPTIONS_H__ */

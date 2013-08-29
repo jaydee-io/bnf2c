@@ -31,11 +31,11 @@
 #define __PARSINGTABLE_H__
 #include "Grammar.h"
 #include "ParserState.h"
-#include "OutputFormatter.h"
+#include "Options.h"
 
 #include <list>
-#include <ostream>
 #include <cstdint>
+#include <ostream>
 
 class ParsingTable
 {
@@ -44,14 +44,14 @@ class ParsingTable
 
     public :
         void generateStates(const Grammar & grammar);
-        void output(OutputFormatter & of, const Grammar & grammar) const;
+        void outputTable(std::ostream & output, Options & options, const Grammar & grammar) const;
 
-        void outputDebug(std::ostream & os) const;
+        void outputDebug(std::ostream & output) const;
 
     protected :
-        void outputActions(OutputFormatter & of, const Grammar & grammar) const;
-        void outputBranchSwitch(OutputFormatter & of, const Grammar & grammar) const;
-        void outputBranchTable(OutputFormatter & of, const Grammar & grammar) const;
+        void outputActions     (std::ostream & output, Options & options, const Grammar & grammar) const;
+        void outputBranchSwitch(std::ostream & output, Options & options, const Grammar & grammar) const;
+        void outputBranchTable (std::ostream & output, Options & options, const Grammar & grammar) const;
 
     protected :
         StatesSet   m_statesSet;

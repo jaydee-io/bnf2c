@@ -85,110 +85,110 @@ void ParsingTable::generateStates(const Grammar & grammar)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::output(OutputFormatter & of, const Grammar & grammar) const
+void ParsingTable::outputTable(std::ostream & output, Options & options, const Grammar & grammar) const
 {
     // Branches
-    if(of.useTableForBranches)
-        outputBranchTable(of, grammar);
+    if(options.useTableForBranches)
+        outputBranchTable(output, options, grammar);
     else
-        outputBranchSwitch(of, grammar);
+        outputBranchSwitch(output, options, grammar);
 
-    of.outputStream << std::endl;
+    output << std::endl;
 
     // Actions
-    outputActions(of, grammar);
+    outputActions(output, options, grammar);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::outputDebug(std::ostream & os) const
+void ParsingTable::outputDebug(std::ostream & output) const
 {
     for(const ParserState & itemSet : m_statesSet)
     {
-        os << "--------------------------------------------------" << std::endl;
-        os << itemSet << std::endl;
+        output << "--------------------------------------------------" << std::endl;
+        output << itemSet << std::endl;
 
         for(const Item & item : itemSet.items)
         {
             switch(item.getType())
             {
                 case Item::Type::REDUCE :
-                    std::cout << "[R] using rule \"" << item.rule << "\"" << std::endl;
+                    output << "[R] using rule \"" << item.rule << "\"" << std::endl;
                     break;
                 case Item::Type::SHIFT :
                     switch(item.rule.symbols[item.dot].type)
                     {
-                        case Symbol::Type::TERMINAL     : std::cout << item.rule.symbols[item.dot].name << " => [S " << (item.nextState != nullptr ? item.nextState->numState : -1) << "]" << std::endl; break;
-                        case Symbol::Type::INTERMEDIATE : std::cout << item.rule.symbols[item.dot].name << " => [B " << (item.nextState != nullptr ? item.nextState->numState : -1) << "]" << std::endl; break;
-                        default                         : std::cout << "Unknown what to do for \"" << item << "\"" << std::endl;        break;
+                        case Symbol::Type::TERMINAL     : output << item.rule.symbols[item.dot].name << " => [S " << (item.nextState != nullptr ? item.nextState->numState : -1) << "]" << std::endl; break;
+                        case Symbol::Type::INTERMEDIATE : output << item.rule.symbols[item.dot].name << " => [B " << (item.nextState != nullptr ? item.nextState->numState : -1) << "]" << std::endl; break;
+                        default                         : output << "Unknown what to do for \"" << item << "\"" << std::endl;        break;
                     }
 
                     break;
                 default :
-                    std::cout << "Unknown what to do for \"" << item << "\"" << std::endl;
+                    output << "Unknown what to do for \"" << item << "\"" << std::endl;
                     break;
             }
         }
 
-        os << std::endl;
+        output << std::endl;
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::outputActions(OutputFormatter & of, const Grammar & grammar) const
+void ParsingTable::outputActions(std::ostream & output, Options & options, const Grammar & grammar) const
 {
-    if(of.throwedExceptions.empty())
-        of.outputStream << of.indent << of.stateType << " " << of.parseFunctionName << "(" << of.tokenType << " token)" << std::endl;
+    if(options.throwedExceptions.empty())
+        output << options.indent << options.stateType << " " << options.parseFunctionName << "(" << options.tokenType << " token)" << std::endl;
     else
-        of.outputStream << of.indent << of.stateType << " " << of.parseFunctionName << "(" << of.tokenType << " token) throw(" << of.throwedExceptions << ")" << std::endl;
-    of.outputStream << of.indent << '{' << std::endl;
-    of.indent++;
-    of.outputStream << of.indent << "switch(" << of.topState << ")" << std::endl;
-    of.outputStream << of.indent << '{' << std::endl;
-    of.indent++;
+        output << options.indent << options.stateType << " " << options.parseFunctionName << "(" << options.tokenType << " token) throw(" << options.throwedExceptions << ")" << std::endl;
+    output << options.indent << '{' << std::endl;
+    options.indent++;
+    output << options.indent << "switch(" << options.topState << ")" << std::endl;
+    output << options.indent << '{' << std::endl;
+    options.indent++;
     for(const ParserState & itemSet : m_statesSet)
-        itemSet.outputActions(of, grammar);
-    if(of.defaultSwitchStatement)
-        of.outputStream << of.indent << "default : return " << of.errorState << "; break;" << std::endl;
-    of.indent--;
-    of.outputStream << of.indent << '}' << std::endl;
-    of.outputStream << of.indent << "return " << of.errorState << ';' << std::endl;
-    of.indent--;
-    of.outputStream << of.indent << '}' << std::endl;
+        itemSet.outputActions(output, options, grammar);
+    if(options.defaultSwitchStatement)
+        output << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
+    options.indent--;
+    output << options.indent << '}' << std::endl;
+    output << options.indent << "return " << options.errorState << ';' << std::endl;
+    options.indent--;
+    output << options.indent << '}' << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::outputBranchSwitch(OutputFormatter & of, const Grammar & grammar) const
+void ParsingTable::outputBranchSwitch(std::ostream & output, Options & options, const Grammar & grammar) const
 {
-    of.outputStream << of.indent << of.stateType << " " << of.branchFunctionName << "(" << of.intermediateType << " intermediate)" << std::endl;
-    of.outputStream << of.indent << '{' << std::endl;
-    of.indent++;
-    of.outputStream << of.indent << "switch(" << of.topState << ")" << std::endl;
-    of.outputStream << of.indent << '{' << std::endl;
-    of.indent++;
+    output << options.indent << options.stateType << " " << options.branchFunctionName << "(" << options.intermediateType << " intermediate)" << std::endl;
+    output << options.indent << '{' << std::endl;
+    options.indent++;
+    output << options.indent << "switch(" << options.topState << ")" << std::endl;
+    output << options.indent << '{' << std::endl;
+    options.indent++;
     for(const ParserState & itemSet : m_statesSet)
-        itemSet.outputBranchesSwitch(of, grammar);
-    if(of.defaultSwitchStatement)
-        of.outputStream << of.indent << "default : return " << of.errorState << "; break;" << std::endl;
-    of.indent--;
-    of.outputStream << of.indent << '}' << std::endl;
-    of.outputStream << of.indent << "return " << of.errorState << ';' << std::endl;
-    of.indent--;
-    of.outputStream << of.indent << '}' << std::endl;
+        itemSet.outputBranchesSwitch(output, options, grammar);
+    if(options.defaultSwitchStatement)
+        output << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
+    options.indent--;
+    output << options.indent << '}' << std::endl;
+    output << options.indent << "return " << options.errorState << ';' << std::endl;
+    options.indent--;
+    output << options.indent << '}' << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::outputBranchTable(OutputFormatter & of, const Grammar & grammar) const
+void ParsingTable::outputBranchTable(std::ostream & output, Options & options, const Grammar & grammar) const
 {
-    of.outputStream << of.indent << "const " << of.stateType << " " << of.branchFunctionName << "[] = {" << std::endl;
-    of.indent++;
+    output << options.indent << "const " << options.stateType << " " << options.branchFunctionName << "[] = {" << std::endl;
+    options.indent++;
     for(StatesSet::const_iterator it = m_statesSet.begin(); it != m_statesSet.end(); ++it)
     {
         if(it != m_statesSet.begin())
-            of.outputStream << ", " << std::endl;
+            output << ", " << std::endl;
 
-        it->outputBranchesTable(of, grammar);
+        it->outputBranchesTable(output, options, grammar);
     }
-    of.outputStream << std::endl;
-    of.indent--;
-    of.outputStream << of.indent << "};" << std::endl;
+    output << std::endl;
+    options.indent--;
+    output << options.indent << "};" << std::endl;
 }

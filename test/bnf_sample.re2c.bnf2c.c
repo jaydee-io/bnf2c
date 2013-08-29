@@ -25,6 +25,9 @@
    bnf2c:indent:top              = "0"
 */
 
+long long parseFunction(long long token);
+
+
 typedef enum {
     MULT,
     ADD,
@@ -98,10 +101,22 @@ void pushState(int state)
 /*!bnf2c
 <START> ::= <E>
 
-<E> ::= <E> MULT <B> { printf("Multiply %d with %d\n", valueStack[currentValue - 2], valueStack[currentValue - 1]); valueStack[currentValue - 2] = valueStack[currentValue - 2] * valueStack[currentValue - 1]; currentValue--; }
-      | <E> ADD  <B> { printf("Add %d with %d\n",    valueStack[currentValue - 2], valueStack[currentValue - 1]); valueStack[currentValue - 2] = valueStack[currentValue - 2] + valueStack[currentValue - 1]; currentValue--; }
+<E> ::= <E> MULT <B>
+        {
+            // printf("Multiply %d with %d\n", valueStack[currentValue - 2], valueStack[currentValue - 1]);
+            valueStack[currentValue - 2] = valueStack[currentValue - 2] * valueStack[currentValue - 1];
+            currentValue--;
+        }
+      | <E> ADD  <B>
+        {
+            /* printf("Add %d with %d\n", valueStack[currentValue - 2], valueStack[currentValue - 1]); */
+            valueStack[currentValue - 2] = valueStack[currentValue - 2] + valueStack[currentValue - 1];
+            currentValue--;
+        }
       | <B>
+*/
 
+/*!bnf2c
 <B> ::= ZERO { valueStack[currentValue++] = 0; }
 <B> ::= ONE  { valueStack[currentValue++] = 1; }
 */

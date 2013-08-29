@@ -31,10 +31,10 @@
 #define __PARSERSTATE_H__
 #include "Rule.h"
 #include "Grammar.h"
-#include "OutputFormatter.h"
+#include "Options.h"
 
 #include <list>
-#include <iostream>
+#include <ostream>
 
 class ParserState;
 
@@ -64,15 +64,15 @@ class ParserState
         bool contains(const Item & item) const;
         void close(const Grammar & grammar);
 
-        void outputActions (OutputFormatter & of, const Grammar & grammar) const;
-        void outputBranchesSwitch(OutputFormatter & of, const Grammar & grammar) const;
-        void outputBranchesTable(OutputFormatter & of, const Grammar & grammar) const;
+        void outputActions       (std::ostream & output, Options & options, const Grammar & grammar) const;
+        void outputBranchesSwitch(std::ostream & output, Options & options, const Grammar & grammar) const;
+        void outputBranchesTable (std::ostream & output, Options & options, const Grammar & grammar) const;
 
         bool operator ==(const ParserState & set) const;
 
     protected :
-        void outputActionItems(OutputFormatter & of, const Grammar & grammar) const;
-        void outputPopFunction(OutputFormatter & of, int nbStates) const;
+        void outputActionItems(std::ostream & output, Options & options, const Grammar & grammar) const;
+        void outputPopFunction(std::ostream & output, Options & options, int nbStates) const;
 
     public :
         ItemList items;

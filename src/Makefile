@@ -10,7 +10,7 @@ OBJS+= Rule.o
 OBJS+= Grammar.o
 OBJS+= ParserState.o
 OBJS+= ParsingTable.o
-OBJS+= OutputFormatter.o
+OBJS+= Options.o
 OBJS+= main.o
 
 ###############################################################################

@@ -44,16 +44,15 @@
 const std::string LexerBNF::BNF2C_TOKEN("/*!bnf2c");
 
 ////////////////////////////////////////////////////////////////////////////////
-LexerBNF::LexerBNF(const char * input)
-: m_state({input, input, 1, 0})
+LexerBNF::LexerBNF(const std::string & input, std::ostream & output)
+: m_state({input.c_str(), input.c_str(), 1, 0}), m_output(output)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool LexerBNF::nextBnf2c(std::string & source)
+bool LexerBNF::moveToNextBnf2cBlock(void)
 {
     const char * start = m_state.input;
-    source.clear();
 
     while((m_state.input[0] != '\0') && (LexerBNF::BNF2C_TOKEN.compare(0, std::string::npos, m_state.input, LexerBNF::BNF2C_TOKEN.size()) != 0))
     {
@@ -77,8 +76,9 @@ bool LexerBNF::nextBnf2c(std::string & source)
         m_state.input++;
     }
 
-    source.assign(start, m_state.input - start);
-    m_state.input += LexerBNF::BNF2C_TOKEN.size();
+    m_output.write(start, m_state.input - start);
+    if(m_state.input[0] != '\0')
+        m_state.input += LexerBNF::BNF2C_TOKEN.size();
 
     return (m_state.input[0] != '\0');
 }
