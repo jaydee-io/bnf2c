@@ -30,7 +30,6 @@
 #include "Options.h"
 #include "LexerBNF.h"
 #include "ParserBNF.h"
-#include "ParsingTable.h"
 
 #include <string>
 #include <iostream>
@@ -42,20 +41,20 @@ int main(int argc, char ** argv)
     try
     {
         // Parse command line arguments
-        Options options;
-        options.parseArguments(argc, argv);
+        Options cmdLineOptions;
+        cmdLineOptions.parseArguments(argc, argv);
 
         // Open input & output file
-        std::istream & inputStream = options.inputStream();
-        std::ostream & outputStream = options.outputStream();
+        std::istream & inputStream = cmdLineOptions.inputStream();
+        std::ostream & outputStream = cmdLineOptions.outputStream();
 
         // Read input file
         std::string inputBuffer;
         inputBuffer.assign((std::istreambuf_iterator<char>(inputStream)), std::istreambuf_iterator<char>());
 
         // Start parser
-        LexerBNF        lexer(inputBuffer, outputStream);
-        ParserBNF       parser(lexer, options);
+        LexerBNF    lexer(inputBuffer, outputStream);
+        ParserBNF   parser(lexer);
 
         // Find each "bnf2c" block
         while(lexer.moveToNextBnf2cBlock())
@@ -71,13 +70,11 @@ int main(int argc, char ** argv)
             }
         }
 
+        // Command line options prevails over in file options
+        parser.applyOptions(cmdLineOptions);
+
         // Output generated code
-        if(!parser.grammar.rules.empty())
-        {
-            ParsingTable table;
-            table.generateStates(parser.grammar);
-            table.outputTable(outputStream, options, parser.grammar);
-        }
+        parser >> outputStream;
 
         return 0;
     }

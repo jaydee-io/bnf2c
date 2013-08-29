@@ -28,6 +28,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 #include "ParserBNF.h"
+#include "ParsingTable.h"
 
 #include <iomanip>
 #include <sstream>
@@ -68,8 +69,8 @@ std::ostream & operator <<(std::ostream & os, const ParsingError & error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-ParserBNF::ParserBNF(LexerBNF & lexer, Options & options)
-: m_options(options), m_lexer(lexer)
+ParserBNF::ParserBNF(LexerBNF & lexer)
+: m_lexer(lexer)
 {
     m_stringParams["bnf2c:state:top"]               = &m_options.topState;
     m_stringParams["bnf2c:state:pop"]               = &m_options.popState;
@@ -93,6 +94,12 @@ ParserBNF::ParserBNF(LexerBNF & lexer, Options & options)
 
     m_stringParams["bnf2c:indent:string"]           = &m_options.indent.string;
     m_uintParams  ["bnf2c:indent:top"]              = &m_options.indent.top;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ParserBNF::applyOptions(const Options & options)
+{
+    m_options << options;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -171,6 +178,19 @@ void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+std::ostream & ParserBNF::operator >>(std::ostream & os)
+{
+    if(!grammar.rules.empty())
+    {
+        ParsingTable table(grammar, m_options);
+        table.generateStates();
+        table >> os;
+    }
+
+    return os;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void ParserBNF::parseRule(Rule & rule) throw(ParsingError)
 {
     bool endOfRule = false;
@@ -193,6 +213,7 @@ void ParserBNF::parseRule(Rule & rule) throw(ParsingError)
                 rule.addSymbol(grammar.addTerminal(m_token.valueToTerminal()));
                 break;
 
+            // Rule action
             case TokenType::BRACE_OPEN :
             {
                 m_lexer.readRuleAction(rule.action);
@@ -267,6 +288,10 @@ void ParserBNF::parseParameter(void) throw(ParsingError)
             ss >> (*itBool->second);
         else
             ss >> std::boolalpha >> (*itBool->second);
+
+        if(ss.fail())
+            THROW_PARSING_ERROR("Parameter \"" << paramName << "\" conversion failure, value must be boolean");
+
         return;
     }
 

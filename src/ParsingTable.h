@@ -43,18 +43,24 @@ class ParsingTable
         typedef std::list<ParserState> StatesSet;
 
     public :
-        void generateStates(const Grammar & grammar);
-        void outputTable(std::ostream & output, Options & options, const Grammar & grammar) const;
+        ParsingTable(const Grammar & grammar, Options & options);
+
+        void generateStates(void);
+
+        std::ostream & operator >>(std::ostream & os) const;
 
         void outputDebug(std::ostream & output) const;
 
     protected :
-        void outputActions     (std::ostream & output, Options & options, const Grammar & grammar) const;
-        void outputBranchSwitch(std::ostream & output, Options & options, const Grammar & grammar) const;
-        void outputBranchTable (std::ostream & output, Options & options, const Grammar & grammar) const;
+        void outputActions     (std::ostream & output) const;
+        void outputBranchSwitch(std::ostream & output) const;
+        void outputBranchTable (std::ostream & output) const;
 
     protected :
-        StatesSet   m_statesSet;
+        const Grammar & m_grammar;
+        Options &       m_options;
+
+        StatesSet       m_statesSet;
 };
 
 #endif /* __PARSINGTABLE_H__ */

@@ -62,6 +62,12 @@ Indenter & Indenter::operator --(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+bool Indenter::operator !=(const Indenter & indenter) const
+{
+    return (string != indenter.string) || (top != indenter.top) || (indent != indenter.indent);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator <<(std::ostream & os, const Indenter & indenter)
 {
     for(unsigned int i = 0; i < (indenter.top + indenter.indent); i++)
@@ -70,7 +76,11 @@ std::ostream & operator <<(std::ostream & os, const Indenter & indenter)
     return os;
 }
 
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
+Options     Options::DEFAULT;
 const std::string Options::VAR_NB_STATES("<NB_STATES>");
 
 const struct option Options::LONG_OPTIONS [] = {
@@ -233,6 +243,35 @@ std::ostream & Options::outputStream(void) throw(CommandLineParsingError)
 
         return m_outputFileStream;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+Options & Options::operator <<(const Options & options)
+{
+    if(options.topState               != Options::DEFAULT.topState              ) topState               = options.topState;
+    if(options.popState               != Options::DEFAULT.popState              ) popState               = options.popState;
+    if(options.errorState             != Options::DEFAULT.errorState            ) errorState             = options.errorState;
+    if(options.acceptState            != Options::DEFAULT.acceptState           ) acceptState            = options.acceptState;
+    if(options.stateType              != Options::DEFAULT.stateType             ) stateType              = options.stateType;
+    if(options.tokenType              != Options::DEFAULT.tokenType             ) tokenType              = options.tokenType;
+    if(options.intermediateType       != Options::DEFAULT.intermediateType      ) intermediateType       = options.intermediateType;
+    if(options.shiftToken             != Options::DEFAULT.shiftToken            ) shiftToken             = options.shiftToken;
+    if(options.tokenPrefix            != Options::DEFAULT.tokenPrefix           ) tokenPrefix            = options.tokenPrefix;
+    if(options.endOfInputToken        != Options::DEFAULT.endOfInputToken       ) endOfInputToken        = options.endOfInputToken;
+    if(options.parseFunctionName      != Options::DEFAULT.parseFunctionName     ) parseFunctionName      = options.parseFunctionName;
+    if(options.branchFunctionName     != Options::DEFAULT.branchFunctionName    ) branchFunctionName     = options.branchFunctionName;
+    if(options.throwedExceptions      != Options::DEFAULT.throwedExceptions     ) throwedExceptions      = options.throwedExceptions;
+    if(options.defaultSwitchStatement != Options::DEFAULT.defaultSwitchStatement) defaultSwitchStatement = options.defaultSwitchStatement;
+    if(options.useTableForBranches    != Options::DEFAULT.useTableForBranches   ) useTableForBranches    = options.useTableForBranches;
+    if(options.tokenName              != Options::DEFAULT.tokenName             ) tokenName              = options.tokenName;
+    if(options.intermediateName       != Options::DEFAULT.intermediateName      ) intermediateName       = options.intermediateName;
+
+    if(options.indent != Options::DEFAULT.indent) indent = options.indent;
+
+    if(options.m_inputFileName  != Options::DEFAULT.m_inputFileName ) m_inputFileName  = options.m_inputFileName;
+    if(options.m_outputFileName != Options::DEFAULT.m_outputFileName) m_outputFileName = options.m_outputFileName;
+
+    return (*this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

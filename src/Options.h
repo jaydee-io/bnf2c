@@ -44,6 +44,8 @@ struct Indenter
     Indenter & operator --(int);
     Indenter & operator ++(void);
     Indenter & operator --(void);
+
+    bool operator !=(const Indenter & indenter) const;
 };
 
 std::ostream & operator <<(std::ostream & os, const Indenter & indenter);
@@ -57,7 +59,8 @@ struct CommandLineParsingError
 struct Options
 {
     public :
-        static const std::string VAR_NB_STATES;
+        static Options              DEFAULT;
+        static const std::string    VAR_NB_STATES;
 
         std::string     topState           = "topState()";
         std::string     popState           = "popStates(<NB_STATES>)";
@@ -91,6 +94,9 @@ struct Options
 
         std::istream & inputStream(void) throw(CommandLineParsingError);
         std::ostream & outputStream(void) throw(CommandLineParsingError);
+
+        // Overwrite option if the corresponding option in "options" is not default
+        Options & operator <<(const Options & options);
 
     protected :
         static const struct option LONG_OPTIONS [];
