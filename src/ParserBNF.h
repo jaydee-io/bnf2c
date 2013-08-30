@@ -56,22 +56,17 @@ class ParserBNF
         typedef std::unordered_map<std::string, unsigned int *> UintParamMap;
 
     public :
-        ParserBNF(LexerBNF & lexer);
+        ParserBNF(LexerBNF & lexer, Options & options, Grammar & grammar);
 
-        void applyOptions(const Options & options);
         void parseBnf2cBlock(void) throw(ParsingError);
-
-        std::ostream & operator >>(std::ostream & os);
 
     protected :
         void parseRule(Rule & rule) throw(ParsingError);
         void parseParameter(void) throw(ParsingError);
 
-    public :
-        Grammar         grammar;
-
     protected :
-        Options         m_options;
+        Grammar &       m_grammar;
+        Options &       m_options;
 
         LexerBNF &      m_lexer;
         Token           m_token;

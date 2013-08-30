@@ -30,6 +30,8 @@
 #include "Options.h"
 #include "LexerBNF.h"
 #include "ParserBNF.h"
+#include "Grammar.h"
+#include "ParseTable.h"
 
 #include <string>
 #include <iostream>
@@ -53,28 +55,23 @@ int main(int argc, char ** argv)
         inputBuffer.assign((std::istreambuf_iterator<char>(inputStream)), std::istreambuf_iterator<char>());
 
         // Start parser
+        Options     options;
+        Grammar     grammar;
         LexerBNF    lexer(inputBuffer, outputStream);
-        ParserBNF   parser(lexer);
+        ParserBNF   parser(lexer, options, grammar);
 
-        // Find each "bnf2c" block
+        // Find each "bnf2c" block and parse it
         while(lexer.moveToNextBnf2cBlock())
-        {
-            try
-            {
-                parser.parseBnf2cBlock();
-            }
-            catch(const ParsingError & error)
-            {
-                std::cerr << error;
-                return 1;
-            }
-        }
+            parser.parseBnf2cBlock();
 
         // Command line options prevails over in file options
-        parser.applyOptions(cmdLineOptions);
+        options << cmdLineOptions;
 
-        // Output generated code
-        parser >> outputStream;
+        // Output generated code at the end of output file
+        ParseTable table(grammar, options);
+        table.checkGrammar();
+        table.generateStates();
+        table >> outputStream;
 
         return 0;
     }
@@ -84,5 +81,15 @@ int main(int argc, char ** argv)
             std::cerr << e.message << std::endl << std::endl;
         Options::usage();
         return e.exitCode;
+    }
+    catch(const ParsingError & error)
+    {
+        std::cerr << error << std::endl;
+        return 1;
+    }
+    catch(const GeneratingError & e)
+    {
+        std::cerr << e.message << std::endl;
+        return 1;
     }
 }

@@ -28,7 +28,6 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 #include "ParserBNF.h"
-#include "ParsingTable.h"
 
 #include <iomanip>
 #include <sstream>
@@ -69,8 +68,8 @@ std::ostream & operator <<(std::ostream & os, const ParsingError & error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-ParserBNF::ParserBNF(LexerBNF & lexer)
-: m_lexer(lexer)
+ParserBNF::ParserBNF(LexerBNF & lexer, Options & options, Grammar & grammar)
+: m_grammar(grammar), m_options(options), m_lexer(lexer)
 {
     m_stringParams["bnf2c:state:top"]               = &m_options.topState;
     m_stringParams["bnf2c:state:pop"]               = &m_options.popState;
@@ -97,12 +96,6 @@ ParserBNF::ParserBNF(LexerBNF & lexer)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserBNF::applyOptions(const Options & options)
-{
-    m_options << options;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
 {
     m_lexer.nextToken(m_token);
@@ -115,7 +108,7 @@ void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
             case TokenType::INTERMEDIATE :
             {
                 m_lastIntermediate = m_token.valueToIntermediate();
-                Rule rule(grammar.intermediates.add(m_lastIntermediate));
+                Rule rule(m_grammar.intermediates.add(m_lastIntermediate));
 
                 m_lexer.nextToken(m_token);
                 if(m_token.type != TokenType::AFFECTATION)
@@ -123,7 +116,7 @@ void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
 
                 parseRule(rule);
 
-                grammar.addRule(rule);
+                m_grammar.addRule(rule);
                 continue;
                 break;
             }
@@ -131,11 +124,11 @@ void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
             // New alternative to the current parsing rule
             case TokenType::OR :
             {
-                Rule rule(grammar.intermediates.add(m_lastIntermediate));
+                Rule rule(m_grammar.intermediates.add(m_lastIntermediate));
 
                 parseRule(rule);
 
-                grammar.addRule(rule);
+                m_grammar.addRule(rule);
                 continue;
                 break;
             }
@@ -178,19 +171,6 @@ void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream & ParserBNF::operator >>(std::ostream & os)
-{
-    if(!grammar.rules.empty())
-    {
-        ParsingTable table(grammar, m_options);
-        table.generateStates();
-        table >> os;
-    }
-
-    return os;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 void ParserBNF::parseRule(Rule & rule) throw(ParsingError)
 {
     bool endOfRule = false;
@@ -204,13 +184,13 @@ void ParserBNF::parseRule(Rule & rule) throw(ParsingError)
             case TokenType::INTERMEDIATE :
                 if(endOfRule)
                     return;
-                rule.addSymbol(grammar.addIntermediate(m_token.valueToIntermediate()));
+                rule.addSymbol(m_grammar.addIntermediate(m_token.valueToIntermediate()));
                 break;
 
             case TokenType::TERMINAL :
                 if(endOfRule)
                     return;
-                rule.addSymbol(grammar.addTerminal(m_token.valueToTerminal()));
+                rule.addSymbol(m_grammar.addTerminal(m_token.valueToTerminal()));
                 break;
 
             // Rule action

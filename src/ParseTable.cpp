@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
-#include "ParsingTable.h"
+#include "ParseTable.h"
 
 #include <unordered_map>
 #include <string>
@@ -35,13 +35,29 @@
 #include <iterator>
 
 ////////////////////////////////////////////////////////////////////////////////
-ParsingTable::ParsingTable(const Grammar & grammar, Options & options)
+ParseTable::ParseTable(const Grammar & grammar, Options & options)
 : m_grammar(grammar), m_options(options)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::generateStates(void)
+void ParseTable::checkGrammar(void) const throw(GeneratingError)
+{
+    Dictionnary::Index startIndex = m_grammar.intermediates[Grammar::START_RULE];
+
+    if(startIndex == m_grammar.intermediates.end())
+        throw GeneratingError({ "No rule named \"" + Grammar::START_RULE + "\" found !!!" });
+
+    Grammar::RuleMap::size_type nbStartsRules = m_grammar.rules.count(startIndex);
+
+    if(nbStartsRules == 0)
+            throw GeneratingError({ "No rule named \"" + Grammar::START_RULE + "\" found !!!" });
+    else if(nbStartsRules > 1)
+            throw GeneratingError({ "Multiple start rules \"" + Grammar::START_RULE + "\" found !!!" });
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ParseTable::generateStates(void)
 {
     ParserState startSet;
     startSet.numState = 0;
@@ -91,7 +107,7 @@ void ParsingTable::generateStates(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream & ParsingTable::operator >>(std::ostream & os) const
+std::ostream & ParseTable::operator >>(std::ostream & os) const
 {
     // Branches
     if(m_options.useTableForBranches)
@@ -108,7 +124,7 @@ std::ostream & ParsingTable::operator >>(std::ostream & os) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::outputDebug(std::ostream & output) const
+void ParseTable::outputDebug(std::ostream & output) const
 {
     for(const ParserState & itemSet : m_statesSet)
     {
@@ -142,7 +158,7 @@ void ParsingTable::outputDebug(std::ostream & output) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::outputActions(std::ostream & output) const
+void ParseTable::outputActions(std::ostream & output) const
 {
     if(m_options.throwedExceptions.empty())
         output << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(" << m_options.tokenType << " token)" << std::endl;
@@ -165,7 +181,7 @@ void ParsingTable::outputActions(std::ostream & output) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::outputBranchSwitch(std::ostream & output) const
+void ParseTable::outputBranchSwitch(std::ostream & output) const
 {
     output << m_options.indent << m_options.stateType << " " << m_options.branchFunctionName << "(" << m_options.intermediateType << " intermediate)" << std::endl;
     output << m_options.indent << '{' << std::endl;
@@ -185,7 +201,7 @@ void ParsingTable::outputBranchSwitch(std::ostream & output) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParsingTable::outputBranchTable(std::ostream & output) const
+void ParseTable::outputBranchTable(std::ostream & output) const
 {
     output << m_options.indent << "const " << m_options.stateType << " " << m_options.branchFunctionName << "[] = {" << std::endl;
     m_options.indent++;

@@ -37,14 +37,20 @@
 #include <cstdint>
 #include <ostream>
 
-class ParsingTable
+struct GeneratingError
+{
+    const std::string message;
+};
+
+class ParseTable
 {
     protected :
         typedef std::list<ParserState> StatesSet;
 
     public :
-        ParsingTable(const Grammar & grammar, Options & options);
+        ParseTable(const Grammar & grammar, Options & options);
 
+        void checkGrammar(void) const throw(GeneratingError);
         void generateStates(void);
 
         std::ostream & operator >>(std::ostream & os) const;

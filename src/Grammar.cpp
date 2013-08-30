@@ -29,7 +29,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "Grammar.h"
 
-#include <stdexcept>
 #include <iostream>
 
 const std::string Grammar::START_RULE("START");
@@ -43,9 +42,6 @@ void Grammar::addRule(const Rule & rule)
 const Rule & Grammar::getStartRule(void) const
 {
     RuleIterator it = rules.find(intermediates[Grammar::START_RULE]);
-
-    if(it == rules.end())
-        throw std::runtime_error("No rule named \"" + Grammar::START_RULE + "\" found !!!");
 
     return it->second;
 }
