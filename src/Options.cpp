@@ -82,9 +82,11 @@ std::ostream & operator <<(std::ostream & os, const Indenter & indenter)
 ////////////////////////////////////////////////////////////////////////////////
 Options     Options::DEFAULT;
 const std::string Options::VAR_NB_STATES("<NB_STATES>");
+const std::string Options::VERSION("0.1");
 
 const struct option Options::LONG_OPTIONS [] = {
         { "help",                   no_argument,       nullptr, 'h'},
+        { "version",                no_argument,       nullptr, 'v'},
         { "top-state-code",         required_argument, nullptr, 't'},
         { "pop-state-code",         required_argument, nullptr, 'p'},
         { "error-state",            required_argument, nullptr, 'e'},
@@ -107,7 +109,7 @@ const struct option Options::LONG_OPTIONS [] = {
         { "output",                 required_argument, nullptr, 'o'},
         { nullptr,                  no_argument,       nullptr,  0}
 };
-const char Options::SHORT_OPTIONS [] = ":ht:p:e:a:s:y:i:c:r:f:n:b:w:duo:";
+const char Options::SHORT_OPTIONS [] = ":hvt:p:e:a:s:y:i:c:r:f:n:b:w:duo:";
 
 ////////////////////////////////////////////////////////////////////////////////
 void Options::parseArguments(int argc, char ** argv) throw(CommandLineParsingError)
@@ -139,7 +141,16 @@ void Options::parseArguments(int argc, char ** argv) throw(CommandLineParsingErr
             case 'd' : defaultSwitchStatement = true;     break;
             case 'u' : useTableForBranches    = true;     break;
 
-            case 'o' : m_outputFileName.assign(optarg);     break;
+            case 'o' : m_outputFileName.assign(optarg);   break;
+
+            case 'v' :
+                std::cout << "bnf2c version " << Options::VERSION << std::endl;
+                std::cout << "Copyright © 2013, Jerome DUMESNIL" << std::endl;
+                std::cout << "License BSD" << std::endl;
+                std::cout << "https://code.google.com/p/bnf2c" << std::endl << std::endl;
+                std::cout << "Written by Jérôme DUMESNIL" << std::endl;
+                ::exit(0);
+                break;
 
             case 'h' :
                 throw CommandLineParsingError({"", 0});
@@ -177,7 +188,8 @@ void Options::usage(void)
     std::cout << "Usage : bnf2c [OPTIONS] [InputBnfFile]" << std::endl;
 
     std::cout << std::endl;
-    USAGE_OPTION_LINE('h', "help"                  , "This help");
+    USAGE_OPTION_LINE('h', "help"                  , "Print this help");
+    USAGE_OPTION_LINE('v', "version"               , "Print version number");
 
     std::cout << std::endl << "Parser states options :" << std::endl;
     USAGE_OPTION_LINE('s', "state-type"            , "Type used for generated states (default \"" << options.stateType << "\")");

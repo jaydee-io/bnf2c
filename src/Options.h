@@ -61,6 +61,7 @@ struct Options
     public :
         static Options              DEFAULT;
         static const std::string    VAR_NB_STATES;
+        static const std::string    VERSION;
 
         std::string     topState           = "topState()";
         std::string     popState           = "popStates(<NB_STATES>)";
