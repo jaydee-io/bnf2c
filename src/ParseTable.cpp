@@ -157,19 +157,22 @@ void ParseTable::printDebug(std::ostream & output) const
 
     for(const std::string & terminal : m_grammar.terminals)
     {
-        headerStream << std::setw(m_grammar.terminals.getMaxSrtingLength()) << std::left << terminal << '|';
-        sizeTerminals += m_grammar.terminals.getMaxSrtingLength() + 1;
+        headerStream << terminal << '|';
+        sizeTerminals += terminal.length() + 1;
     }
+    headerStream << m_options.endOfInputToken << '|';
+    sizeTerminals += m_options.endOfInputToken.length() + 1;
+
     for(const std::string & intermediate : m_grammar.intermediates)
     {
         if(intermediate != m_grammar.START_RULE)
         {
-            headerStream << std::setw(m_grammar.intermediates.getMaxSrtingLength()) << std::left << intermediate << '|';
-            sizeIntermediate += m_grammar.intermediates.getMaxSrtingLength() + 1;
+            headerStream << intermediate << '|';
+            sizeIntermediate += intermediate.length() + 1;
         }
     }
 
-    output << "Parse states :" << std::endl << std::endl;
+    output << "Parse table :" << std::endl << std::endl;
     output << "     |" << std::setw((sizeTerminals    - 7) / 2) << ' ' << "Actions" << std::setw((sizeTerminals    - 7) / 2) << ' ' << '|';
     output <<             std::setw((sizeIntermediate - 7) / 2) << ' ' << "Branchs" << std::setw((sizeIntermediate - 7) / 2) << ' ' << '|' << std::endl;
     output << "State|" << headerStream.str() << std::endl;
@@ -178,7 +181,7 @@ void ParseTable::printDebug(std::ostream & output) const
     for(const ParserState & itemSet : m_statesSet)
     {
         output << std::left << std::setw(5) << itemSet.numState << '|';
-        itemSet.printDebugActions(output, m_grammar);
+        itemSet.printDebugActions(output, m_grammar, m_options);
         itemSet.printDebugBranches(output, m_grammar);
 
         output << std::endl;
