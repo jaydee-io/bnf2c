@@ -147,7 +147,11 @@ void ParseTable::printDebug(std::ostream & output) const
     // Print rules
     output << "Rules :" << std::endl << std::endl;
     for(Grammar::RuleMap::const_iterator it = m_grammar.rules.begin(); it != m_grammar.rules.end(); ++it)
-        output << "[" << it->second.numRule << "] " << it->second << std::endl;
+    {
+        output << "[" << it->second.numRule << "] " << it->second;
+        if(!it->second.action.empty())
+            output << std::endl << '"' << it->second.action << '"' << std::endl;
+    }
     output << std::endl << std::endl;
 
     // Print parse table
