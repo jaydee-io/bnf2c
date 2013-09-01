@@ -32,7 +32,7 @@
 #include <algorithm>
 
 ////////////////////////////////////////////////////////////////////////////////
-size_t Dictionnary::size(void) const
+std::size_t Dictionnary::size(void) const
 {
     return m_dictionnary.size();
 }
@@ -40,12 +40,16 @@ size_t Dictionnary::size(void) const
 ////////////////////////////////////////////////////////////////////////////////
 Dictionnary::Index Dictionnary::add(const std::string & name)
 {
+    if(name.length() > m_maxStringLength)
+        m_maxStringLength = name.length();
     return m_dictionnary.insert(name).first;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Dictionnary::Index Dictionnary::add(std::string && name)
 {
+    if(name.length() > m_maxStringLength)
+        m_maxStringLength = name.length();
     return m_dictionnary.insert(name).first;
 }
 
@@ -62,7 +66,7 @@ Dictionnary::Index Dictionnary::operator [](const std::string & name) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-size_t Dictionnary::index(const Index & index) const
+std::size_t Dictionnary::index(const Index & index) const
 {
     return std::distance(m_dictionnary.begin(), index);
 }
@@ -77,6 +81,12 @@ Dictionnary::Index Dictionnary::begin(void) const
 Dictionnary::Index Dictionnary::end(void) const
 {
     return m_dictionnary.end();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+std::size_t Dictionnary::getMaxSrtingLength(void) const
+{
+    return m_maxStringLength;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -87,6 +87,8 @@ const std::string Options::VERSION("0.1");
 const struct option Options::LONG_OPTIONS [] = {
         { "help",                   no_argument,       nullptr, 'h'},
         { "version",                no_argument,       nullptr, 'v'},
+        { "debug",                  required_argument, nullptr, 'd'},
+
         { "top-state-code",         required_argument, nullptr, 't'},
         { "pop-state-code",         required_argument, nullptr, 'p'},
         { "error-state",            required_argument, nullptr, 'e'},
@@ -102,14 +104,14 @@ const struct option Options::LONG_OPTIONS [] = {
 
         { "parse-function",         required_argument, nullptr, 'n'},
         { "branch-function",        required_argument, nullptr, 'b'},
-        { "throwed-exceptions",     required_argument, nullptr, 'w'},
+        { "throwed-exceptions",     required_argument, nullptr, 'x'},
 
-        { "default-switch",         no_argument,       nullptr, 'd'},
+        { "default-switch",         no_argument,       nullptr, 'w'},
         { "use-table-for-branches", no_argument,       nullptr, 'u'},
         { "output",                 required_argument, nullptr, 'o'},
         { nullptr,                  no_argument,       nullptr,  0}
 };
-const char Options::SHORT_OPTIONS [] = ":hvt:p:e:a:s:y:i:c:r:f:n:b:w:duo:";
+const char Options::SHORT_OPTIONS [] = ":hvd:t:p:e:a:s:y:i:c:r:f:n:b:x:wuo:";
 
 ////////////////////////////////////////////////////////////////////////////////
 void Options::parseArguments(int argc, char ** argv) throw(CommandLineParsingError)
@@ -136,13 +138,21 @@ void Options::parseArguments(int argc, char ** argv) throw(CommandLineParsingErr
 
             case 'n' : parseFunctionName.assign(optarg);  break;
             case 'b' : branchFunctionName.assign(optarg); break;
-            case 'w' : throwedExceptions.assign(optarg);  break;
+            case 'x' : throwedExceptions.assign(optarg);  break;
 
-            case 'd' : defaultSwitchStatement = true;     break;
+            case 'w' : defaultSwitchStatement = true;     break;
             case 'u' : useTableForBranches    = true;     break;
 
             case 'o' : m_outputFileName.assign(optarg);   break;
 
+            case 'd' :
+            {
+                int debugLevelInt = 0;
+                std::istringstream iss(optarg);
+                iss >> debugLevelInt;
+                debugLevel = (DebugLevel) debugLevelInt;
+                break;
+            }
             case 'v' :
                 std::cout << "bnf2c version " << Options::VERSION << std::endl;
                 std::cout << "Copyright © 2013, Jerome DUMESNIL" << std::endl;
@@ -190,6 +200,10 @@ void Options::usage(void)
     std::cout << std::endl;
     USAGE_OPTION_LINE('h', "help"                  , "Print this help");
     USAGE_OPTION_LINE('v', "version"               , "Print version number");
+    USAGE_OPTION_LINE('d', "debug"                 , "Print addtionnal debugging information on stderr");
+    USAGE_OPTION_OTHERS_LINE(                        "\t1 : Debug generator");
+    USAGE_OPTION_OTHERS_LINE(                        "\t2 : Debug parser");
+    USAGE_OPTION_OTHERS_LINE(                        "\t3 : Debug lexer");
 
     std::cout << std::endl << "Parser states options :" << std::endl;
     USAGE_OPTION_LINE('s', "state-type"            , "Type used for generated states (default \"" << options.stateType << "\")");
@@ -209,8 +223,8 @@ void Options::usage(void)
     USAGE_OPTION_LINE('i', "intermediate-type"     , "Type used for generated intermediate type (default \"" << options.intermediateType << "\")");
     USAGE_OPTION_LINE('n', "parse-function"        , "Name of the generated parse function (default \"" << options.parseFunctionName << "\")");
     USAGE_OPTION_LINE('b', "branch-function"       , "Name of the generated branch function (default \"" << options.branchFunctionName << "\")");
-    USAGE_OPTION_LINE('w', "throwed-exceptions"    , "Names of the exceptions throwed by generated functions (default no exceptions throwed)");
-    USAGE_OPTION_LINE('d', "default-switch"        , "Generate a default statement in switch / case (default no default case)");
+    USAGE_OPTION_LINE('x', "throwed-exceptions"    , "Names of the exceptions throwed by generated functions (default no exceptions throwed)");
+    USAGE_OPTION_LINE('w', "default-switch"        , "Generate a default statement in switch / case (default no default case)");
     USAGE_OPTION_LINE('u', "use-table-for-branches", "Use table instead of a function for branches (default use function)");
 
     std::cout << std::endl << "File :" << std::endl;
@@ -277,6 +291,7 @@ Options & Options::operator <<(const Options & options)
     if(options.useTableForBranches    != Options::DEFAULT.useTableForBranches   ) useTableForBranches    = options.useTableForBranches;
     if(options.tokenName              != Options::DEFAULT.tokenName             ) tokenName              = options.tokenName;
     if(options.intermediateName       != Options::DEFAULT.intermediateName      ) intermediateName       = options.intermediateName;
+    if(options.debugLevel             != Options::DEFAULT.debugLevel            ) debugLevel             = options.debugLevel;
 
     if(options.indent != Options::DEFAULT.indent) indent = options.indent;
 

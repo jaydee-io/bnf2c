@@ -49,7 +49,7 @@ class Grammar
         static const std::string START_RULE;
 
     public :
-        void         addRule(const Rule & rule);
+        void         addRule(Rule & rule);
         const Rule & getStartRule(void) const;
         RuleRange    operator[](const Dictionnary::Index & name) const;
 

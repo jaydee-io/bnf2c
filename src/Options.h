@@ -56,6 +56,14 @@ struct CommandLineParsingError
     int         exitCode;
 };
 
+enum class DebugLevel
+{
+    NONE,
+    GENERATOR,
+    PARSER,
+    LEXER
+};
+
 struct Options
 {
     public :
@@ -88,6 +96,8 @@ struct Options
         std::string     intermediateName = "intermediate";
 
         Indenter        indent;
+
+        DebugLevel      debugLevel = DebugLevel::NONE;
 
     public :
         void parseArguments(int argc, char ** argv) throw(CommandLineParsingError);

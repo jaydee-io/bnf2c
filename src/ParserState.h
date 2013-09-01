@@ -64,15 +64,18 @@ class ParserState
         bool contains(const Item & item) const;
         void close(const Grammar & grammar);
 
-        void outputActions       (std::ostream & output, Options & options, const Grammar & grammar) const;
-        void outputBranchesSwitch(std::ostream & output, Options & options, const Grammar & grammar) const;
-        void outputBranchesTable (std::ostream & output, Options & options, const Grammar & grammar) const;
+        void generateActions       (std::ostream & os, Options & options, const Grammar & grammar) const;
+        void generateBranchesSwitch(std::ostream & os, Options & options, const Grammar & grammar) const;
+        void generateBranchesTable (std::ostream & os, Options & options, const Grammar & grammar) const;
+
+        void printDebugActions (std::ostream & os, const Grammar & grammar) const;
+        void printDebugBranches(std::ostream & os, const Grammar & grammar) const;
 
         bool operator ==(const ParserState & set) const;
 
     protected :
-        void outputActionItems(std::ostream & output, Options & options, const Grammar & grammar) const;
-        void outputPopFunction(std::ostream & output, Options & options, int nbStates) const;
+        void generateActionItems(std::ostream & os, Options & options, const Grammar & grammar) const;
+        void generatePopFunction(std::ostream & os, Options & options, int nbStates) const;
 
     public :
         ItemList items;

@@ -71,7 +71,13 @@ int main(int argc, char ** argv)
         ParseTable table(grammar, options);
         table.checkGrammar();
         table.generateStates();
-        table >> outputStream;
+        table.generateBranchesCode(outputStream);
+        outputStream << std::endl;
+        table.generateParseCode(outputStream);
+
+        // Debug output
+        if(options.debugLevel != DebugLevel::NONE)
+            table.printDebug(std::cerr);
 
         return 0;
     }

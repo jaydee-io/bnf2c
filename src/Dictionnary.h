@@ -43,7 +43,7 @@ class Dictionnary
         typedef InternalType::const_iterator    Index;
 
     public :
-        size_t size(void) const;
+        std::size_t size(void) const;
 
         Index add(const std::string & name);
         Index add(std::string && name);
@@ -51,15 +51,18 @@ class Dictionnary
         const std::string & operator [](const Index & index) const;
         Index               operator [](const std::string & name) const;
 
-        size_t index(const Index & index) const;
+        std::size_t index(const Index & index) const;
 
         Index begin(void) const;
         Index end(void) const;
+
+        std::size_t getMaxSrtingLength(void) const;
 
         friend std::ostream & operator <<(std::ostream & os, const Dictionnary & dictionnary);
 
     protected :
         InternalType    m_dictionnary;
+        std::size_t     m_maxStringLength = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

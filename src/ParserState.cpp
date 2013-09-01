@@ -33,6 +33,7 @@
 #include <unordered_set>
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 
 ////////////////////////////////////////////////////////////////////////////////
 bool Item::operator ==(const Item & item) const
@@ -96,17 +97,17 @@ void ParserState::close(const Grammar & grammar)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::outputActions(std::ostream & output, Options & options, const Grammar & grammar) const
+void ParserState::generateActions(std::ostream & os, Options & options, const Grammar & grammar) const
 {
-    output << options.indent << "case " << numState << " :" << std::endl;
+    os << options.indent << "case " << numState << " :" << std::endl;
 
     options.indent++;
-    outputActionItems(output, options, grammar);
+    generateActionItems(os, options, grammar);
     options.indent--;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::outputBranchesSwitch(std::ostream & output, Options & options, const Grammar & grammar) const
+void ParserState::generateBranchesSwitch(std::ostream & os, Options & options, const Grammar & grammar) const
 {
     std::unordered_set<std::string> outCases;
     options.indent++++;
@@ -130,35 +131,35 @@ void ParserState::outputBranchesSwitch(std::ostream & output, Options & options,
     if(!outCases.empty())
     {
         // Epilog
-        output << options.indent << "case " << numState << " :";
+        os << options.indent << "case " << numState << " :";
         options.indent++;
 
-        output << std::endl;
-        output << options.indent << "switch(" << options.intermediateName << ")" << std::endl;
-        output << options.indent << "{" << std::endl;
+        os << std::endl;
+        os << options.indent << "switch(" << options.intermediateName << ")" << std::endl;
+        os << options.indent << "{" << std::endl;
         for(const std::string & str : outCases)
-            output << str;
+            os << str;
 
         if(options.defaultSwitchStatement)
         {
             options.indent++;
-            output << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
+            os << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
             options.indent--;
         }
 
-        output << options.indent << "}" << std::endl;
+        os << options.indent << "}" << std::endl;
         options.indent--;
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::outputBranchesTable(std::ostream & output, Options & options, const Grammar & grammar) const
+void ParserState::generateBranchesTable(std::ostream & os, Options & options, const Grammar & grammar) const
 {
-    output << options.indent;
+    os << options.indent;
     for(Dictionnary::Index itIntermediate = grammar.intermediates.begin(); itIntermediate != grammar.intermediates.end(); ++itIntermediate)
     {
         if(itIntermediate != grammar.intermediates.begin())
-            output << ", ";
+            os << ", ";
 
         ItemList::const_iterator itItem;
         for(itItem = items.begin(); itItem != items.end(); ++itItem)
@@ -166,9 +167,66 @@ void ParserState::outputBranchesTable(std::ostream & output, Options & options, 
                 break;
 
         if(itItem != items.end() && (itItem->nextState != nullptr))
-            output << itItem->nextState->numState;
+            os << itItem->nextState->numState;
         else
-            output << options.errorState;
+            os << options.errorState;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar) const
+{
+    // Reduce rule
+    if(items.begin()->getType() == Item::Type::REDUCE)
+    {
+        for(Dictionnary::Index idx = grammar.terminals.begin(); idx != grammar.terminals.end(); ++idx)
+            os << 'R' << std::setw(grammar.terminals.getMaxSrtingLength() - 1) << std::left << items.begin()->rule.numRule << '|';
+    }
+    // Shift rules
+    else
+    {
+        for(const std::string & terminal : grammar.terminals)
+        {
+            ItemList::const_iterator it;
+            for(it = items.begin(); it != items.end(); ++it)
+            {
+                const Symbol & symbol = it->rule.symbols[it->dot];
+
+                if((*symbol.name) == terminal)
+                {
+                    os << 'S' << std::setw(grammar.terminals.getMaxSrtingLength() - 1) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
+                    break;
+                }
+            }
+
+            if(it == items.end())
+                os << std::setw(grammar.terminals.getMaxSrtingLength() + 1) << std::right << '|';
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ParserState::printDebugBranches(std::ostream & os, const Grammar & grammar) const
+{
+    for(const std::string & intermediate : grammar.intermediates)
+    {
+        if(intermediate != grammar.START_RULE)
+        {
+            ItemList::const_iterator it;
+            for(it = items.begin(); it != items.end(); ++it)
+            {
+                const Symbol & symbol = it->rule.symbols[it->dot];
+
+                if((it->getType() == Item::Type::SHIFT) && (symbol.type == Symbol::Type::INTERMEDIATE) && ((*symbol.name) == intermediate))
+                {
+                    os << std::setw(grammar.intermediates.getMaxSrtingLength()) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
+                    break;
+                }
+            }
+
+            if(it == items.end())
+                os << std::setw(grammar.intermediates.getMaxSrtingLength() + 1) << std::right << '|';
+        }
     }
 }
 
@@ -182,7 +240,7 @@ bool ParserState::operator ==(const ParserState & set) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::outputActionItems(std::ostream & output, Options & options, const Grammar & grammar) const
+void ParserState::generateActionItems(std::ostream & os, Options & options, const Grammar & grammar) const
 {
     // Reduce
     if((items.size() == 1) && (items.begin()->getType() == Item::Type::REDUCE))
@@ -191,15 +249,15 @@ void ParserState::outputActionItems(std::ostream & output, Options & options, co
 
         if(!item.rule.action.empty())
         {
-            output << options.indent << '{' << std::endl;
-            output << item.rule.action << std::endl;
-            output << options.indent << '}' << std::endl;
+            os << options.indent << '{' << std::endl;
+            os << item.rule.action << std::endl;
+            os << options.indent << '}' << std::endl;
         }
-        outputPopFunction(output, options, item.rule.symbols.size());
+        generatePopFunction(os, options, item.rule.symbols.size());
         if(options.useTableForBranches)
-            output << " return " << options.branchFunctionName << "[(" << grammar.intermediates.size() << "*" << options.topState << ") + " << grammar.intermediates.index(item.rule.name) << "]; break;" << std::endl;
+            os << " return " << options.branchFunctionName << "[(" << grammar.intermediates.size() << "*" << options.topState << ") + " << grammar.intermediates.index(item.rule.name) << "]; break;" << std::endl;
         else
-            output << " return " << options.branchFunctionName << "(" << grammar.intermediates.index(item.rule.name) << "); break;" << std::endl;
+            os << " return " << options.branchFunctionName << "(" << grammar.intermediates.index(item.rule.name) << "); break;" << std::endl;
 
         return;
     }
@@ -236,26 +294,26 @@ void ParserState::outputActionItems(std::ostream & output, Options & options, co
 
     if(!outCases.empty())
     {
-        output << options.indent << "switch(" << options.tokenName << ")" << std::endl;
-        output << options.indent << "{" << std::endl;
+        os << options.indent << "switch(" << options.tokenName << ")" << std::endl;
+        os << options.indent << "{" << std::endl;
         for(const std::string & str : outCases)
-            output << str;
+            os << str;
         if(options.defaultSwitchStatement)
         {
             options.indent++;
-            output << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
+            os << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
             options.indent--;
         }
-        output << options.indent << "}" << std::endl;
+        os << options.indent << "}" << std::endl;
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::outputPopFunction(std::ostream & output, Options & options, int nbStates) const
+void ParserState::generatePopFunction(std::ostream & os, Options & options, int nbStates) const
 {
     std::string popFunction(options.popState);
 
-    output << options.indent << popFunction.replace(popFunction.find(Options::VAR_NB_STATES), Options::VAR_NB_STATES.size(), std::to_string(nbStates)) << ";";
+    os << options.indent << popFunction.replace(popFunction.find(Options::VAR_NB_STATES), Options::VAR_NB_STATES.size(), std::to_string(nbStates)) << ";";
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -50,6 +50,7 @@ class Rule
         Dictionnary::Index  name;
         SymbolList          symbols;
         std::string         action;
+        int                 numRule = -1;
 };
 
 std::ostream & operator <<(std::ostream & os, const Rule & rule);

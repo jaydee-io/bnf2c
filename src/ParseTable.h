@@ -53,14 +53,14 @@ class ParseTable
         void checkGrammar(void) const throw(GeneratingError);
         void generateStates(void);
 
-        std::ostream & operator >>(std::ostream & os) const;
+        void generateBranchesCode(std::ostream & os) const;
+        void generateParseCode(std::ostream & os) const;
 
-        void outputDebug(std::ostream & output) const;
+        void printDebug(std::ostream & os) const;
 
     protected :
-        void outputActions     (std::ostream & output) const;
-        void outputBranchSwitch(std::ostream & output) const;
-        void outputBranchTable (std::ostream & output) const;
+        void generateBranchSwitch(std::ostream & os) const;
+        void generateBranchTable (std::ostream & os) const;
 
     protected :
         const Grammar & m_grammar;

@@ -34,8 +34,9 @@
 const std::string Grammar::START_RULE("START");
 
 ////////////////////////////////////////////////////////////////////////////////
-void Grammar::addRule(const Rule & rule)
+void Grammar::addRule(Rule & rule)
 {
+    rule.numRule = rules.size() + 1;
     rules.insert(RuleMap::value_type(rule.name, rule));
 }
 
