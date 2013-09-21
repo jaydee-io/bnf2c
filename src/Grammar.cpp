@@ -30,6 +30,7 @@
 #include "Grammar.h"
 
 #include <iostream>
+#include <regex>
 
 const std::string Grammar::START_RULE("START");
 
@@ -79,6 +80,56 @@ Symbol Grammar::addIntermediate(std::string && name)
 {
     Dictionnary::Index index = intermediates.add(name);
     return Symbol({Symbol::Type::INTERMEDIATE, index});
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void Grammar::replacePseudoVariables(Options & options)
+{
+    for(RuleMap::value_type & pair : rules)
+    {
+        Rule & rule = pair.second;
+        if(!rule.action.empty())
+        {
+            // Replace return pseudo-variable '$$'
+            std::size_t pos = 0;
+
+            while((pos = rule.action.find(Options::VAR_EXTERNAL_RETURN, pos)) != std::string::npos)
+                rule.action.replace(pos, Options::VAR_EXTERNAL_RETURN.size(), Options::VAR_RETURN);
+
+            // Replace pseudo-variables '$1', '$2', ... '$n'
+            // For now (21 september 2013), regexp is not implemented in libstdc++,
+            // so manually look for pseudo-variables 1 to 100
+            for(int i = 1; i <= 100; i++)
+            {
+                pos = 0;
+                std::string replacement(options.getValue);
+                while((pos = replacement.find(Options::VAR_VALUE_IDX, pos)) != std::string::npos)
+                    replacement.replace(pos, Options::VAR_VALUE_IDX.size(), std::to_string(rule.symbols.size() - i));
+
+                pos = 0;
+                std::string pseudoVar('$' + std::to_string(i));
+                while((pos = rule.action.find(pseudoVar, pos)) != std::string::npos)
+                    rule.action.replace(pos, pseudoVar.size(), replacement);
+            }
+
+            /*
+            std::string replacement(options.getValue);
+            pos = replacement.find(Options::VAR_VALUE_IDX, pos);
+            if(std::string::npos != pos)
+                replacement.replace(0, Options::VAR_VALUE_IDX.size(), std::to_string(rule.symbols.size()) + " - \\1");
+
+            try
+            {
+                std::regex regexp("\\$([:digit:]+)");
+                std::regex_replace(rule.action, regexp, replacement);
+            }
+            catch (std::regex_error & e)
+            {
+                // TODO We should throw an exception...
+            }
+            */
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

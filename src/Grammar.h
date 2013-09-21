@@ -32,6 +32,7 @@
 #include "Rule.h"
 #include "Symbol.h"
 #include "Dictionnary.h"
+#include "Options.h"
 
 #include <unordered_map>
 #include <string>
@@ -57,6 +58,8 @@ class Grammar
         Symbol addTerminal(std::string && name);
         Symbol addIntermediate(const std::string & name);
         Symbol addIntermediate(std::string && name);
+
+        void replacePseudoVariables(Options & options);
 
     public :
         RuleMap     rules;

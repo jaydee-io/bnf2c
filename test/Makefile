@@ -4,23 +4,23 @@ include ../MakeNames.mk
 EXEC_DIR=../src
 INC_DIR=-I$(EXEC_DIR)
 
-TESTS+= bnf_sample_test
+TESTS+= wikipedia_sample_test
 
 ###############################################################################
 # Global targets
 ###############################################################################
 all : $(TESTS)
 
-bnf_sample : bnf_sample.o
+wikipedia_sample : wikipedia_sample.o
 	@echo "[ LINK] $@"
 	@$(LD) $(LD_FLAGS) -o $@ $^
 	
-bnf_sample_test : bnf_sample
-	@echo "[$@] 1+0+1*1+1+1+1+1+1*1"
+wikipedia_sample_test : wikipedia_sample
+	@echo "[$^] 1+0+1*1+1+1+1+1+1*1"
 	@$^ 1+0+1*1+1+1+1+1+1*1
 
 clean :
-	rm -f bnf_sample bnf_sample.o bnf_sample.c
+	rm -f wikipedia_sample wikipedia_sample.o wikipedia_sample.c
 	rm -f $(TESTS)
 
 ###############################################################################
@@ -28,8 +28,8 @@ clean :
 ###############################################################################
 %.c : %.bnf2c.c $(EXEC_DIR)/$(EXEC_BNF2C)
 	@echo "[BNF2C] $@"
-#	@cat $< | $(EXEC_DIR)/$(EXEC_BNF2C) > $@
-	@$(EXEC_DIR)/$(EXEC_BNF2C) $< -o $@
+	@cat $< | $(EXEC_DIR)/$(EXEC_BNF2C) > $@
+#	@$(EXEC_DIR)/$(EXEC_BNF2C) $< -o $@
 
 ###############################################################################
 # Targets

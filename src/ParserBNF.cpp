@@ -71,26 +71,33 @@ std::ostream & operator <<(std::ostream & os, const ParsingError & error)
 ParserBNF::ParserBNF(LexerBNF & lexer, Options & options, Grammar & grammar)
 : m_grammar(grammar), m_options(options), m_lexer(lexer)
 {
+    // Generated code options
+    m_stringParams["bnf2c:type:state"]              = &m_options.stateType;
     m_stringParams["bnf2c:state:top"]               = &m_options.topState;
     m_stringParams["bnf2c:state:pop"]               = &m_options.popState;
     m_stringParams["bnf2c:state:error"]             = &m_options.errorState;
     m_stringParams["bnf2c:state:accept"]            = &m_options.acceptState;
 
-    m_stringParams["bnf2c:type:state"]              = &m_options.stateType;
-    m_stringParams["bnf2c:type:token"]              = &m_options.tokenType;
-    m_stringParams["bnf2c:type:intermediate"]       = &m_options.intermediateType;
+    m_stringParams["bnf2c:state:pushValue"]         = &m_options.pushValue;
+    m_stringParams["bnf2c:state:popValues"]         = &m_options.popValues;
+    m_stringParams["bnf2c:state:getValue"]          = &m_options.getValue;
 
+    // Generated code options
+    m_stringParams["bnf2c:type:token"]              = &m_options.tokenType;
     m_stringParams["bnf2c:token:shift"]             = &m_options.shiftToken;
     m_stringParams["bnf2c:token:prefix"]            = &m_options.tokenPrefix;
     m_stringParams["bnf2c:token:endOfInput"]        = &m_options.endOfInputToken;
 
-    m_boolParams  ["bnf2c:generator:defaultSwitch"] = &m_options.defaultSwitchStatement;
-    m_boolParams  ["bnf2c:generator:branchTable"]   = &m_options.useTableForBranches;
-
+    // Generated code options
+    m_stringParams["bnf2c:type:intermediate"]       = &m_options.intermediateType;
     m_stringParams["bnf2c:output:parseFunction"]    = &m_options.parseFunctionName;
     m_stringParams["bnf2c:output:branchFunction"]   = &m_options.branchFunctionName;
     m_stringParams["bnf2c:output:exceptions"]       = &m_options.throwedExceptions;
 
+    m_boolParams  ["bnf2c:generator:defaultSwitch"] = &m_options.defaultSwitchStatement;
+    m_boolParams  ["bnf2c:generator:branchTable"]   = &m_options.useTableForBranches;
+
+    // Internal options
     m_stringParams["bnf2c:indent:string"]           = &m_options.indent.string;
     m_uintParams  ["bnf2c:indent:top"]              = &m_options.indent.top;
 }
@@ -157,7 +164,7 @@ void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
 
             // Lexer error
             case TokenType::ERROR :
-                THROW_PARSING_ERROR("Lexer error");
+                THROW_PARSING_ERROR("Unknown token");
                 break;
 
             // End of input
@@ -216,7 +223,7 @@ void ParserBNF::parseRule(Rule & rule) throw(ParsingError)
                 break;
 
             case TokenType::ERROR :
-                THROW_PARSING_ERROR("Lexer error");
+                THROW_PARSING_ERROR("Unknown token");
                 break;
 
             default :

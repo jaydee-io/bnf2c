@@ -261,32 +261,56 @@ void ParserState::generateActionItems(std::ostream & os, Options & options, cons
     {
         const Item & item = *items.begin();
 
+        os << options.indent << '{' << std::endl;
+        options.indent++;
+
+        // Returned value
+        os << options.indent
+                << Options::VAR_RETURN_TYPE << ' ' << Options::VAR_RETURN << " = "
+                << '(' << Options::VAR_RETURN_TYPE << ") "
+                << checkedStringReplace(options.getValue, Options::VAR_VALUE_IDX, std::to_string(item.rule.symbols.size() - 1)) << ';'
+                << std::endl;
+
+        // Rule action code
         if(!item.rule.action.empty())
         {
-            os << options.indent << '{' << std::endl;
-            os << item.rule.action << std::endl;
-            os << options.indent << '}' << std::endl;
+            if(item.rule.action.find_first_of("\n\r") != std::string::npos)
+                os << std::endl << item.rule.action << std::endl << std::endl;
+            else
+                os << std::endl << options.indent << item.rule.action << std::endl << std::endl;
         }
-        generatePopFunction(os, options, item.rule.symbols.size());
+
+        // Values stack
+        os << options.indent << checkedStringReplace(options.popValues, Options::VAR_NB_VALUES, std::to_string(item.rule.symbols.size())) << ';' << std::endl;
+        os << options.indent << checkedStringReplace(options.pushValue, Options::VAR_VALUE,     Options::VAR_RETURN)                      << ';' << std::endl;
+
+        // States stack
+        os << options.indent << checkedStringReplace(options.popState, Options::VAR_NB_STATES, std::to_string(item.rule.symbols.size())) << ';' << std::endl;
+
+        // New state
         if(options.useTableForBranches)
-            os << " return " << options.branchFunctionName << "[(" << grammar.intermediates.size() << "*" << options.topState << ") + " << grammar.intermediates.index(item.rule.name) << "]; break;" << std::endl;
+            os << options.indent << "return " << options.branchFunctionName << "[(" << grammar.intermediates.size() << "*" << options.topState << ") + " << grammar.intermediates.index(item.rule.name) << "];" << std::endl;
         else
-            os << " return " << options.branchFunctionName << "(" << grammar.intermediates.index(item.rule.name) << "); break;" << std::endl;
+            os << options.indent << "return " << options.branchFunctionName << "(" << grammar.intermediates.index(item.rule.name) << ");" << std::endl;
+
+        os << options.indent << "break;" << std::endl;
+
+        options.indent--;
+        os << options.indent << '}' << std::endl;
 
         return;
     }
 
-    std::unordered_set<std::string> outCases;
+    os << options.indent << "switch(" << options.tokenName << ")" << std::endl;
+    os << options.indent << "{" << std::endl;
+
     options.indent++;
     for(const Item & item : items)
     {
-        std::stringstream os;
-
         // Accept
         if((item.rule == grammar.getStartRule()) && (item.dot >= item.rule.symbols.size()))
         {
             os << options.indent << "case " << options.tokenPrefix << options.endOfInputToken << " : return " << options.acceptState << "; break;" << std::endl;
-            outCases.insert(os.str());
             continue;
         }
 
@@ -294,40 +318,42 @@ void ParserState::generateActionItems(std::ostream & os, Options & options, cons
         if((item.dot < item.rule.symbols.size()) && (item.rule.symbols[item.dot].type == Symbol::Type::TERMINAL))
         {
             os << options.indent << "case " << options.tokenPrefix << item.rule.symbols[item.dot] << " :";
-            os << " " << options.shiftToken << ';';
+            os << ' ' << options.shiftToken << ';';
             if(item.nextState != nullptr)
                 os << " return " << item.nextState->numState << ";";
             else
                 os << " return " << options.errorState << ";";
             os << " break;" << std::endl;
-            outCases.insert(os.str());
             continue;
         }
     }
     options.indent--;
 
-    if(!outCases.empty())
+    if(options.defaultSwitchStatement)
     {
-        os << options.indent << "switch(" << options.tokenName << ")" << std::endl;
-        os << options.indent << "{" << std::endl;
-        for(const std::string & str : outCases)
-            os << str;
-        if(options.defaultSwitchStatement)
-        {
-            options.indent++;
-            os << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
-            options.indent--;
-        }
-        os << options.indent << "}" << std::endl;
+        options.indent++;
+        os << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
+        options.indent--;
     }
+
+    os << options.indent << "}" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::generatePopFunction(std::ostream & os, Options & options, int nbStates) const
+std::string ParserState::checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const
 {
-    std::string popFunction(options.popState);
+    // Check that replacement string doesn't contains the pattern to avoid infinite loop
+    if(replacement.find(pattern) != std::string::npos)
+        return str;
 
-    os << options.indent << popFunction.replace(popFunction.find(Options::VAR_NB_STATES), Options::VAR_NB_STATES.size(), std::to_string(nbStates)) << ";";
+    // Replace each occurrence
+    std::string replacedStr(str);
+    std::size_t pos = 0;
+
+    while((pos = replacedStr.find(pattern, pos)) != std::string::npos)
+        replacedStr.replace(pos, pattern.size(), replacement);
+
+    return replacedStr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

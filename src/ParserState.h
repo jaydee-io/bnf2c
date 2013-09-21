@@ -35,6 +35,7 @@
 
 #include <list>
 #include <ostream>
+#include <string>
 
 class ParserState;
 
@@ -75,7 +76,7 @@ class ParserState
 
     protected :
         void generateActionItems(std::ostream & os, Options & options, const Grammar & grammar) const;
-        void generatePopFunction(std::ostream & os, Options & options, int nbStates) const;
+        std::string checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const;
 
     public :
         ItemList items;

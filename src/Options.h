@@ -69,21 +69,33 @@ struct Options
     public :
         static Options              DEFAULT;
         static const std::string    VAR_NB_STATES;
+        static const std::string    VAR_VALUE;
+        static const std::string    VAR_NB_VALUES;
+        static const std::string    VAR_VALUE_IDX;
+        static const std::string    VAR_EXTERNAL_RETURN;
+        static const std::string    VAR_RETURN;
+        static const std::string    VAR_RETURN_TYPE;
         static const std::string    VERSION;
 
+        // Parser options
+        std::string     stateType          = "int";
         std::string     topState           = "topState()";
         std::string     popState           = "popStates(<NB_STATES>)";
         std::string     errorState         = "-1";
         std::string     acceptState        = "-2";
 
-        std::string     stateType          = "int";
-        std::string     tokenType          = "int";
-        std::string     intermediateType   = "int";
+        std::string     pushValue          = "pushValue(<VALUE>)";
+        std::string     popValues          = "popValues(<NB_VALUES>)";
+        std::string     getValue           = "getValue(<VALUE_IDX>)";
 
+        // Lexer options
+        std::string     tokenType          = "int";
         std::string     shiftToken         = "shiftToken()";
         std::string     tokenPrefix        = "";
         std::string     endOfInputToken    = "END_OF_INPUT";
 
+        // Generated code options
+        std::string     intermediateType   = "int";
         std::string     parseFunctionName  = "parse";
         std::string     branchFunctionName = "branch";
         std::string     throwedExceptions  = "";

@@ -126,15 +126,53 @@ void LexerBNF::nextToken(Token & token)
 ////////////////////////////////////////////////////////////////////////////////
 bool LexerBNF::readRuleAction(std::string & ruleAction)
 {
-    const char * start = m_state.input;
     int nBraces = 1;
 
+    // Find start of action (skip spaces, tabulations and first new line)
+    while((nBraces > 0) && (m_state.input[0] != '\0'))
+    {
+        if(m_state.input[0] == '\n')
+        {
+            if(m_state.input[1] == '\r')
+                m_state.input++;
+
+            m_state.lastNewLine = m_state.input + 1;
+            m_state.line++;
+            m_state.input++;
+            break;
+        }
+        else if(m_state.input[0] == '\r')
+        {
+            if(m_state.input[1] == '\n')
+                m_state.input++;
+
+            m_state.lastNewLine = m_state.input + 1;
+            m_state.line++;
+            m_state.input++;
+            break;
+        }
+        if((m_state.input[0] != ' ') && (m_state.input[0] != '\t'))
+            break;
+
+        m_state.input++;
+    }
+    const char * start = m_state.input;
+
+    // Find end of action (skip trailing spaces, tabulations and new line)
+    const char * end = m_state.input;
     while((nBraces > 0) && (m_state.input[0] != '\0'))
     {
         if(m_state.input[0] == '{')
+        {
             nBraces++;
+            end = m_state.input;
+        }
         else if(m_state.input[0] == '}')
+        {
             nBraces--;
+            if(nBraces > 0)
+                end = m_state.input;
+        }
         else if(m_state.input[0] == '\n')
         {
             if(m_state.input[1] == '\r')
@@ -151,6 +189,8 @@ bool LexerBNF::readRuleAction(std::string & ruleAction)
             m_state.lastNewLine = m_state.input + 1;
             m_state.line++;
         }
+        else if((m_state.input[0] != ' ') && (m_state.input[0] != '\t'))
+            end = m_state.input;
 
         m_state.input++;
     }
@@ -158,7 +198,7 @@ bool LexerBNF::readRuleAction(std::string & ruleAction)
     if(nBraces == 0)
     {
         m_state.input--;
-        ruleAction.assign(start, m_state.input - start);
+        ruleAction.assign(start, end - start + 1);
         return true;
     }
 

@@ -69,6 +69,7 @@ int main(int argc, char ** argv)
 
         // Output generated code at the end of output file
         ParseTable table(grammar, options);
+        grammar.replacePseudoVariables(options);
         table.checkGrammar();
         table.generateStates();
         table.generateBranchesCode(outputStream);

@@ -1,10 +1,14 @@
-#include "stdio.h"
+#include <stdio.h>
 
 /*!bnf2c
    bnf2c:state:top               = "top()"
    bnf2c:state:pop               = "pop(<NB_STATES>)"
    bnf2c:state:error             = "STATE_ERROR"
    bnf2c:state:accept            = "STATE_ACCEPT"
+
+   bnf2c:state:pushValue         = "pushValue((void *) <VALUE>)"
+   bnf2c:state:popValues         = "popValues(<NB_VALUES>)"
+   bnf2c:state:getValue          = "getValue(<VALUE_IDX>)"
 
    bnf2c:type:state              = "long long"
    bnf2c:type:token              = "long long"
@@ -29,12 +33,12 @@ long long parseFunction(long long token);
 
 
 typedef enum {
-    MULT,
-    ADD,
-    ZERO,
-    ONE,
-    EOI,
-    ERROR
+    MULT  = '*',
+    ADD   = '+',
+    ZERO  = '0',
+    ONE   = '1',
+    EOI   = '.',
+    ERROR = 'E'
 } T_TOKEN;
 
 
@@ -46,19 +50,50 @@ typedef enum {
 int stateStack[NB_STATES];
 int currentState;
 
-int valueStack[NB_STATES];
-int currentValue;
+void * valueStack[NB_STATES];
+int nbValues;
 
 char * input;
 
-T_TOKEN token;
+T_TOKEN token = EOI;
 
 
 
+
+int top(void)
+{
+    return stateStack[currentState-1];
+}
+
+void pop(int nbStates)
+{
+    currentState -= nbStates;
+}
+
+void pushState(int state)
+{
+    stateStack[currentState++] = state;
+}
+
+void pushValue(void * value)
+{
+    valueStack[nbValues++] = value;
+}
+
+void popValues(int nbValuesToPop)
+{
+    nbValues -= nbValuesToPop;
+}
+
+void * getValue(int valueIdx)
+{
+    return valueStack[nbValues - valueIdx - 1];
+}
 
 void nextToken(void)
 {
-    token = ERROR;
+    if(token != EOI)
+        pushValue((void *) token);
 
     for(;;)
     {
@@ -83,64 +118,44 @@ void nextToken(void)
     }
 }
 
-int top(void)
-{
-    return stateStack[currentState-1];
-}
-
-void pop(int nbStates)
-{
-    currentState -= nbStates;
-}
-
-void pushState(int state)
-{
-    stateStack[currentState++] = state;
-}
-
 /*!bnf2c
 <START> ::= <E>
 
 <E> ::= <E> MULT <B>
         {
-            // printf("Multiply %d with %d\n", valueStack[currentValue - 2], valueStack[currentValue - 1]);
-            valueStack[currentValue - 2] = valueStack[currentValue - 2] * valueStack[currentValue - 1];
-            currentValue--;
+                // printf("Multiply %d with %d\n", $1, $3);
+                $$ = (void *) ((long) $1 * (long) $3);
         }
       | <E> ADD  <B>
         {
-            /* printf("Add %d with %d\n", valueStack[currentValue - 2], valueStack[currentValue - 1]); */
-            valueStack[currentValue - 2] = valueStack[currentValue - 2] + valueStack[currentValue - 1];
-            currentValue--;
+                // printf("Add %d with %d\n", $1, $3);
+                $$ = (void *) ((long) $1 + (long) $3);
         }
       | <B>
 */
 
 /*!bnf2c
-<B> ::= ZERO { valueStack[currentValue++] = 0; }
-<B> ::= ONE  { valueStack[currentValue++] = 1; }
+<B> ::= ZERO { $$ = (void *) 0; }
+<B> ::= ONE  { $$ = (void *) 1; }
 */
 
 int main(int argc, char ** argv)
 {
-    int state = 0;
-
     if(argc < 2)
         return 1;
 
     input = argv[1];
     nextToken();
 
-    while((state != STATE_ERROR) && (state != STATE_ACCEPT))
-    {
-        pushState(state);
-        state = parseFunction(token);
-    }
+    pushState(0);
+    while((top() != STATE_ERROR) && (top() != STATE_ACCEPT))
+        pushState(parseFunction(token));
 
-    if(state == STATE_ERROR)
+
+    if(top() == STATE_ERROR)
         printf("Error\n");
     else
-        printf("The result of \"%s\" = %d\n", argv[1], valueStack[currentValue - 1]);
+        printf("The result of \"%s\" = %ld\n", argv[1], (long)valueStack[nbValues - 1]);
 
     return 0;
 }
