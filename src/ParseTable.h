@@ -42,6 +42,8 @@ struct GeneratingError
     const std::string message;
 };
 
+std::ostream & operator <<(std::ostream & os, const GeneratingError & error);
+
 class ParseTable
 {
     protected :

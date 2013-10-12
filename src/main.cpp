@@ -69,8 +69,8 @@ int main(int argc, char ** argv)
 
         // Output generated code at the end of output file
         ParseTable table(grammar, options);
-        grammar.replacePseudoVariables(options);
         table.checkGrammar();
+        grammar.replacePseudoVariables(options);
         table.generateStates();
         table.generateBranchesCode(outputStream);
         outputStream << std::endl;
@@ -94,9 +94,9 @@ int main(int argc, char ** argv)
         std::cerr << error << std::endl;
         return 1;
     }
-    catch(const GeneratingError & e)
+    catch(const GeneratingError & error)
     {
-        std::cerr << e.message << std::endl;
+        std::cerr << error << std::endl;
         return 1;
     }
 }

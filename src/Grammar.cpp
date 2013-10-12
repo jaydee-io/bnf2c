@@ -90,11 +90,11 @@ void Grammar::replacePseudoVariables(Options & options)
         Rule & rule = pair.second;
         if(!rule.action.empty())
         {
-            // Replace return pseudo-variable '$$'
             std::size_t pos = 0;
 
+            // Replace return pseudo-variable '$$'
             while((pos = rule.action.find(Options::VAR_EXTERNAL_RETURN, pos)) != std::string::npos)
-                rule.action.replace(pos, Options::VAR_EXTERNAL_RETURN.size(), Options::VAR_RETURN);
+                rule.action.replace(pos, Options::VAR_EXTERNAL_RETURN.size(), Options::VAR_RETURN + '.' + intermediateTypes.at(intermediates[rule.name]));
 
             // Replace pseudo-variables '$1', '$2', ... '$n'
             // For now (21 september 2013), regexp is not implemented in libstdc++,
@@ -105,6 +105,9 @@ void Grammar::replacePseudoVariables(Options & options)
                 std::string replacement(options.getValue);
                 while((pos = replacement.find(Options::VAR_VALUE_IDX, pos)) != std::string::npos)
                     replacement.replace(pos, Options::VAR_VALUE_IDX.size(), std::to_string(rule.symbols.size() - i));
+
+                if(i <= rule.symbols.size())
+                    replacement += "." + ((rule.symbols[i-1].type == Symbol::Type::INTERMEDIATE) ? intermediateTypes.at(*rule.symbols[i-1].name) : options.tokenUnionName);
 
                 pos = 0;
                 std::string pseudoVar('$' + std::to_string(i));

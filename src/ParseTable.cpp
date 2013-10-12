@@ -36,6 +36,19 @@
 #include <iomanip>
 #include <sstream>
 
+#define COLOR_RED    "\033[0;31"
+#define COLOR_RESET  "\033[0"
+#define COLOR_NORMAL "m"
+#define COLOR_BOLD   ";1m"
+
+////////////////////////////////////////////////////////////////////////////////
+std::ostream & operator <<(std::ostream & os, const GeneratingError & error)
+{
+    os << COLOR_RED COLOR_BOLD "Generating error" COLOR_RESET COLOR_BOLD << " : " << error.message <<  COLOR_RESET COLOR_NORMAL << std::endl;
+
+    return os;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ParseTable::ParseTable(const Grammar & grammar, Options & options)
 : m_grammar(grammar), m_options(options)
@@ -45,6 +58,7 @@ ParseTable::ParseTable(const Grammar & grammar, Options & options)
 ////////////////////////////////////////////////////////////////////////////////
 void ParseTable::checkGrammar(void) const throw(GeneratingError)
 {
+    // Check start rule
     Dictionnary::Index startIndex = m_grammar.intermediates[Grammar::START_RULE];
 
     if(startIndex == m_grammar.intermediates.end())
@@ -56,6 +70,11 @@ void ParseTable::checkGrammar(void) const throw(GeneratingError)
             throw GeneratingError({ "No rule named \"" + Grammar::START_RULE + "\" found !!!" });
     else if(nbStartsRules > 1)
             throw GeneratingError({ "Multiple start rules \"" + Grammar::START_RULE + "\" found !!!" });
+
+    // Check intermediates types
+    for(Dictionnary::Index intermediate = m_grammar.intermediates.begin(); intermediate != m_grammar.intermediates.end(); ++intermediate)
+        if(m_grammar.intermediateTypes.find(*intermediate) == m_grammar.intermediateTypes.end())
+            throw GeneratingError({ "Intermediate '" + (*intermediate) + "' has no type !!!" });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -121,12 +140,18 @@ void ParseTable::generateBranchesCode(std::ostream & os) const
 ////////////////////////////////////////////////////////////////////////////////
 void ParseTable::generateParseCode(std::ostream & os) const
 {
+    // Function begin
     if(m_options.throwedExceptions.empty())
-        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(" << m_options.tokenType << " token)" << std::endl;
+        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(" << m_options.tokenType << ' ' << m_options.tokenName << ')' << std::endl;
     else
-        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(" << m_options.tokenType << " token) throw(" << m_options.throwedExceptions << ")" << std::endl;
+        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(" << m_options.tokenType << ' ' << m_options.tokenName << ") throw(" << m_options.throwedExceptions << ")" << std::endl;
     os << m_options.indent << '{' << std::endl;
     m_options.indent++;
+
+    // Returned value
+    os << m_options.indent << m_options.valueType << ' ' << Options::VAR_RETURN << ';' << std::endl;
+
+    // Switch on state
     os << m_options.indent << "switch(" << m_options.topState << ")" << std::endl;
     os << m_options.indent << '{' << std::endl;
     m_options.indent++;
@@ -136,7 +161,11 @@ void ParseTable::generateParseCode(std::ostream & os) const
         os << m_options.indent << "default : return " << m_options.errorState << "; break;" << std::endl;
     m_options.indent--;
     os << m_options.indent << '}' << std::endl;
+
+    // Return error
     os << m_options.indent << "return " << m_options.errorState << ';' << std::endl;
+
+    // Function end
     m_options.indent--;
     os << m_options.indent << '}' << std::endl;
 }

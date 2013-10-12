@@ -37,6 +37,7 @@ enum class TokenType
     INTERMEDIATE,
     TERMINAL,
     COMMENT,
+    TYPE_NAME,
     PARAM_NAME,
     PARAM_VALUE,
 
@@ -67,6 +68,7 @@ struct Token
     std::string valueToTerminal(void) const;
     std::string valueToParameterName(void) const;
     std::string valueToParameterValue(void) const;
+    std::string valueToTypeName(void) const;
 };
 
 std::ostream & operator<<(std::ostream & os, const TokenType tokenType);

@@ -37,12 +37,13 @@
 #include <unordered_map>
 #include <string>
 #include <set>
-#include <list>
 #include <iostream>
 
 class Grammar
 {
     public :
+        typedef std::unordered_map<std::string, std::string>      IntermediateTypeDictionnary;
+
         typedef std::unordered_multimap<Dictionnary::Index, Rule> RuleMap;
         typedef RuleMap::const_iterator                 RuleIterator;
         typedef std::pair<RuleIterator, RuleIterator>   RuleRange;
@@ -62,9 +63,12 @@ class Grammar
         void replacePseudoVariables(Options & options);
 
     public :
-        RuleMap     rules;
-        Dictionnary terminals;
-        Dictionnary intermediates;
+        RuleMap                     rules;
+
+        Dictionnary                 terminals;
+        Dictionnary                 intermediates;
+
+        IntermediateTypeDictionnary intermediateTypes;
 };
 
 std::ostream & operator <<(std::ostream & os, const Grammar & ruleSet);

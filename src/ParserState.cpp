@@ -266,10 +266,9 @@ void ParserState::generateActionItems(std::ostream & os, Options & options, cons
 
         // Returned value
         os << options.indent
-                << Options::VAR_RETURN_TYPE << ' ' << Options::VAR_RETURN << " = "
-                << '(' << Options::VAR_RETURN_TYPE << ") "
-                << checkedStringReplace(options.getValue, Options::VAR_VALUE_IDX, std::to_string(item.rule.symbols.size() - 1)) << ';'
-                << std::endl;
+                << Options::VAR_RETURN << " = "
+                << checkedStringReplace(options.getValue, Options::VAR_VALUE_IDX, std::to_string(item.rule.symbols.size() - 1))
+                << ';' << std::endl;
 
         // Rule action code
         if(!item.rule.action.empty())
@@ -281,11 +280,11 @@ void ParserState::generateActionItems(std::ostream & os, Options & options, cons
         }
 
         // Values stack
-        os << options.indent << checkedStringReplace(options.popValues, Options::VAR_NB_VALUES, std::to_string(item.rule.symbols.size())) << ';' << std::endl;
-        os << options.indent << checkedStringReplace(options.pushValue, Options::VAR_VALUE,     Options::VAR_RETURN)                      << ';' << std::endl;
+        os << options.indent << checkedStringReplace(options.popValues, Options::VAR_NB_VALUES, std::to_string(item.rule.symbols.size()))  << std::endl;
+        os << options.indent << checkedStringReplace(options.pushValue, Options::VAR_VALUE,     Options::VAR_RETURN)                       << std::endl;
 
         // States stack
-        os << options.indent << checkedStringReplace(options.popState, Options::VAR_NB_STATES, std::to_string(item.rule.symbols.size())) << ';' << std::endl;
+        os << options.indent << checkedStringReplace(options.popState, Options::VAR_NB_STATES, std::to_string(item.rule.symbols.size())) << std::endl;
 
         // New state
         if(options.useTableForBranches)
@@ -301,7 +300,7 @@ void ParserState::generateActionItems(std::ostream & os, Options & options, cons
         return;
     }
 
-    os << options.indent << "switch(" << options.tokenName << ")" << std::endl;
+    os << options.indent << "switch(" << checkedStringReplace(options.getTypeOfToken, Options::VAR_TOKEN, options.tokenName) << ")" << std::endl;
     os << options.indent << "{" << std::endl;
 
     options.indent++;
@@ -318,11 +317,13 @@ void ParserState::generateActionItems(std::ostream & os, Options & options, cons
         if((item.dot < item.rule.symbols.size()) && (item.rule.symbols[item.dot].type == Symbol::Type::TERMINAL))
         {
             os << options.indent << "case " << options.tokenPrefix << item.rule.symbols[item.dot] << " :";
-            os << ' ' << options.shiftToken << ';';
+            os << ' ' << Options::VAR_RETURN << '.' << options.tokenUnionName << " = " << options.tokenName << ';';
+            os << ' ' << options.shiftToken;
+            os << ' ' << checkedStringReplace(options.pushValue, Options::VAR_VALUE, Options::VAR_RETURN);
             if(item.nextState != nullptr)
-                os << " return " << item.nextState->numState << ";";
+                os << " return " << item.nextState->numState << ';';
             else
-                os << " return " << options.errorState << ";";
+                os << " return " << options.errorState << ';';
             os << " break;" << std::endl;
             continue;
         }

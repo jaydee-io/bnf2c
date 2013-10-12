@@ -86,8 +86,8 @@ const std::string Options::VAR_VALUE          ("<VALUE>");
 const std::string Options::VAR_VALUE_IDX      ("<VALUE_IDX>");
 const std::string Options::VAR_NB_VALUES      ("<NB_VALUES>");
 const std::string Options::VAR_EXTERNAL_RETURN("$$");
-const std::string Options::VAR_RETURN         ("__return");
-const std::string Options::VAR_RETURN_TYPE    ("void *");
+const std::string Options::VAR_RETURN         ("yylval");
+const std::string Options::VAR_TOKEN          ("<TOKEN>");
 const std::string Options::VERSION            ("0.1");
 
 const struct option Options::LONG_OPTIONS [] = {
@@ -102,14 +102,17 @@ const struct option Options::LONG_OPTIONS [] = {
         { "error-state",            required_argument, nullptr, 'e'},
         { "accept-state",           required_argument, nullptr, 'a'},
 
+        { "value-type",             required_argument, nullptr, 'q'},
         { "push-value-code",        required_argument, nullptr, 'g'},
         { "pop-values-code",        required_argument, nullptr, 'j'},
         { "get-value-code",         required_argument, nullptr, 'k'},
 
         // Lexer options
         { "token-type",             required_argument, nullptr, 'y'},
+        { "token-union-name",       required_argument, nullptr, 'm'},
         { "shift-token-code",       required_argument, nullptr, 'c'},
         { "token-prefix",           required_argument, nullptr, 'r'},
+        { "get-type-of-token-code", required_argument, nullptr, 'l'},
         { "end-of-input-token",     required_argument, nullptr, 'f'},
 
         // Generated code options
@@ -123,7 +126,7 @@ const struct option Options::LONG_OPTIONS [] = {
         { "output",                 required_argument, nullptr, 'o'},
         { nullptr,                  no_argument,       nullptr,  0}
 };
-const char Options::SHORT_OPTIONS [] = ":hvd:s:t:p:e:a:g:j:k:y:c:r:f:i:n:b:x:wuo:";
+const char Options::SHORT_OPTIONS [] = ":hvd:s:t:p:e:a:q:g:j:k:y:m:c:r:l:f:i:n:b:x:wuo:";
 
 ////////////////////////////////////////////////////////////////////////////////
 void Options::parseArguments(int argc, char ** argv) throw(CommandLineParsingError)
@@ -141,13 +144,16 @@ void Options::parseArguments(int argc, char ** argv) throw(CommandLineParsingErr
             case 'e' : errorState.assign(optarg);         break;
             case 'a' : acceptState.assign(optarg);        break;
 
+            case 'q' : valueType.assign(optarg);          break;
             case 'g' : pushValue.assign(optarg);          break;
             case 'j' : popValues.assign(optarg);          break;
             case 'k' : getValue .assign(optarg);          break;
 
             case 'y' : tokenType.assign(optarg);          break;
+            case 'm' : tokenUnionName.assign(optarg);     break;
             case 'c' : shiftToken.assign(optarg);         break;
             case 'r' : tokenPrefix.assign(optarg);        break;
+            case 'l' : getTypeOfToken.assign(optarg);     break;
             case 'f' : endOfInputToken.assign(optarg);    break;
 
             case 'i' : intermediateType.assign(optarg);   break;
@@ -220,7 +226,7 @@ void Options::usage(void)
     USAGE_OPTION_OTHERS_LINE(                        "  - 2 : Debug parser");
     USAGE_OPTION_OTHERS_LINE(                        "  - 3 : Debug lexer");
 
-    std::cout << std::endl << "Parser states options :" << std::endl;
+    std::cout << std::endl << "Parser options :" << std::endl;
     USAGE_OPTION_LINE('s', "state-type"            , "Type used for generated states (default \"" << options.stateType << "\")");
     USAGE_OPTION_LINE('t', "top-state-code"        , "Code used to get the state on top of the stack (default \"" << options.topState << "\")");
     USAGE_OPTION_LINE('p', "pop-state-code"        , "Code used to pop states from the stack (default \"" << options.popState << "\")");
@@ -228,6 +234,7 @@ void Options::usage(void)
     USAGE_OPTION_LINE('e', "error-state"           , "State number used to specify an error (default \"" << options.errorState << "\")");
     USAGE_OPTION_LINE('a', "accept-state"          , "State number used when parsing is done and the input is accepted (default \"" << options.acceptState << "\")");
 
+    USAGE_OPTION_LINE('q', "value-type"            , "Type used for intermediate values (default \"" << options.valueType << "\")");
     USAGE_OPTION_LINE('g', "push-value-code"       , "Code used to push a new value on the stack (default \"" << options.pushValue << "\")");
     USAGE_OPTION_OTHERS_LINE(                        "The string \"" << Options::VAR_VALUE << "\" can be used to know the value to push");
     USAGE_OPTION_LINE('j', "pop-values-code"       , "Code used to pop values from the stack (default \"" << options.popValues << "\")");
@@ -237,8 +244,11 @@ void Options::usage(void)
 
     std::cout << std::endl << "Lexer options :" << std::endl;
     USAGE_OPTION_LINE('y', "token-type"            , "Type used for tokens (default \"" << options.tokenType << "\")");
+    USAGE_OPTION_LINE('m', "token-union-name"      , "Name of the value's union member used to store a token (default \"" << options.tokenUnionName << "\")");
     USAGE_OPTION_LINE('c', "shift-token-code"      , "Code used to move lexer to the next token (default \"" << options.shiftToken << "\")");
     USAGE_OPTION_LINE('r', "token-prefix"          , "Prefix of token (e.g. \"TokenType::\", default \"" << options.tokenPrefix << "\")");
+    USAGE_OPTION_LINE('l', "get-type-of-token-code", "Code used to get the type of token(e.g. \"<TOKEN>.getType()\", default \"" << options.getTypeOfToken << "\")");
+    USAGE_OPTION_OTHERS_LINE(                        "The string \"" << Options::VAR_TOKEN << "\" can be used to know the name of the token variable");
     USAGE_OPTION_LINE('f', "end-of-input-token"    , "Name of the token use to specify end of input stream (default \"" << options.endOfInputToken << "\")");
 
     std::cout << std::endl << "Generated code options :" << std::endl;
@@ -303,14 +313,17 @@ Options & Options::operator <<(const Options & options)
     if(options.errorState             != Options::DEFAULT.errorState            ) errorState             = options.errorState;
     if(options.acceptState            != Options::DEFAULT.acceptState           ) acceptState            = options.acceptState;
 
+    if(options.valueType              != Options::DEFAULT.valueType             ) valueType              = options.valueType;
     if(options.pushValue              != Options::DEFAULT.pushValue             ) pushValue              = options.pushValue;
     if(options.popValues              != Options::DEFAULT.popValues             ) popValues              = options.popValues;
     if(options.getValue               != Options::DEFAULT.getValue              ) getValue               = options.getValue;
 
     // Lexer options
     if(options.tokenType              != Options::DEFAULT.tokenType             ) tokenType              = options.tokenType;
+    if(options.tokenUnionName         != Options::DEFAULT.tokenUnionName        ) tokenUnionName         = options.tokenUnionName;
     if(options.shiftToken             != Options::DEFAULT.shiftToken            ) shiftToken             = options.shiftToken;
     if(options.tokenPrefix            != Options::DEFAULT.tokenPrefix           ) tokenPrefix            = options.tokenPrefix;
+    if(options.getTypeOfToken         != Options::DEFAULT.getTypeOfToken        ) getTypeOfToken         = options.getTypeOfToken;
     if(options.endOfInputToken        != Options::DEFAULT.endOfInputToken       ) endOfInputToken        = options.endOfInputToken;
 
     // Generated code options
@@ -342,14 +355,17 @@ std::ostream & operator <<(std::ostream & os, const Options & options)
     os << "errorState             = \"" << options.errorState             << "\"" << std::endl;
     os << "acceptState            = \"" << options.acceptState            << "\"" << std::endl;
 
+    os << "valueType              = \"" << options.valueType              << "\"" << std::endl;
     os << "pushValue              = \"" << options.pushValue              << "\"" << std::endl;
     os << "popValues              = \"" << options.popValues              << "\"" << std::endl;
     os << "getValue               = \"" << options.getValue               << "\"" << std::endl;
 
     // Lexer options
     os << "tokenType              = \"" << options.tokenType              << "\"" << std::endl;
+    os << "tokenUnionName         = \"" << options.tokenUnionName         << "\"" << std::endl;
     os << "shiftToken             = \"" << options.shiftToken             << "\"" << std::endl;
     os << "tokenPrefix            = \"" << options.tokenPrefix            << "\"" << std::endl;
+    os << "getTypeOfToken         = \"" << options.getTypeOfToken         << "\"" << std::endl;
     os << "endOfInputToken        = \"" << options.endOfInputToken        << "\"" << std::endl;
 
     // Generated code options

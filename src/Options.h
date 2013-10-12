@@ -74,7 +74,7 @@ struct Options
         static const std::string    VAR_VALUE_IDX;
         static const std::string    VAR_EXTERNAL_RETURN;
         static const std::string    VAR_RETURN;
-        static const std::string    VAR_RETURN_TYPE;
+        static const std::string    VAR_TOKEN;
         static const std::string    VERSION;
 
         // Parser options
@@ -84,14 +84,17 @@ struct Options
         std::string     errorState         = "-1";
         std::string     acceptState        = "-2";
 
+        std::string     valueType          = "ValueType";
         std::string     pushValue          = "pushValue(<VALUE>)";
         std::string     popValues          = "popValues(<NB_VALUES>)";
         std::string     getValue           = "getValue(<VALUE_IDX>)";
 
         // Lexer options
         std::string     tokenType          = "int";
+        std::string     tokenUnionName     = "token";
         std::string     shiftToken         = "shiftToken()";
         std::string     tokenPrefix        = "";
+        std::string     getTypeOfToken     = "<TOKEN>";
         std::string     endOfInputToken    = "END_OF_INPUT";
 
         // Generated code options
@@ -104,7 +107,7 @@ struct Options
         bool            useTableForBranches    = false;
 
         // Internal
-        std::string     tokenName        = "token";
+        std::string     tokenName        = "yytoken";
         std::string     intermediateName = "intermediate";
 
         Indenter        indent;

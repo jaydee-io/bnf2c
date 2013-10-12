@@ -33,6 +33,9 @@
 #include <cstring>
 #include <iomanip>
 
+#define PARAM_NAME_PREFIX_SIZE 6
+#define TYPE_NAME_PREFIX_SIZE  11
+
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator<<(std::ostream & os, const TokenType tokenType)
 {
@@ -116,7 +119,7 @@ std::string Token::valueToTerminal(void) const
 std::string Token::valueToParameterName(void) const
 {
     if((value != nullptr) && (end != nullptr))
-        return std::string(value, end - value);
+        return std::string(value + PARAM_NAME_PREFIX_SIZE, end - (value + PARAM_NAME_PREFIX_SIZE));
     else
         return std::string("value error");
 }
@@ -125,7 +128,24 @@ std::string Token::valueToParameterName(void) const
 std::string Token::valueToParameterValue(void) const
 {
     if((value != nullptr) && (end != nullptr))
-        return std::string(value + 1, end - value - 2);
+    {
+        std::string paramValue(value + 1, end - value - 2);
+
+        std::size_t pos = 0;
+        while((pos = paramValue.find("\\\"", pos)) != std::string::npos)
+            paramValue.replace(pos, 2, "\"");
+
+        return paramValue;
+    }
+    else
+        return std::string("value error");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+std::string Token::valueToTypeName(void) const
+{
+    if((value != nullptr) && (end != nullptr))
+        return std::string(value + TYPE_NAME_PREFIX_SIZE, end - (value + TYPE_NAME_PREFIX_SIZE) - 1);
     else
         return std::string("value error");
 }

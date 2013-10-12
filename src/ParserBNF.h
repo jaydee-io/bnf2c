@@ -63,6 +63,7 @@ class ParserBNF
     protected :
         void parseRule(Rule & rule) throw(ParsingError);
         void parseParameter(void) throw(ParsingError);
+        void parseIntermediatesTypes(void) throw(ParsingError);
 
     protected :
         Grammar &       m_grammar;
