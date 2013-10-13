@@ -30,6 +30,7 @@
 #ifndef __OPTIONS_H__
 #define __OPTIONS_H__
 #include <string>
+#include <vector>
 #include <ostream>
 #include <fstream>
 #include <getopt.h>
@@ -122,8 +123,8 @@ struct Options
         Options & operator <<(const Options & options);
 
     protected :
-        static const struct option LONG_OPTIONS [];
-        static const char          SHORT_OPTIONS [];
+        static const struct option            OPTIONS [];
+        static const std::vector<std::string> OPTIONS_TEXT [];
 
         std::string     m_inputFileName;
         std::string     m_outputFileName;

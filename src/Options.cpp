@@ -77,6 +77,7 @@ std::ostream & operator <<(std::ostream & os, const Indenter & indenter)
 }
 
 
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(0[x]))
 
 #define ADD_COMMAND_LINE_PARSING_ERROR(code, message)\
     do {\
@@ -97,43 +98,83 @@ const std::string Options::VAR_RETURN         ("yylval");
 const std::string Options::VAR_TOKEN          ("<TOKEN>");
 const std::string Options::VERSION            ("0.2");
 
-const struct option Options::LONG_OPTIONS [] = {
-        { "help",                   no_argument,       nullptr, 'h'},
-        { "version",                no_argument,       nullptr, 'v'},
-        { "debug",                  required_argument, nullptr, 'd'},
+const struct option Options::OPTIONS [] = {
+    { "help",                   no_argument,       nullptr, 'h'},
+    { "version",                no_argument,       nullptr, 'v'},
+    { "debug",                  required_argument, nullptr, 'd'},
 
-        // Parser options
-        { "state-type",             required_argument, nullptr, 's'},
-        { "top-state-code",         required_argument, nullptr, 't'},
-        { "pop-state-code",         required_argument, nullptr, 'p'},
-        { "error-state",            required_argument, nullptr, 'e'},
-        { "accept-state",           required_argument, nullptr, 'a'},
+    // Parser options
+    { "state-type",             required_argument, nullptr, 's'},
+    { "top-state-code",         required_argument, nullptr, 't'},
+    { "pop-state-code",         required_argument, nullptr, 'p'},
+    { "error-state",            required_argument, nullptr, 'e'},
+    { "accept-state",           required_argument, nullptr, 'a'},
 
-        { "value-type",             required_argument, nullptr, 'q'},
-        { "push-value-code",        required_argument, nullptr, 'g'},
-        { "pop-values-code",        required_argument, nullptr, 'j'},
-        { "get-value-code",         required_argument, nullptr, 'k'},
+    { "value-type",             required_argument, nullptr, 'q'},
+    { "push-value-code",        required_argument, nullptr, 'g'},
+    { "pop-values-code",        required_argument, nullptr, 'j'},
+    { "get-value-code",         required_argument, nullptr, 'k'},
 
-        // Lexer options
-        { "token-type",             required_argument, nullptr, 'y'},
-        { "token-union-name",       required_argument, nullptr, 'm'},
-        { "shift-token-code",       required_argument, nullptr, 'c'},
-        { "token-prefix",           required_argument, nullptr, 'r'},
-        { "get-type-of-token-code", required_argument, nullptr, 'l'},
-        { "end-of-input-token",     required_argument, nullptr, 'f'},
+    // Lexer options
+    { "token-type",             required_argument, nullptr, 'y'},
+    { "token-union-name",       required_argument, nullptr, 'm'},
+    { "shift-token-code",       required_argument, nullptr, 'c'},
+    { "token-prefix",           required_argument, nullptr, 'r'},
+    { "get-type-of-token-code", required_argument, nullptr, 'l'},
+    { "end-of-input-token",     required_argument, nullptr, 'f'},
 
-        // Generated code options
-        { "intermediate-type",      required_argument, nullptr, 'i'},
-        { "parse-function",         required_argument, nullptr, 'n'},
-        { "branch-function",        required_argument, nullptr, 'b'},
-        { "throwed-exceptions",     required_argument, nullptr, 'x'},
+    // Generated code options
+    { "intermediate-type",      required_argument, nullptr, 'i'},
+    { "parse-function",         required_argument, nullptr, 'n'},
+    { "branch-function",        required_argument, nullptr, 'b'},
+    { "throwed-exceptions",     required_argument, nullptr, 'x'},
 
-        { "default-switch",         no_argument,       nullptr, 'w'},
-        { "use-table-for-branches", no_argument,       nullptr, 'u'},
-        { "output",                 required_argument, nullptr, 'o'},
-        { nullptr,                  no_argument,       nullptr,  0}
+    { "default-switch",         no_argument,       nullptr, 'w'},
+    { "use-table-for-branches", no_argument,       nullptr, 'u'},
+    { "output",                 required_argument, nullptr, 'o'},
+    { nullptr,                  no_argument,       nullptr,  0}
 };
-const char Options::SHORT_OPTIONS [] = ":hvd:s:t:p:e:a:q:g:j:k:y:m:c:r:l:f:i:n:b:x:wuo:";
+
+const std::vector<std::string> Options::OPTIONS_TEXT [] = {
+        { "Print this help" },
+        { "Print version number" },
+        { "Print addtionnal debugging information on stderr",
+          "  - 1 : Debug generator",
+          "  - 2 : Debug parser",
+          "  - 3 : Debug lexer" },
+
+        { "Type used for generated states" },
+        { "Code used to get the state on top of the stack" },
+        { "Code used to pop states from the stack" },
+        { "State number used to specify an error" },
+        { "State number used when parsing is done and the input is accepted" },
+        { "Type used for intermediate values" },
+        { "Code used to push a new value on the stack" },
+        { "Code used to pop values from the stack" },
+        { "Code used to get the N-th value from the stack" },
+
+        { "Type used for tokens" },
+        { "Name of the value's union member used to store a token" },
+        { "Code used to move lexer to the next token" },
+        { "Prefix of token" },
+        { "Code used to get the type of token" },
+        { "Name of the token use to specify end of input stream" },
+
+        { "Type used for generated intermediate type" },
+        { "Name of the generated parse function" },
+        { "Name of the generated branch function" },
+        { "Names of the exceptions throwed by generated functions (default no exceptions throwed)" },
+        { "Generate a default statement in switch / case (default no default case)" },
+        { "Use table instead of a function for branches (default use function)" },
+
+        { "Specify the name of the output file (default to stdout)" }
+};
+
+#define NB_OPTIONS_COMMON    3
+#define NB_OPTIONS_PARSER    9
+#define NB_OPTIONS_LEXER     6
+#define NB_OPTIONS_GENERATOR 6
+#define NB_OPTIONS_FILE      1
 
 ////////////////////////////////////////////////////////////////////////////////
 void Options::parseArguments(int argc, char ** argv)
@@ -141,7 +182,33 @@ void Options::parseArguments(int argc, char ** argv)
     int optionIndex = 0;
     int option = 0;
 
-    while ((option = getopt_long(argc, argv, Options::SHORT_OPTIONS, Options::LONG_OPTIONS, &optionIndex)) != -1)
+    // Construct short options table
+    int nbShortOptions = 0;
+    for(int i=0; i<(ARRAY_SIZE(Options::OPTIONS) - 1); i++)
+    {
+        switch(Options::OPTIONS[i].has_arg)
+        {
+            case no_argument       : nbShortOptions += 1; break;
+            case required_argument : nbShortOptions += 2; break;
+            case optional_argument : nbShortOptions += 3; break;
+            default                : /* do nothing */;    break;
+        }
+    }
+    char * shortOptions = new char[nbShortOptions];
+    for(int i=0, j=0; i<(ARRAY_SIZE(Options::OPTIONS) - 1); i++)
+    {
+        shortOptions[j++] = Options::OPTIONS[i].val;
+        switch(Options::OPTIONS[i].has_arg)
+        {
+            case optional_argument : shortOptions[j++] = ':'; /* no break */
+            case required_argument : shortOptions[j++] = ':'; break;
+            default                : /* do nothing */;        break;
+        }
+    }
+
+    // Parse options
+    opterr = 0;
+    while ((option = getopt_long(argc, argv, shortOptions, Options::OPTIONS, &optionIndex)) != -1)
     {
         switch (option)
         {
@@ -208,62 +275,44 @@ void Options::parseArguments(int argc, char ** argv)
         }
     }
 
+    delete [] shortOptions;
+
     if (optind < argc)
         m_inputFileName.assign(argv[optind]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#define USAGE_OPTION_LINE(shortOption, longOption, message) std::cout << "  -" << shortOption << ", --" << std::left << std::setw(22) << longOption  << "    " << message << std::endl
-#define USAGE_OPTION_OTHERS_LINE(message)                   std::cout << std::left << std::setw(34) << ' ' << message << std::endl
+#define USAGE_OPTION(nbOptions) \
+    do { \
+        for(int max=i + nbOptions; i<max; i++) \
+        { \
+            std::cout << "  -" << (char) Options::OPTIONS[i].val << ", --" << std::left << std::setw(22) << Options::OPTIONS[i].name  << "    " << Options::OPTIONS_TEXT[i][0] << std::endl; \
+            for(int j=1; j<Options::OPTIONS_TEXT[i].size(); j++) \
+                std::cout << std::left << std::setw(34) << ' ' << Options::OPTIONS_TEXT[i][j] << std::endl; \
+        } \
+    } while(false)
+
 void Options::usage(void)
 {
     Options options;
+    int i = 0;
 
     std::cout << "Usage : bnf2c [OPTIONS] [InputBnfFile]" << std::endl;
 
     std::cout << std::endl;
-    USAGE_OPTION_LINE('h', "help"                  , "Print this help");
-    USAGE_OPTION_LINE('v', "version"               , "Print version number");
-    USAGE_OPTION_LINE('d', "debug"                 , "Print addtionnal debugging information on stderr");
-    USAGE_OPTION_OTHERS_LINE(                        "  - 1 : Debug generator");
-    USAGE_OPTION_OTHERS_LINE(                        "  - 2 : Debug parser");
-    USAGE_OPTION_OTHERS_LINE(                        "  - 3 : Debug lexer");
+    USAGE_OPTION(NB_OPTIONS_COMMON);
 
     std::cout << std::endl << "Parser options :" << std::endl;
-    USAGE_OPTION_LINE('s', "state-type"            , "Type used for generated states (default \"" << options.stateType << "\")");
-    USAGE_OPTION_LINE('t', "top-state-code"        , "Code used to get the state on top of the stack (default \"" << options.topState << "\")");
-    USAGE_OPTION_LINE('p', "pop-state-code"        , "Code used to pop states from the stack (default \"" << options.popState << "\")");
-    USAGE_OPTION_OTHERS_LINE(                        "The string \"" << Options::VAR_NB_STATES << "\" can be used to know how many states to pop");
-    USAGE_OPTION_LINE('e', "error-state"           , "State number used to specify an error (default \"" << options.errorState << "\")");
-    USAGE_OPTION_LINE('a', "accept-state"          , "State number used when parsing is done and the input is accepted (default \"" << options.acceptState << "\")");
-
-    USAGE_OPTION_LINE('q', "value-type"            , "Type used for intermediate values (default \"" << options.valueType << "\")");
-    USAGE_OPTION_LINE('g', "push-value-code"       , "Code used to push a new value on the stack (default \"" << options.pushValue << "\")");
-    USAGE_OPTION_OTHERS_LINE(                        "The string \"" << Options::VAR_VALUE << "\" can be used to know the value to push");
-    USAGE_OPTION_LINE('j', "pop-values-code"       , "Code used to pop values from the stack (default \"" << options.popValues << "\")");
-    USAGE_OPTION_OTHERS_LINE(                        "The string \"" << Options::VAR_NB_VALUES << "\" can be used to know how many values to pop");
-    USAGE_OPTION_LINE('k', "get-value-code"        , "Code used to get the N-th value from the stack (default \"" << options.getValue << "\")");
-    USAGE_OPTION_OTHERS_LINE(                        "The string \"" << Options::VAR_VALUE_IDX << "\" can be used to know the index of the value to get");
+    USAGE_OPTION(NB_OPTIONS_PARSER);
 
     std::cout << std::endl << "Lexer options :" << std::endl;
-    USAGE_OPTION_LINE('y', "token-type"            , "Type used for tokens (default \"" << options.tokenType << "\")");
-    USAGE_OPTION_LINE('m', "token-union-name"      , "Name of the value's union member used to store a token (default \"" << options.tokenUnionName << "\")");
-    USAGE_OPTION_LINE('c', "shift-token-code"      , "Code used to move lexer to the next token (default \"" << options.shiftToken << "\")");
-    USAGE_OPTION_LINE('r', "token-prefix"          , "Prefix of token (e.g. \"TokenType::\", default \"" << options.tokenPrefix << "\")");
-    USAGE_OPTION_LINE('l', "get-type-of-token-code", "Code used to get the type of token(e.g. \"<TOKEN>.getType()\", default \"" << options.getTypeOfToken << "\")");
-    USAGE_OPTION_OTHERS_LINE(                        "The string \"" << Options::VAR_TOKEN << "\" can be used to know the name of the token variable");
-    USAGE_OPTION_LINE('f', "end-of-input-token"    , "Name of the token use to specify end of input stream (default \"" << options.endOfInputToken << "\")");
+    USAGE_OPTION(NB_OPTIONS_LEXER);
 
     std::cout << std::endl << "Generated code options :" << std::endl;
-    USAGE_OPTION_LINE('i', "intermediate-type"     , "Type used for generated intermediate type (default \"" << options.intermediateType << "\")");
-    USAGE_OPTION_LINE('n', "parse-function"        , "Name of the generated parse function (default \"" << options.parseFunctionName << "\")");
-    USAGE_OPTION_LINE('b', "branch-function"       , "Name of the generated branch function (default \"" << options.branchFunctionName << "\")");
-    USAGE_OPTION_LINE('x', "throwed-exceptions"    , "Names of the exceptions throwed by generated functions (default no exceptions throwed)");
-    USAGE_OPTION_LINE('w', "default-switch"        , "Generate a default statement in switch / case (default no default case)");
-    USAGE_OPTION_LINE('u', "use-table-for-branches", "Use table instead of a function for branches (default use function)");
+    USAGE_OPTION(NB_OPTIONS_GENERATOR);
 
     std::cout << std::endl << "File :" << std::endl;
-    USAGE_OPTION_LINE('o', "output OutputFile"     , "Specify the name of the output file (default to stdout)");
+    USAGE_OPTION(NB_OPTIONS_FILE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -299,80 +348,80 @@ std::ostream & Options::outputStream(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+#define SET_OPTION_IF_NOT_DEFAULT(option) if(options.option != Options::DEFAULT.option) option = options.option
 Options & Options::operator <<(const Options & options)
 {
     // Parser options
-    if(options.stateType              != Options::DEFAULT.stateType             ) stateType              = options.stateType;
-    if(options.topState               != Options::DEFAULT.topState              ) topState               = options.topState;
-    if(options.popState               != Options::DEFAULT.popState              ) popState               = options.popState;
-    if(options.errorState             != Options::DEFAULT.errorState            ) errorState             = options.errorState;
-    if(options.acceptState            != Options::DEFAULT.acceptState           ) acceptState            = options.acceptState;
+    SET_OPTION_IF_NOT_DEFAULT(stateType);
+    SET_OPTION_IF_NOT_DEFAULT(topState);
+    SET_OPTION_IF_NOT_DEFAULT(popState);
+    SET_OPTION_IF_NOT_DEFAULT(errorState);
+    SET_OPTION_IF_NOT_DEFAULT(acceptState);
 
-    if(options.valueType              != Options::DEFAULT.valueType             ) valueType              = options.valueType;
-    if(options.pushValue              != Options::DEFAULT.pushValue             ) pushValue              = options.pushValue;
-    if(options.popValues              != Options::DEFAULT.popValues             ) popValues              = options.popValues;
-    if(options.getValue               != Options::DEFAULT.getValue              ) getValue               = options.getValue;
+    SET_OPTION_IF_NOT_DEFAULT(valueType);
+    SET_OPTION_IF_NOT_DEFAULT(pushValue);
+    SET_OPTION_IF_NOT_DEFAULT(popValues);
+    SET_OPTION_IF_NOT_DEFAULT(getValue);
 
     // Lexer options
-    if(options.tokenType              != Options::DEFAULT.tokenType             ) tokenType              = options.tokenType;
-    if(options.tokenUnionName         != Options::DEFAULT.tokenUnionName        ) tokenUnionName         = options.tokenUnionName;
-    if(options.shiftToken             != Options::DEFAULT.shiftToken            ) shiftToken             = options.shiftToken;
-    if(options.tokenPrefix            != Options::DEFAULT.tokenPrefix           ) tokenPrefix            = options.tokenPrefix;
-    if(options.getTypeOfToken         != Options::DEFAULT.getTypeOfToken        ) getTypeOfToken         = options.getTypeOfToken;
-    if(options.endOfInputToken        != Options::DEFAULT.endOfInputToken       ) endOfInputToken        = options.endOfInputToken;
+    SET_OPTION_IF_NOT_DEFAULT(tokenType);
+    SET_OPTION_IF_NOT_DEFAULT(tokenUnionName);
+    SET_OPTION_IF_NOT_DEFAULT(shiftToken);
+    SET_OPTION_IF_NOT_DEFAULT(tokenPrefix);
+    SET_OPTION_IF_NOT_DEFAULT(getTypeOfToken);
+    SET_OPTION_IF_NOT_DEFAULT(endOfInputToken);
 
     // Generated code options
-    if(options.intermediateType       != Options::DEFAULT.intermediateType      ) intermediateType       = options.intermediateType;
-    if(options.parseFunctionName      != Options::DEFAULT.parseFunctionName     ) parseFunctionName      = options.parseFunctionName;
-    if(options.branchFunctionName     != Options::DEFAULT.branchFunctionName    ) branchFunctionName     = options.branchFunctionName;
-    if(options.throwedExceptions      != Options::DEFAULT.throwedExceptions     ) throwedExceptions      = options.throwedExceptions;
-    if(options.defaultSwitchStatement != Options::DEFAULT.defaultSwitchStatement) defaultSwitchStatement = options.defaultSwitchStatement;
-    if(options.useTableForBranches    != Options::DEFAULT.useTableForBranches   ) useTableForBranches    = options.useTableForBranches;
-    if(options.tokenName              != Options::DEFAULT.tokenName             ) tokenName              = options.tokenName;
-    if(options.intermediateName       != Options::DEFAULT.intermediateName      ) intermediateName       = options.intermediateName;
-    if(options.debugLevel             != Options::DEFAULT.debugLevel            ) debugLevel             = options.debugLevel;
+    SET_OPTION_IF_NOT_DEFAULT(intermediateType);
+    SET_OPTION_IF_NOT_DEFAULT(parseFunctionName);
+    SET_OPTION_IF_NOT_DEFAULT(branchFunctionName);
+    SET_OPTION_IF_NOT_DEFAULT(throwedExceptions);
+    SET_OPTION_IF_NOT_DEFAULT(defaultSwitchStatement);
+    SET_OPTION_IF_NOT_DEFAULT(useTableForBranches);
+    SET_OPTION_IF_NOT_DEFAULT(tokenName);
+    SET_OPTION_IF_NOT_DEFAULT(intermediateName);
+    SET_OPTION_IF_NOT_DEFAULT(debugLevel);
 
-    if(options.indent != Options::DEFAULT.indent) indent = options.indent;
-
-    if(options.m_inputFileName  != Options::DEFAULT.m_inputFileName ) m_inputFileName  = options.m_inputFileName;
-    if(options.m_outputFileName != Options::DEFAULT.m_outputFileName) m_outputFileName = options.m_outputFileName;
+    SET_OPTION_IF_NOT_DEFAULT(indent);
+    SET_OPTION_IF_NOT_DEFAULT(m_inputFileName);
+    SET_OPTION_IF_NOT_DEFAULT(m_outputFileName);
 
     return (*this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+#define DISPLAY_OPTION(option) os << #option << " = \"" << options.option << '"' << std::endl
 std::ostream & operator <<(std::ostream & os, const Options & options)
 {
     // Parser options
-    os << "stateType              = \"" << options.stateType              << "\"" << std::endl;
-    os << "topState               = \"" << options.topState               << "\"" << std::endl;
-    os << "popState               = \"" << options.popState               << "\"" << std::endl;
-    os << "errorState             = \"" << options.errorState             << "\"" << std::endl;
-    os << "acceptState            = \"" << options.acceptState            << "\"" << std::endl;
-
-    os << "valueType              = \"" << options.valueType              << "\"" << std::endl;
-    os << "pushValue              = \"" << options.pushValue              << "\"" << std::endl;
-    os << "popValues              = \"" << options.popValues              << "\"" << std::endl;
-    os << "getValue               = \"" << options.getValue               << "\"" << std::endl;
+    DISPLAY_OPTION(stateType  );
+    DISPLAY_OPTION(topState   );
+    DISPLAY_OPTION(popState   );
+    DISPLAY_OPTION(errorState );
+    DISPLAY_OPTION(acceptState);
+    DISPLAY_OPTION(valueType  );
+    DISPLAY_OPTION(pushValue  );
+    DISPLAY_OPTION(popValues  );
+    DISPLAY_OPTION(getValue   );
 
     // Lexer options
-    os << "tokenType              = \"" << options.tokenType              << "\"" << std::endl;
-    os << "tokenUnionName         = \"" << options.tokenUnionName         << "\"" << std::endl;
-    os << "shiftToken             = \"" << options.shiftToken             << "\"" << std::endl;
-    os << "tokenPrefix            = \"" << options.tokenPrefix            << "\"" << std::endl;
-    os << "getTypeOfToken         = \"" << options.getTypeOfToken         << "\"" << std::endl;
-    os << "endOfInputToken        = \"" << options.endOfInputToken        << "\"" << std::endl;
+    DISPLAY_OPTION(tokenType      );
+    DISPLAY_OPTION(tokenUnionName );
+    DISPLAY_OPTION(shiftToken     );
+    DISPLAY_OPTION(tokenPrefix    );
+    DISPLAY_OPTION(getTypeOfToken );
+    DISPLAY_OPTION(endOfInputToken);
 
     // Generated code options
-    os << "intermediateType       = \"" << options.intermediateType       << "\"" << std::endl;
-    os << "parseFunctionName      = \"" << options.parseFunctionName      << "\"" << std::endl;
-    os << "branchFunctionName     = \"" << options.branchFunctionName     << "\"" << std::endl;
+    DISPLAY_OPTION(intermediateType  );
+    DISPLAY_OPTION(parseFunctionName );
+    DISPLAY_OPTION(branchFunctionName);
 
-    os << "defaultSwitchStatement = \"" << options.defaultSwitchStatement << "\"" << std::endl;
-    os << "useTableForBranches    = \"" << options.useTableForBranches    << "\"" << std::endl;
+    DISPLAY_OPTION(defaultSwitchStatement);
+    DISPLAY_OPTION(useTableForBranches   );
 
-    os << "tokenName              = \"" << options.tokenName              << "\"" << std::endl;
-    os << "intermediateName       = \"" << options.intermediateName       << "\"" << std::endl;
+    DISPLAY_OPTION(tokenName       );
+    DISPLAY_OPTION(intermediateName);
 
     return os;
 }
