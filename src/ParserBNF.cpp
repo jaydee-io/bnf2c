@@ -29,43 +29,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "ParserBNF.h"
 
-#include <iomanip>
 #include <sstream>
 
-#define COLOR_RED   "\033[0;31m"
-#define COLOR_GREEN "\033[0;32m"
-#define COLOR_RESET "\033[0m"
-
-#define THROW_PARSING_ERROR(message)\
+#define ADD_PARSING_ERROR(message)\
     do {\
         std::stringstream ss;\
         ss << message;\
-        throw ParsingError({m_lexer, m_token, ss.str()});\
+        errors.list.push_back(ParsingError({m_token.line, m_token.column, m_lexer.getTabulations(), m_lexer.getCurrentLine(), m_token.valueToVerbatim(), ss.str()}));\
     } while(false)
 
-////////////////////////////////////////////////////////////////////////////////
-std::ostream & operator <<(std::ostream & os, const ParsingError & error)
-{
-    std::string currentLine = error.lexer.getCurrentLine();
-
-    os << COLOR_RED "Parsing error" COLOR_RESET " at L" << error.token.line << ":C" << error.token.column << " : " << error.message << std::endl;
-    os << currentLine << std::endl;
-    if(error.token.valueSize() > 1)
-    {
-        for(int i=0; i<error.lexer.getTabulations(); i++)
-            os << '\t';
-        os << COLOR_GREEN << std::setw(error.token.column - error.lexer.getTabulations()) << std::setfill(' ') << std::right << '^';
-        os << std::setw(error.token.valueSize() - 1) << std::setfill('-') << std::right << '^' << COLOR_RESET << std::endl;
-    }
-    else
-    {
-        for(int i=0; i<error.lexer.getTabulations(); i++)
-            os << '\t';
-        os << COLOR_GREEN << std::setw(error.token.column - error.lexer.getTabulations()) << std::right << '^' << COLOR_RESET << std::endl;
-    }
-
-    return os;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ParserBNF::ParserBNF(LexerBNF & lexer, Options & options, Grammar & grammar)
@@ -106,7 +78,7 @@ ParserBNF::ParserBNF(LexerBNF & lexer, Options & options, Grammar & grammar)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
+void ParserBNF::parseBnf2cBlock(void)
 {
     m_lexer.nextToken(m_token);
 
@@ -122,7 +94,7 @@ void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
 
                 m_lexer.nextToken(m_token);
                 if(m_token.type != TokenType::AFFECTATION)
-                    THROW_PARSING_ERROR("Expected token " << TokenType::AFFECTATION << " but got " << m_token.type);
+                    ADD_PARSING_ERROR("Expected " << TokenType::AFFECTATION << " '::=' but got a " << m_token.type);
 
                 parseRule(rule);
 
@@ -169,12 +141,12 @@ void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
             case TokenType::BRACE_CLOSE :
             case TokenType::PARAM_VALUE :
             case TokenType::EQUAL :
-                THROW_PARSING_ERROR("Unexpected token " << m_token.type);
+                ADD_PARSING_ERROR("Unexpected " << m_token.type);
                 break;
 
             // Lexer error
             case TokenType::ERROR :
-                THROW_PARSING_ERROR("Unknown token");
+                ADD_PARSING_ERROR("Unknown '" << m_token.valueToVerbatim() << "'");
                 break;
 
             // End of input
@@ -188,7 +160,7 @@ void ParserBNF::parseBnf2cBlock(void) throw(ParsingError)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserBNF::parseRule(Rule & rule) throw(ParsingError)
+void ParserBNF::parseRule(Rule & rule)
 {
     bool endOfRule = false;
 
@@ -217,7 +189,7 @@ void ParserBNF::parseRule(Rule & rule) throw(ParsingError)
 
                 m_lexer.nextToken(m_token);
                 if(m_token.type != TokenType::BRACE_CLOSE)
-                    THROW_PARSING_ERROR("Expected token " << TokenType::BRACE_CLOSE << " but got " << m_token.type);
+                    ADD_PARSING_ERROR("Expected " << TokenType::BRACE_CLOSE << " '}' but got " << m_token.type);
 
                 endOfRule = true;
 
@@ -229,11 +201,11 @@ void ParserBNF::parseRule(Rule & rule) throw(ParsingError)
                 break;
 
             case TokenType::AFFECTATION :
-                THROW_PARSING_ERROR("Unexpected token " << m_token.type);
+                ADD_PARSING_ERROR("Expected terminal or intermediate name but got " << m_token.type);
                 break;
 
             case TokenType::ERROR :
-                THROW_PARSING_ERROR("Unknown token");
+                ADD_PARSING_ERROR("Unknown '" << m_token.valueToVerbatim() << "'");
                 break;
 
             default :
@@ -244,7 +216,7 @@ void ParserBNF::parseRule(Rule & rule) throw(ParsingError)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserBNF::parseParameter(void) throw(ParsingError)
+void ParserBNF::parseParameter(void)
 {
     Token           backupToken = m_token;
     LexerBNF::State backupState = m_lexer.saveState();
@@ -254,13 +226,13 @@ void ParserBNF::parseParameter(void) throw(ParsingError)
     while(m_token.type == TokenType::NEW_LINE)
         m_lexer.nextToken(m_token);
     if(m_token.type != TokenType::EQUAL)
-        THROW_PARSING_ERROR("Expected token " << TokenType::EQUAL << " but got " << m_token.type);
+        ADD_PARSING_ERROR("Expected " << TokenType::EQUAL << " '=' but got " << m_token.type);
 
     m_lexer.nextToken(m_token);
     while(m_token.type == TokenType::NEW_LINE)
         m_lexer.nextToken(m_token);
     if(m_token.type != TokenType::PARAM_VALUE)
-        THROW_PARSING_ERROR("Expected token " << TokenType::PARAM_VALUE << " but got " << m_token.type);
+        ADD_PARSING_ERROR("Expected " << TokenType::PARAM_VALUE << " but got " << m_token.type);
 
     std::stringstream ss(m_token.valueToParameterValue());
 
@@ -272,7 +244,7 @@ void ParserBNF::parseParameter(void) throw(ParsingError)
 
         // Check "popState" special parameter
         if(m_options.popState.find(Options::VAR_NB_STATES) == std::string::npos)
-            THROW_PARSING_ERROR("Parameter \"" << paramName << "\" must contains the keyword " << Options::VAR_NB_STATES << " to be replaced by the number of states to be poped");
+            ADD_PARSING_ERROR("Parameter \"" << paramName << "\" must contains the keyword " << Options::VAR_NB_STATES << " to be replaced by the number of states to be poped");
 
         return;
     }
@@ -287,7 +259,7 @@ void ParserBNF::parseParameter(void) throw(ParsingError)
             ss >> std::boolalpha >> (*itBool->second);
 
         if(ss.fail())
-            THROW_PARSING_ERROR("Parameter \"" << paramName << "\" conversion failure, value must be boolean");
+            ADD_PARSING_ERROR("Parameter \"" << paramName << "\" conversion failure, value must be boolean");
 
         return;
     }
@@ -299,18 +271,18 @@ void ParserBNF::parseParameter(void) throw(ParsingError)
         ss >> (*itUint->second);
 
         if(ss.fail())
-            THROW_PARSING_ERROR("Parameter \"" << paramName << "\" conversion failure, value must be numerical");
+            ADD_PARSING_ERROR("Parameter \"" << paramName << "\" conversion failure, value must be numerical");
 
         return;
     }
 
     m_token = backupToken;
     m_lexer.restoreState(backupState);
-    THROW_PARSING_ERROR("Unknown parameter \"" << paramName << "\"");
+    ADD_PARSING_ERROR("Unknown parameter \"" << paramName << "\"");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserBNF::parseIntermediatesTypes(void) throw(ParsingError)
+void ParserBNF::parseIntermediatesTypes(void)
 {
     std::string type = m_token.valueToTypeName();
 

@@ -37,12 +37,6 @@
 #include <cstdint>
 #include <ostream>
 
-struct GeneratingError
-{
-    const std::string message;
-};
-
-std::ostream & operator <<(std::ostream & os, const GeneratingError & error);
 
 class ParseTable
 {
@@ -52,7 +46,6 @@ class ParseTable
     public :
         ParseTable(const Grammar & grammar, Options & options);
 
-        void checkGrammar(void) const throw(GeneratingError);
         void generateStates(void);
 
         void generateBranchesCode(std::ostream & os) const;

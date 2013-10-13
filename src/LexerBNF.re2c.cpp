@@ -118,7 +118,7 @@ void LexerBNF::nextToken(Token & token)
 
         "*\/"  {                  token.type = TokenType::END_OF_INPUT; break; }
         "\000" { m_state.input--; token.type = TokenType::END_OF_INPUT; break; }
-        [^]    { m_state.input--; token.type = TokenType::ERROR;        break; }
+        [^]    {                  token.type = TokenType::ERROR;        break; }
         */
     }
 

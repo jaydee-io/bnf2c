@@ -78,6 +78,13 @@ std::ostream & operator <<(std::ostream & os, const Indenter & indenter)
 
 
 
+#define ADD_COMMAND_LINE_PARSING_ERROR(code, message)\
+    do {\
+        std::stringstream ss;\
+        ss << message;\
+        errors.list.push_back(CommandLineParsingError{ss.str()});\
+        errors.exitCode = code;\
+    } while(false)
 
 ////////////////////////////////////////////////////////////////////////////////
 Options     Options::DEFAULT;
@@ -88,7 +95,7 @@ const std::string Options::VAR_NB_VALUES      ("<NB_VALUES>");
 const std::string Options::VAR_EXTERNAL_RETURN("$$");
 const std::string Options::VAR_RETURN         ("yylval");
 const std::string Options::VAR_TOKEN          ("<TOKEN>");
-const std::string Options::VERSION            ("0.1");
+const std::string Options::VERSION            ("0.2");
 
 const struct option Options::LONG_OPTIONS [] = {
         { "help",                   no_argument,       nullptr, 'h'},
@@ -129,7 +136,7 @@ const struct option Options::LONG_OPTIONS [] = {
 const char Options::SHORT_OPTIONS [] = ":hvd:s:t:p:e:a:q:g:j:k:y:m:c:r:l:f:i:n:b:x:wuo:";
 
 ////////////////////////////////////////////////////////////////////////////////
-void Options::parseArguments(int argc, char ** argv) throw(CommandLineParsingError)
+void Options::parseArguments(int argc, char ** argv)
 {
     int optionIndex = 0;
     int option = 0;
@@ -184,22 +191,18 @@ void Options::parseArguments(int argc, char ** argv) throw(CommandLineParsingErr
                 break;
 
             case 'h' :
-                throw CommandLineParsingError({"", 0});
+                ADD_COMMAND_LINE_PARSING_ERROR(0, "");
                 break;
 
             case ':' :
             {
-                std::stringstream error;
-                error << "Missing argument for option '-" << (char) optopt << "'";
-                throw CommandLineParsingError({error.str(), 1});
+                ADD_COMMAND_LINE_PARSING_ERROR(1, "Missing argument for option '-" << (char) optopt << "'");
                 break;
             }
             case '?' :
             default :
             {
-                std::stringstream error;
-                error << "Unknown option '-" << (char) optopt << "'";
-                throw CommandLineParsingError({error.str(), 1});
+                ADD_COMMAND_LINE_PARSING_ERROR(1, "Unknown option '-" << (char) optopt << "'");
                 break;
             }
         }
@@ -264,7 +267,7 @@ void Options::usage(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::istream & Options::inputStream(void) throw(CommandLineParsingError)
+std::istream & Options::inputStream(void)
 {
     if(m_inputFileName.empty())
         return std::cin;
@@ -273,18 +276,14 @@ std::istream & Options::inputStream(void) throw(CommandLineParsingError)
         m_inputFileStream.open(m_inputFileName);
 
         if(m_inputFileStream.fail())
-        {
-            std::stringstream error;
-            error << "Unable to open input file \"" << m_inputFileName << "\"";
-            throw CommandLineParsingError({error.str(), 1});
-        }
+            ADD_COMMAND_LINE_PARSING_ERROR(1, "Unable to open input file \"" << m_inputFileName << "\"");
 
         return m_inputFileStream;
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream & Options::outputStream(void) throw(CommandLineParsingError)
+std::ostream & Options::outputStream(void)
 {
     if(m_outputFileName.empty())
         return std::cout;
@@ -293,11 +292,7 @@ std::ostream & Options::outputStream(void) throw(CommandLineParsingError)
         m_outputFileStream.open(m_outputFileName);
 
         if(m_outputFileStream.fail())
-        {
-            std::stringstream error;
-            error << "Unable to open output file \"" << m_outputFileName << "\"";
-            throw CommandLineParsingError({error.str(), 1});
-        }
+            ADD_COMMAND_LINE_PARSING_ERROR(1, "Unable to open output file \"" << m_outputFileName << "\"");
 
         return m_outputFileStream;
     }

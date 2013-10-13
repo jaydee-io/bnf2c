@@ -40,63 +40,63 @@
 ////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char ** argv)
 {
-    try
+    // Parse command line arguments
+    Options cmdLineOptions;
+    cmdLineOptions.parseArguments(argc, argv);
+
+    // Open input & output file
+    std::istream & inputStream = cmdLineOptions.inputStream();
+    std::ostream & outputStream = cmdLineOptions.outputStream();
+
+    // Check for command line errors
+    if(!cmdLineOptions.errors.list.empty())
     {
-        // Parse command line arguments
-        Options cmdLineOptions;
-        cmdLineOptions.parseArguments(argc, argv);
-
-        // Open input & output file
-        std::istream & inputStream = cmdLineOptions.inputStream();
-        std::ostream & outputStream = cmdLineOptions.outputStream();
-
-        // Read input file
-        std::string inputBuffer;
-        inputBuffer.assign((std::istreambuf_iterator<char>(inputStream)), std::istreambuf_iterator<char>());
-
-        // Start parser
-        Options     options;
-        Grammar     grammar;
-        LexerBNF    lexer(inputBuffer, outputStream);
-        ParserBNF   parser(lexer, options, grammar);
-
-        // Find each "bnf2c" block and parse it
-        while(lexer.moveToNextBnf2cBlock())
-            parser.parseBnf2cBlock();
-
-        // Command line options prevails over in file options
-        options << cmdLineOptions;
-
-        // Output generated code at the end of output file
-        ParseTable table(grammar, options);
-        table.checkGrammar();
-        grammar.replacePseudoVariables(options);
-        table.generateStates();
-        table.generateBranchesCode(outputStream);
-        outputStream << std::endl;
-        table.generateParseCode(outputStream);
-
-        // Debug output
-        if(options.debugLevel != DebugLevel::NONE)
-            table.printDebug(std::cerr);
-
-        return 0;
-    }
-    catch(const CommandLineParsingError & e)
-    {
-        if(!e.message.empty())
-            std::cerr << e.message << std::endl << std::endl;
+        std::cerr << cmdLineOptions.errors << std::endl;
         Options::usage();
-        return e.exitCode;
+        return cmdLineOptions.errors.exitCode;
     }
-    catch(const ParsingError & error)
+
+    // Read input file
+    std::string inputBuffer;
+    inputBuffer.assign((std::istreambuf_iterator<char>(inputStream)), std::istreambuf_iterator<char>());
+
+    // Start parser
+    Options     options;
+    Grammar     grammar;
+    LexerBNF    lexer(inputBuffer, outputStream);
+    ParserBNF   parser(lexer, options, grammar);
+
+    // Find each "bnf2c" block and parse it
+    while(lexer.moveToNextBnf2cBlock())
+        parser.parseBnf2cBlock();
+
+    // Command line options prevails over in file options
+    options << cmdLineOptions;
+
+    // Check grammar
+    grammar.check();
+    if(!parser.errors.list.empty() || !grammar.errors.list.empty())
     {
-        std::cerr << error << std::endl;
+        std::cerr << parser.errors;
+        std::cerr << grammar.errors;
         return 1;
     }
-    catch(const GeneratingError & error)
-    {
-        std::cerr << error << std::endl;
-        return 1;
-    }
+
+    // Replace pseudo variable
+    grammar.replacePseudoVariables(options);
+
+    // Generate parser states
+    ParseTable table(grammar, options);
+    table.generateStates();
+
+    // Output generated code at the end of output file
+    table.generateBranchesCode(outputStream);
+    outputStream << std::endl;
+    table.generateParseCode(outputStream);
+
+    // Debug output
+    if(options.debugLevel != DebugLevel::NONE)
+        table.printDebug(std::cerr);
+
+    return 0;
 }

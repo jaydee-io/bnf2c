@@ -11,6 +11,7 @@ OBJS+= Grammar.o
 OBJS+= ParserState.o
 OBJS+= ParseTable.o
 OBJS+= Options.o
+OBJS+= Errors.o
 OBJS+= main.o
 
 ###############################################################################

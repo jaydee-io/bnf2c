@@ -27,52 +27,57 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __TOKEN_H__
-#define __TOKEN_H__
+#ifndef __ERRORS_H__
+#define __ERRORS_H__
 #include <string>
-#include <ostream>
+#include <list>
 
-enum class TokenType
+#include "LexerBNF.h"
+#include "Token.h"
+
+// Command line parsing error
+struct CommandLineParsingError
 {
-    INTERMEDIATE,
-    TERMINAL,
-    COMMENT,
-    TYPE_NAME,
-    PARAM_NAME,
-    PARAM_VALUE,
-
-    NEW_LINE,
-    AFFECTATION,
-    OR,
-    BRACE_OPEN,
-    BRACE_CLOSE,
-    EQUAL,
-
-    END_OF_INPUT,
-    ERROR
+    std::string message;
 };
 
-struct Token
+// Parsing error
+struct ParsingError // : public Error
 {
-    TokenType    type;
-    const char * value;
-    const char * end;
-    int          line;
-    int          column;
+    int         line;
+    int         column;
+    int         nbTabs;
+    std::string currentLine;
+    std::string value;
 
-
-    long        valueSize(void) const;
-
-    std::string valueToVerbatim(void) const;
-    std::string valueToComment(void) const;
-    std::string valueToIntermediate(void) const;
-    std::string valueToTerminal(void) const;
-    std::string valueToParameterName(void) const;
-    std::string valueToParameterValue(void) const;
-    std::string valueToTypeName(void) const;
+    std::string message;
 };
 
-std::ostream & operator<<(std::ostream & os, const TokenType tokenType);
-std::ostream & operator<<(std::ostream & os, const Token & token);
+// Generating error
+struct GeneratingError // : public Error
+{
+    const std::string message;
+};
 
-#endif /* __TOKEN_H__ */
+std::ostream & operator <<(std::ostream & os, const CommandLineParsingError & error);
+std::ostream & operator <<(std::ostream & os, const ParsingError & error);
+std::ostream & operator <<(std::ostream & os, const GeneratingError & error);
+
+// Errors list
+template<class ErrorType>
+struct Errors
+{
+    std::list<ErrorType> list;
+    int                  exitCode;
+};
+
+template<class ErrorType>
+std::ostream & operator <<(std::ostream & os, const Errors<ErrorType> & errors)
+{
+    for(const ErrorType & error : errors.list)
+        os << error;
+
+    return os;
+}
+
+#endif /* __ERRORS_H__ */

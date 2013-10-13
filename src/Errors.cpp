@@ -27,52 +27,55 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __TOKEN_H__
-#define __TOKEN_H__
-#include <string>
-#include <ostream>
+#include "Errors.h"
 
-enum class TokenType
+#include <iomanip>
+
+
+#define COLOR_GREEN  "\033[0;32"
+#define COLOR_RED    "\033[0;31"
+#define COLOR_RESET  "\033[0"
+#define COLOR_NORMAL "m"
+#define COLOR_BOLD   ";1m"
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::ostream & operator <<(std::ostream & os, const CommandLineParsingError & error)
 {
-    INTERMEDIATE,
-    TERMINAL,
-    COMMENT,
-    TYPE_NAME,
-    PARAM_NAME,
-    PARAM_VALUE,
+    if(!error.message.empty())
+        os << error.message << std::endl;
 
-    NEW_LINE,
-    AFFECTATION,
-    OR,
-    BRACE_OPEN,
-    BRACE_CLOSE,
-    EQUAL,
+    return os;
+}
 
-    END_OF_INPUT,
-    ERROR
-};
-
-struct Token
+////////////////////////////////////////////////////////////////////////////////
+std::ostream & operator <<(std::ostream & os, const ParsingError & error)
 {
-    TokenType    type;
-    const char * value;
-    const char * end;
-    int          line;
-    int          column;
+    std::string currentLine = error.currentLine;
 
+    os << COLOR_RED COLOR_BOLD "Parsing error" COLOR_RESET COLOR_BOLD " at L" << error.line << ":C" << error.column << " : " << error.message << COLOR_RESET COLOR_NORMAL << std::endl;
+    os << currentLine << std::endl;
+    if(error.value.size() > 1)
+    {
+        for(int i=0; i<error.nbTabs; i++)
+            os << '\t';
+        os << COLOR_GREEN COLOR_BOLD << std::setw(error.column - error.nbTabs) << std::setfill(' ') << std::right << '^';
+        os << std::setw(error.value.size() - 1) << std::setfill('-') << std::right << '^' << COLOR_RESET COLOR_NORMAL << std::endl;
+    }
+    else
+    {
+        for(int i=0; i<error.nbTabs; i++)
+            os << '\t';
+        os << COLOR_GREEN COLOR_BOLD << std::setw(error.column - error.nbTabs) << std::right << '^' << COLOR_RESET COLOR_NORMAL << std::endl;
+    }
 
-    long        valueSize(void) const;
+    return os;
+}
 
-    std::string valueToVerbatim(void) const;
-    std::string valueToComment(void) const;
-    std::string valueToIntermediate(void) const;
-    std::string valueToTerminal(void) const;
-    std::string valueToParameterName(void) const;
-    std::string valueToParameterValue(void) const;
-    std::string valueToTypeName(void) const;
-};
+////////////////////////////////////////////////////////////////////////////////
+std::ostream & operator <<(std::ostream & os, const GeneratingError & error)
+{
+    os << COLOR_RED COLOR_BOLD "Generating error" COLOR_RESET COLOR_BOLD << " : " << error.message <<  COLOR_RESET COLOR_NORMAL << std::endl;
 
-std::ostream & operator<<(std::ostream & os, const TokenType tokenType);
-std::ostream & operator<<(std::ostream & os, const Token & token);
-
-#endif /* __TOKEN_H__ */
+    return os;
+}

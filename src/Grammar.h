@@ -33,6 +33,7 @@
 #include "Symbol.h"
 #include "Dictionnary.h"
 #include "Options.h"
+#include "Errors.h"
 
 #include <unordered_map>
 #include <string>
@@ -61,6 +62,9 @@ class Grammar
         Symbol addIntermediate(std::string && name);
 
         void replacePseudoVariables(Options & options);
+        void check(void);
+
+        Errors<GeneratingError> errors;
 
     public :
         RuleMap                     rules;

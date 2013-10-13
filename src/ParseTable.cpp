@@ -36,45 +36,10 @@
 #include <iomanip>
 #include <sstream>
 
-#define COLOR_RED    "\033[0;31"
-#define COLOR_RESET  "\033[0"
-#define COLOR_NORMAL "m"
-#define COLOR_BOLD   ";1m"
-
-////////////////////////////////////////////////////////////////////////////////
-std::ostream & operator <<(std::ostream & os, const GeneratingError & error)
-{
-    os << COLOR_RED COLOR_BOLD "Generating error" COLOR_RESET COLOR_BOLD << " : " << error.message <<  COLOR_RESET COLOR_NORMAL << std::endl;
-
-    return os;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 ParseTable::ParseTable(const Grammar & grammar, Options & options)
 : m_grammar(grammar), m_options(options)
 {
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void ParseTable::checkGrammar(void) const throw(GeneratingError)
-{
-    // Check start rule
-    Dictionnary::Index startIndex = m_grammar.intermediates[Grammar::START_RULE];
-
-    if(startIndex == m_grammar.intermediates.end())
-        throw GeneratingError({ "No rule named \"" + Grammar::START_RULE + "\" found !!!" });
-
-    Grammar::RuleMap::size_type nbStartsRules = m_grammar.rules.count(startIndex);
-
-    if(nbStartsRules == 0)
-            throw GeneratingError({ "No rule named \"" + Grammar::START_RULE + "\" found !!!" });
-    else if(nbStartsRules > 1)
-            throw GeneratingError({ "Multiple start rules \"" + Grammar::START_RULE + "\" found !!!" });
-
-    // Check intermediates types
-    for(Dictionnary::Index intermediate = m_grammar.intermediates.begin(); intermediate != m_grammar.intermediates.end(); ++intermediate)
-        if(m_grammar.intermediateTypes.find(*intermediate) == m_grammar.intermediateTypes.end())
-            throw GeneratingError({ "Intermediate '" + (*intermediate) + "' has no type !!!" });
 }
 
 ////////////////////////////////////////////////////////////////////////////////

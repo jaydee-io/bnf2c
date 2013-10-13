@@ -32,6 +32,16 @@
 #include <iostream>
 #include <regex>
 
+
+#define ADD_GENERATING_ERROR(message)\
+    do {\
+        std::stringstream ss;\
+        ss << message;\
+        errors.list.push_back(GeneratingError({ss.str()}));\
+    } while(false)
+
+
+////////////////////////////////////////////////////////////////////////////////
 const std::string Grammar::START_RULE("START");
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +143,30 @@ void Grammar::replacePseudoVariables(Options & options)
             */
         }
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void Grammar::check(void)
+{
+    // Check start rule
+    Dictionnary::Index startIndex = intermediates[Grammar::START_RULE];
+
+    if(startIndex == intermediates.end())
+        ADD_GENERATING_ERROR("No start rule '" + Grammar::START_RULE + "' found");
+    else
+    {
+        Grammar::RuleMap::size_type nbStartsRules = rules.count(startIndex);
+
+        if(nbStartsRules == 0)
+            ADD_GENERATING_ERROR("No start rule '" + Grammar::START_RULE + "' found");
+        else if(nbStartsRules > 1)
+            ADD_GENERATING_ERROR("Multiple start rules \"" + Grammar::START_RULE + "\" found");
+    }
+
+    // Check intermediates types
+    for(Dictionnary::Index intermediate = intermediates.begin(); intermediate != intermediates.end(); ++intermediate)
+        if(intermediateTypes.find(*intermediate) == intermediateTypes.end())
+            ADD_GENERATING_ERROR("Intermediate '" + (*intermediate) + "' has no type");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

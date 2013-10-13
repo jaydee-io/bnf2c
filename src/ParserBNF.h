@@ -33,20 +33,12 @@
 #include "Grammar.h"
 #include "Options.h"
 #include "Rule.h"
+#include "Errors.h"
 
 #include <string>
 #include <list>
 #include <iostream>
 #include <unordered_map>
-
-struct ParsingError
-{
-    const LexerBNF &  lexer;
-    const Token &     token;
-    const std::string message;
-};
-
-std::ostream & operator <<(std::ostream & os, const ParsingError & error);
 
 class ParserBNF
 {
@@ -58,12 +50,14 @@ class ParserBNF
     public :
         ParserBNF(LexerBNF & lexer, Options & options, Grammar & grammar);
 
-        void parseBnf2cBlock(void) throw(ParsingError);
+        void parseBnf2cBlock(void);
+
+        Errors<ParsingError> errors;
 
     protected :
-        void parseRule(Rule & rule) throw(ParsingError);
-        void parseParameter(void) throw(ParsingError);
-        void parseIntermediatesTypes(void) throw(ParsingError);
+        void parseRule(Rule & rule);
+        void parseParameter(void);
+        void parseIntermediatesTypes(void);
 
     protected :
         Grammar &       m_grammar;

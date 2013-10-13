@@ -41,22 +41,22 @@ std::ostream & operator<<(std::ostream & os, const TokenType tokenType)
 {
     switch(tokenType)
     {
-        case TokenType::INTERMEDIATE : os << "INTERMEDIATE";  break;
-        case TokenType::TERMINAL     : os << "TERMINAL";      break;
-        case TokenType::COMMENT      : os << "COMMENT";       break;
-        case TokenType::PARAM_NAME   : os << "PARAM_NAME";    break;
-        case TokenType::PARAM_VALUE  : os << "PARAM_VALUE";   break;
+        case TokenType::INTERMEDIATE : os << "intermediate";    break;
+        case TokenType::TERMINAL     : os << "terminal";        break;
+        case TokenType::COMMENT      : os << "comment";         break;
+        case TokenType::PARAM_NAME   : os << "parameter name";  break;
+        case TokenType::PARAM_VALUE  : os << "parameter value"; break;
 
-        case TokenType::NEW_LINE     : os << "NEW_LINE";      break;
-        case TokenType::AFFECTATION  : os << "AFFECTATION";   break;
-        case TokenType::OR           : os << "OR";            break;
-        case TokenType::BRACE_OPEN   : os << "BRACE_OPEN";    break;
-        case TokenType::BRACE_CLOSE  : os << "BRACE_CLOSE";   break;
-        case TokenType::EQUAL        : os << "EQUAL";         break;
+        case TokenType::NEW_LINE     : os << "new line";        break;
+        case TokenType::AFFECTATION  : os << "affectation";     break;
+        case TokenType::OR           : os << "alternative";     break;
+        case TokenType::BRACE_OPEN   : os << "open brace";      break;
+        case TokenType::BRACE_CLOSE  : os << "close brace";     break;
+        case TokenType::EQUAL        : os << "equal";           break;
 
-        case TokenType::END_OF_INPUT : os << "END_OF_INPUT";  break;
-        case TokenType::ERROR        : os << "ERROR";         break;
-        default                      : os << "Unknown token"; break;
+        case TokenType::END_OF_INPUT : os << "end of input";    break;
+        case TokenType::ERROR        : os << "error";           break;
+        default                      : os << "Unknown token";   break;
     }
 
     return os;
@@ -86,6 +86,15 @@ std::ostream & operator<<(std::ostream & os, const Token & token)
 long Token::valueSize(void) const
 {
     return (end - value);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+std::string Token::valueToVerbatim(void) const
+{
+    if((value != nullptr) && (end != nullptr))
+        return std::string(value, end - value);
+    else
+        return std::string("value error");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

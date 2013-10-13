@@ -33,6 +33,7 @@
 #include <ostream>
 #include <fstream>
 #include <getopt.h>
+#include "Errors.h"
 
 struct Indenter
 {
@@ -50,11 +51,6 @@ struct Indenter
 
 std::ostream & operator <<(std::ostream & os, const Indenter & indenter);
 
-struct CommandLineParsingError
-{
-    std::string message;
-    int         exitCode;
-};
 
 enum class DebugLevel
 {
@@ -107,19 +103,20 @@ struct Options
         bool            useTableForBranches    = false;
 
         // Internal
-        std::string     tokenName        = "yytoken";
-        std::string     intermediateName = "intermediate";
+        std::string                     tokenName        = "yytoken";
+        std::string                     intermediateName = "intermediate";
 
-        Indenter        indent;
+        Indenter                        indent;
 
-        DebugLevel      debugLevel = DebugLevel::NONE;
+        DebugLevel                      debugLevel = DebugLevel::NONE;
+        Errors<CommandLineParsingError> errors;
 
     public :
-        void parseArguments(int argc, char ** argv) throw(CommandLineParsingError);
+        void parseArguments(int argc, char ** argv);
         static void usage(void);
 
-        std::istream & inputStream(void) throw(CommandLineParsingError);
-        std::ostream & outputStream(void) throw(CommandLineParsingError);
+        std::istream & inputStream(void);
+        std::ostream & outputStream(void);
 
         // Overwrite option if the corresponding option in "options" is not default
         Options & operator <<(const Options & options);
