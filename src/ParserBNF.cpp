@@ -90,7 +90,8 @@ void ParserBNF::parseBnf2cBlock(void)
             case TokenType::INTERMEDIATE :
             {
                 m_lastIntermediate = m_token.valueToIntermediate();
-                Rule rule(m_grammar.intermediates.add(m_lastIntermediate));
+                Rule rule(m_lastIntermediate);
+                m_grammar.intermediates.add(m_lastIntermediate);
 
                 m_lexer.nextToken(m_token);
                 if(m_token.type != TokenType::AFFECTATION)
@@ -106,7 +107,8 @@ void ParserBNF::parseBnf2cBlock(void)
             // New alternative to the current parsing rule
             case TokenType::OR :
             {
-                Rule rule(m_grammar.intermediates.add(m_lastIntermediate));
+                Rule rule(m_lastIntermediate);
+                m_grammar.intermediates.add(m_lastIntermediate);
 
                 parseRule(rule);
 

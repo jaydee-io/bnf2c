@@ -29,10 +29,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
-#include "Dictionnary.h"
+#include "Dictionary.h"
 
 #include <vector>
 #include <iostream>
+#include <string>
 
 struct Symbol
 {
@@ -42,14 +43,14 @@ struct Symbol
         INTERMEDIATE
     };
 
-    Type                type;
-    Dictionnary::Index  name;
+    Type        type;
+    std::string name;
 
     bool operator ==(const Symbol & symbol) const;
 };
 
 typedef std::vector<Symbol> SymbolList;
-typedef size_t              SymbolIterator;
+typedef std::size_t         SymbolIterator;
 
 std::ostream & operator <<(std::ostream & os, const Symbol & symbol);
 

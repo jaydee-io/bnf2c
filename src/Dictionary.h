@@ -27,56 +27,25 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __DICTIONNARY_H__
-#define __DICTIONNARY_H__
+#ifndef __DICTIONARY_H__
+#define __DICTIONARY_H__
 #include <string>
-#include <unordered_set>
-#include <functional>
-#include <iostream>
+#include <list>
 
-class Dictionnary
+class Dictionary : public std::list<std::string>
 {
-    protected :
-        typedef std::unordered_set<std::string> InternalType;
-
     public :
-        typedef InternalType::const_iterator    Index;
+        void add(const std::string & name);
+        void add(std::string && name);
 
-    public :
-        std::size_t size(void) const;
-
-        Index add(const std::string & name);
-        Index add(std::string && name);
-
-        const std::string & operator [](const Index & index) const;
-        Index               operator [](const std::string & name) const;
-
-        std::size_t index(const Index & index) const;
-
-        Index begin(void) const;
-        Index end(void) const;
+        std::size_t index(const std::string & name) const;
 
         std::size_t getMaxSrtingLength(void) const;
 
-        friend std::ostream & operator <<(std::ostream & os, const Dictionnary & dictionnary);
+        bool contains(const std::string & name) const;
 
     protected :
-        InternalType    m_dictionnary;
         std::size_t     m_maxStringLength = 0;
 };
 
-////////////////////////////////////////////////////////////////////////////////
-template<>
-struct std::hash<Dictionnary::Index>
-{
-    size_t operator ()(const ::Dictionnary::Index & index) const
-    {
-        std::hash<std::string> hasher;
-
-        return hasher(*index);
-    }
-};
-
-std::ostream & operator <<(std::ostream & os, const Dictionnary::Index & index);
-
-#endif /* __DICTIONNARY_H__ */
+#endif /* __DICTIONARY_H__ */

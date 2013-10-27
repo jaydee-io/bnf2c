@@ -27,72 +27,40 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
-#include "Dictionnary.h"
+#include "Dictionary.h"
 
 #include <algorithm>
+#include <iterator>
 
 ////////////////////////////////////////////////////////////////////////////////
-std::size_t Dictionnary::size(void) const
-{
-    return m_dictionnary.size();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-Dictionnary::Index Dictionnary::add(const std::string & name)
+void Dictionary::add(const std::string & name)
 {
     if(name.length() > m_maxStringLength)
         m_maxStringLength = name.length();
-    return m_dictionnary.insert(name).first;
+    push_back(name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Dictionnary::Index Dictionnary::add(std::string && name)
+void Dictionary::add(std::string && name)
 {
     if(name.length() > m_maxStringLength)
         m_maxStringLength = name.length();
-    return m_dictionnary.insert(name).first;
+    push_back(name);
 }
-
 ////////////////////////////////////////////////////////////////////////////////
-const std::string & Dictionnary::operator [](const Dictionnary::Index & index) const
+std::size_t Dictionary::index(const std::string & name) const
 {
-    return *index;
+    return std::distance(begin(), std::find(begin(), end(), name));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Dictionnary::Index Dictionnary::operator [](const std::string & name) const
-{
-    return m_dictionnary.find(name);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-std::size_t Dictionnary::index(const Index & index) const
-{
-    return std::distance(m_dictionnary.begin(), index);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-Dictionnary::Index Dictionnary::begin(void) const
-{
-    return m_dictionnary.begin();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-Dictionnary::Index Dictionnary::end(void) const
-{
-    return m_dictionnary.end();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-std::size_t Dictionnary::getMaxSrtingLength(void) const
+std::size_t Dictionary::getMaxSrtingLength(void) const
 {
     return m_maxStringLength;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream & operator <<(std::ostream & os, const Dictionnary::Index & index)
+bool Dictionary::contains(const std::string & name) const
 {
-    os << *index;
-
-    return os;
+    return (std::find(begin(), end(), name) != end());
 }

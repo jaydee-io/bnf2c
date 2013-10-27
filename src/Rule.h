@@ -30,7 +30,7 @@
 #ifndef __RULE_H__
 #define __RULE_H__
 #include "Symbol.h"
-#include "Dictionnary.h"
+#include "Dictionary.h"
 
 #include <ostream>
 #include <string>
@@ -39,7 +39,7 @@ class Rule
 {
     public :
         Rule(void) = default;
-        Rule(const Dictionnary::Index & name);
+        Rule(const std::string & name);
 
         void addSymbol(const Symbol & symbol);
         void addSymbol(Symbol && symbol);
@@ -47,10 +47,10 @@ class Rule
         bool operator ==(const Rule & rule) const;
 
     public :
-        Dictionnary::Index  name;
-        SymbolList          symbols;
-        std::string         action;
-        int                 numRule = -1;
+        std::string name;
+        SymbolList  symbols;
+        std::string action;
+        int         numRule = -1;
 };
 
 std::ostream & operator <<(std::ostream & os, const Rule & rule);

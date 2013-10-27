@@ -31,7 +31,7 @@
 #define __GRAMMAR_H__
 #include "Rule.h"
 #include "Symbol.h"
-#include "Dictionnary.h"
+#include "Dictionary.h"
 #include "Options.h"
 #include "Errors.h"
 
@@ -43,18 +43,18 @@
 class Grammar
 {
     public :
-        typedef std::unordered_map<std::string, std::string>      IntermediateTypeDictionnary;
+        typedef std::unordered_map<std::string, std::string>      IntermediateTypeDictionary;
 
-        typedef std::unordered_multimap<Dictionnary::Index, Rule> RuleMap;
-        typedef RuleMap::const_iterator                 RuleIterator;
-        typedef std::pair<RuleIterator, RuleIterator>   RuleRange;
+        typedef std::unordered_multimap<std::string, Rule>  RuleMap;
+        typedef RuleMap::const_iterator                     RuleIterator;
+        typedef std::pair<RuleIterator, RuleIterator>       RuleRange;
 
         static const std::string START_RULE;
 
     public :
         void         addRule(Rule & rule);
         const Rule & getStartRule(void) const;
-        RuleRange    operator[](const Dictionnary::Index & name) const;
+        RuleRange    operator[](const std::string & name) const;
 
         Symbol addTerminal(const std::string & name);
         Symbol addTerminal(std::string && name);
@@ -69,10 +69,10 @@ class Grammar
     public :
         RuleMap                     rules;
 
-        Dictionnary                 terminals;
-        Dictionnary                 intermediates;
+        Dictionary                  terminals;
+        Dictionary                  intermediates;
 
-        IntermediateTypeDictionnary intermediateTypes;
+        IntermediateTypeDictionary intermediateTypes;
 };
 
 std::ostream & operator <<(std::ostream & os, const Grammar & ruleSet);

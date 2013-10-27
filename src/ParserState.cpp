@@ -70,7 +70,7 @@ void ParserState::close(const Grammar & grammar)
 {
     if(!m_isClosed)
     {
-        std::unordered_set<Dictionnary::Index>  symbolsClosed;
+        std::unordered_set<std::string>  symbolsClosed;
 
         for(ItemList::iterator it = items.begin(); it != items.end(); ++it)
         {
@@ -156,14 +156,14 @@ void ParserState::generateBranchesSwitch(std::ostream & os, Options & options, c
 void ParserState::generateBranchesTable(std::ostream & os, Options & options, const Grammar & grammar) const
 {
     os << options.indent;
-    for(Dictionnary::Index itIntermediate = grammar.intermediates.begin(); itIntermediate != grammar.intermediates.end(); ++itIntermediate)
+    for(Dictionary::const_iterator itIntermediate = grammar.intermediates.begin(); itIntermediate != grammar.intermediates.end(); ++itIntermediate)
     {
         if(itIntermediate != grammar.intermediates.begin())
             os << ", ";
 
         ItemList::const_iterator itItem;
         for(itItem = items.begin(); itItem != items.end(); ++itItem)
-            if((itItem->dot < itItem->rule.symbols.size()) && (itItem->rule.symbols[itItem->dot].name == itIntermediate))
+            if((itItem->dot < itItem->rule.symbols.size()) && (itItem->rule.symbols[itItem->dot].name == *itIntermediate))
                 break;
 
         if(itItem != items.end() && (itItem->nextState != nullptr))
@@ -179,7 +179,7 @@ void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar, 
     // Reduce rule
     if((items.size() == 1) && (items.begin()->getType() == Item::Type::REDUCE))
     {
-        for(Dictionnary::Index idx = grammar.terminals.begin(); idx != grammar.terminals.end(); ++idx)
+        for(Dictionary::const_iterator idx = grammar.terminals.begin(); idx != grammar.terminals.end(); ++idx)
             os << 'R' << std::setw(idx->length() - 1) << std::left << items.begin()->rule.numRule << '|';
 
         os << 'R' << std::setw(options.endOfInputToken.length() - 1) << std::left << items.begin()->rule.numRule << '|';
@@ -193,7 +193,7 @@ void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar, 
         ItemList::const_iterator it;
         for(it = items.begin(); it != items.end(); ++it)
         {
-            if((it->dot < it->rule.symbols.size()) && ((*it->rule.symbols[it->dot].name) == terminal))
+            if((it->dot < it->rule.symbols.size()) && (it->rule.symbols[it->dot].name == terminal))
             {
                 os << 'S' << std::setw(terminal.length() - 1) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
                 break;
@@ -231,7 +231,7 @@ void ParserState::printDebugBranches(std::ostream & os, const Grammar & grammar)
             {
                 const Symbol & symbol = it->rule.symbols[it->dot];
 
-                if((it->getType() == Item::Type::SHIFT) && (symbol.type == Symbol::Type::INTERMEDIATE) && ((*symbol.name) == intermediate))
+                if((it->getType() == Item::Type::SHIFT) && (symbol.type == Symbol::Type::INTERMEDIATE) && (symbol.name == intermediate))
                 {
                     os << std::setw(intermediate.length()) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
                     break;

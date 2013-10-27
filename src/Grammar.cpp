@@ -53,13 +53,13 @@ void Grammar::addRule(Rule & rule)
 
 const Rule & Grammar::getStartRule(void) const
 {
-    RuleIterator it = rules.find(intermediates[Grammar::START_RULE]);
+    RuleIterator it = rules.find(Grammar::START_RULE);
 
     return it->second;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Grammar::RuleRange Grammar::operator[](const Dictionnary::Index & name) const
+Grammar::RuleRange Grammar::operator[](const std::string & name) const
 {
     return rules.equal_range(name);
 }
@@ -67,29 +67,29 @@ Grammar::RuleRange Grammar::operator[](const Dictionnary::Index & name) const
 ////////////////////////////////////////////////////////////////////////////////
 Symbol Grammar::addTerminal(const std::string & name)
 {
-    Dictionnary::Index index = terminals.add(name);
-    return Symbol({Symbol::Type::TERMINAL, index});
+    terminals.add(name);
+    return Symbol({Symbol::Type::TERMINAL, name});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Symbol Grammar::addTerminal(std::string && name)
 {
-    Dictionnary::Index index = terminals.add(name);
-    return Symbol({Symbol::Type::TERMINAL, index});
+    terminals.add(name);
+    return Symbol({Symbol::Type::TERMINAL, name});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Symbol Grammar::addIntermediate(const std::string & name)
 {
-    Dictionnary::Index index = intermediates.add(name);
-    return Symbol({Symbol::Type::INTERMEDIATE, index});
+    intermediates.add(name);
+    return Symbol({Symbol::Type::INTERMEDIATE, name});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Symbol Grammar::addIntermediate(std::string && name)
 {
-    Dictionnary::Index index = intermediates.add(name);
-    return Symbol({Symbol::Type::INTERMEDIATE, index});
+    intermediates.add(name);
+    return Symbol({Symbol::Type::INTERMEDIATE, name});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ void Grammar::replacePseudoVariables(Options & options)
 
             // Replace return pseudo-variable '$$'
             while((pos = rule.action.find(Options::VAR_EXTERNAL_RETURN, pos)) != std::string::npos)
-                rule.action.replace(pos, Options::VAR_EXTERNAL_RETURN.size(), Options::VAR_RETURN + '.' + intermediateTypes.at(intermediates[rule.name]));
+                rule.action.replace(pos, Options::VAR_EXTERNAL_RETURN.size(), Options::VAR_RETURN + '.' + intermediateTypes.at(rule.name));
 
             // Replace pseudo-variables '$1', '$2', ... '$n'
             // For now (21 september 2013), regexp is not implemented in libstdc++,
@@ -117,7 +117,7 @@ void Grammar::replacePseudoVariables(Options & options)
                     replacement.replace(pos, Options::VAR_VALUE_IDX.size(), std::to_string(rule.symbols.size() - i));
 
                 if(i <= rule.symbols.size())
-                    replacement += "." + ((rule.symbols[i-1].type == Symbol::Type::INTERMEDIATE) ? intermediateTypes.at(*rule.symbols[i-1].name) : options.tokenUnionName);
+                    replacement += "." + ((rule.symbols[i-1].type == Symbol::Type::INTERMEDIATE) ? intermediateTypes.at(rule.symbols[i-1].name) : options.tokenUnionName);
 
                 pos = 0;
                 std::string pseudoVar('$' + std::to_string(i));
@@ -149,22 +149,20 @@ void Grammar::replacePseudoVariables(Options & options)
 void Grammar::check(void)
 {
     // Check start rule
-    Dictionnary::Index startIndex = intermediates[Grammar::START_RULE];
-
-    if(startIndex == intermediates.end())
-        ADD_GENERATING_ERROR("No start rule '" + Grammar::START_RULE + "' found");
-    else
+    if(intermediates.contains(Grammar::START_RULE))
     {
-        Grammar::RuleMap::size_type nbStartsRules = rules.count(startIndex);
+        Grammar::RuleMap::size_type nbStartsRules = rules.count(Grammar::START_RULE);
 
         if(nbStartsRules == 0)
             ADD_GENERATING_ERROR("No start rule '" + Grammar::START_RULE + "' found");
         else if(nbStartsRules > 1)
             ADD_GENERATING_ERROR("Multiple start rules \"" + Grammar::START_RULE + "\" found");
     }
+    else
+        ADD_GENERATING_ERROR("No start rule '" + Grammar::START_RULE + "' found");
 
     // Check intermediates types
-    for(Dictionnary::Index intermediate = intermediates.begin(); intermediate != intermediates.end(); ++intermediate)
+    for(Dictionary::const_iterator intermediate = intermediates.begin(); intermediate != intermediates.end(); ++intermediate)
         if(intermediateTypes.find(*intermediate) == intermediateTypes.end())
             ADD_GENERATING_ERROR("Intermediate '" + (*intermediate) + "' has no type");
 }

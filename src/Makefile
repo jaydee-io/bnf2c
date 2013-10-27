@@ -4,7 +4,7 @@ include ../MakeNames.mk
 OBJS+= Token.o
 OBJS+= LexerBNF.o
 OBJS+= ParserBNF.o
-OBJS+= Dictionnary.o
+OBJS+= Dictionary.o
 OBJS+= Symbol.o
 OBJS+= Rule.o
 OBJS+= Grammar.o

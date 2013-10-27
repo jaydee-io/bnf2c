@@ -54,7 +54,7 @@ void ParseTable::generateStates(void)
     for(StatesSet::iterator it = m_statesSet.begin(); it != m_statesSet.end(); ++it)
     {
         ParserState & state = *it;
-        std::unordered_map<Dictionnary::Index, ParserState> newStates;
+        std::unordered_map<std::string, ParserState> newStates;
 
         for(Item & item : state.items)
         {
@@ -66,7 +66,7 @@ void ParseTable::generateStates(void)
             }
         }
 
-        for(std::pair<const Dictionnary::Index, ParserState> & newStatePair : newStates)
+        for(std::pair<const std::string, ParserState> & newStatePair : newStates)
         {
             ParserState & newState = newStatePair.second;
 
