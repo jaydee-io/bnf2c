@@ -70,7 +70,7 @@ class ParserState
         void generateBranchesTable (std::ostream & os, Options & options, const Grammar & grammar) const;
 
         void printDebugActions (std::ostream & os, const Grammar & grammar, const Options & options) const;
-        void printDebugBranches(std::ostream & os, const Grammar & grammar) const;
+        void printDebugBranches(std::ostream & os, const Grammar & grammar, std::size_t size) const;
 
         bool operator ==(const ParserState & set) const;
 

@@ -177,7 +177,7 @@ void ParserState::generateBranchesTable(std::ostream & os, Options & options, co
 void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar, const Options & options) const
 {
     // Reduce rule
-    if((items.size() == 1) && (items.begin()->getType() == Item::Type::REDUCE))
+    if((items.size() >= 1) && (items.begin()->getType() == Item::Type::REDUCE) && (items.begin()->rule.numRule > 1))
     {
         for(Dictionary::const_iterator idx = grammar.terminals.begin(); idx != grammar.terminals.end(); ++idx)
             os << 'R' << std::setw(idx->length() - 1) << std::left << items.begin()->rule.numRule << '|';
@@ -220,7 +220,7 @@ void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar, 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::printDebugBranches(std::ostream & os, const Grammar & grammar) const
+void ParserState::printDebugBranches(std::ostream & os, const Grammar & grammar, std::size_t size) const
 {
     for(const std::string & intermediate : grammar.intermediates)
     {
@@ -233,13 +233,13 @@ void ParserState::printDebugBranches(std::ostream & os, const Grammar & grammar)
 
                 if((it->getType() == Item::Type::SHIFT) && (symbol.type == Symbol::Type::INTERMEDIATE) && (symbol.name == intermediate))
                 {
-                    os << std::setw(intermediate.length()) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
+                    os << std::setw(std::max(intermediate.length(), size)) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
                     break;
                 }
             }
 
             if(it == items.end())
-                os << std::setw(intermediate.length() + 1) << std::right << '|';
+                os << std::setw(std::max(intermediate.length(), size) + 1) << std::right << '|';
         }
     }
 }
@@ -257,7 +257,7 @@ bool ParserState::operator ==(const ParserState & set) const
 void ParserState::generateActionItems(std::ostream & os, Options & options, const Grammar & grammar) const
 {
     // Reduce
-    if((items.size() == 1) && (items.begin()->getType() == Item::Type::REDUCE))
+    if((items.size() >= 1) && (items.begin()->getType() == Item::Type::REDUCE) && (items.begin()->rule.numRule > 1))
     {
         const Item & item = *items.begin();
 

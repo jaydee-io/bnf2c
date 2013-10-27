@@ -139,7 +139,7 @@ void ParseTable::generateParseCode(std::ostream & os) const
 void ParseTable::printDebug(std::ostream & output) const
 {
     // Print rules
-    output << "Rules :" << std::endl << std::endl;
+    output << "Rules :" << std::endl;
     for(Grammar::RuleMap::const_iterator it = m_grammar.rules.begin(); it != m_grammar.rules.end(); ++it)
     {
         output << "[" << it->second.numRule << "] " << it->second;
@@ -150,8 +150,9 @@ void ParseTable::printDebug(std::ostream & output) const
 
     // Print parse table
     std::stringstream headerStream;
-    int sizeTerminals    = 0;
-    int sizeIntermediate = 0;
+    int sizeTerminals       = 0;
+    int sizeIntermediate    = 0;
+    std::size_t maxSizeIntermediate = std::to_string(m_statesSet.size()).length();
 
     for(const std::string & terminal : m_grammar.terminals)
     {
@@ -165,12 +166,12 @@ void ParseTable::printDebug(std::ostream & output) const
     {
         if(intermediate != m_grammar.START_RULE)
         {
-            headerStream << intermediate << '|';
-            sizeIntermediate += intermediate.length() + 1;
+            headerStream << std::setw(std::max(intermediate.length(), maxSizeIntermediate)) << std::left << intermediate << '|';
+            sizeIntermediate += std::max(intermediate.length(), maxSizeIntermediate) + 1;
         }
     }
 
-    output << "Parse table :" << std::endl << std::endl;
+    output << "Parse table :" << std::endl;
     output << "     |" << std::setw((sizeTerminals    - 7) / 2) << ' ' << "Actions" << std::setw((sizeTerminals    - 7) / 2) << ' ' << '|';
     output <<             std::setw((sizeIntermediate - 7) / 2) << ' ' << "Branchs" << std::setw((sizeIntermediate - 7) / 2) << ' ' << '|' << std::endl;
     output << "State|" << headerStream.str() << std::endl;
@@ -180,10 +181,15 @@ void ParseTable::printDebug(std::ostream & output) const
     {
         output << std::left << std::setw(5) << itemSet.numState << '|';
         itemSet.printDebugActions(output, m_grammar, m_options);
-        itemSet.printDebugBranches(output, m_grammar);
+        itemSet.printDebugBranches(output, m_grammar, maxSizeIntermediate);
 
         output << std::endl;
     }
+    output << std::endl;
+
+    // Print items sets
+    for(const ParserState & itemSet : m_statesSet)
+        output << itemSet << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

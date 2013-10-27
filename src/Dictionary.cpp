@@ -37,7 +37,7 @@ void Dictionary::add(const std::string & name)
 {
     if(name.length() > m_maxStringLength)
         m_maxStringLength = name.length();
-    push_back(name);
+    insert(name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ void Dictionary::add(std::string && name)
 {
     if(name.length() > m_maxStringLength)
         m_maxStringLength = name.length();
-    push_back(name);
+    insert(name);
 }
 ////////////////////////////////////////////////////////////////////////////////
 std::size_t Dictionary::index(const std::string & name) const

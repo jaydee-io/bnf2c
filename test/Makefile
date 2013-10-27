@@ -5,6 +5,7 @@ EXEC_DIR=../src
 INC_DIR=-I$(EXEC_DIR)
 
 TESTS+= wikipedia
+TESTS+= calc
 
 ###############################################################################
 # Global targets
@@ -15,8 +16,13 @@ wikipedia : wikipedia_test
 	@echo "[$^] 1+0+1*1+1+1+1+1+1*1"
 	@$^ 1+0+1*1+1+1+1+1+1*1
 
+calc : calc_test
+	@echo "[$^] 1+0+1*3+50/2+9+1+1-10"
+	@$^ 1+0+1*3+50/2+9+1+1-10
+
 clean :
 	rm -f wikipedia_test wikipedia.o wikipedia.c
+	rm -f calc_test calc.o calc.cpp
 	rm -f $(TESTS)
 
 ###############################################################################

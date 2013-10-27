@@ -30,9 +30,9 @@
 #ifndef __DICTIONARY_H__
 #define __DICTIONARY_H__
 #include <string>
-#include <list>
+#include <unordered_set>
 
-class Dictionary : public std::list<std::string>
+class Dictionary : public std::unordered_set<std::string>
 {
     public :
         void add(const std::string & name);
