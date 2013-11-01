@@ -32,6 +32,7 @@
 #include "Grammar.h"
 #include "ParserState.h"
 #include "Options.h"
+#include "Errors.h"
 
 #include <list>
 #include <cstdint>
@@ -41,12 +42,13 @@
 class ParseTable
 {
     protected :
-        typedef std::list<ParserState> StatesSet;
+        typedef std::list<ParserState> States;
 
     public :
         ParseTable(const Grammar & grammar, Options & options);
 
         void generateStates(void);
+        void check(void);
 
         void generateBranchesCode(std::ostream & os) const;
         void generateParseCode(std::ostream & os) const;
@@ -57,11 +59,14 @@ class ParseTable
         void generateBranchSwitch(std::ostream & os) const;
         void generateBranchTable (std::ostream & os) const;
 
+    public :
+        Errors<GeneratingError> errors;
+
     protected :
         const Grammar & m_grammar;
         Options &       m_options;
 
-        StatesSet       m_statesSet;
+        States          m_states;
 };
 
 #endif /* __PARSINGTABLE_H__ */

@@ -22,7 +22,7 @@
    bnf2c:output:parse-function    = "parseFunction"
    bnf2c:output:branch-function   = "branchFunction"
 
-   bnf2c:generator:default-switch = "false"
+   bnf2c:generator:default-switch = "true"
    bnf2c:generator:branch-table   = "true"
 
    bnf2c:indent:string            = "    "

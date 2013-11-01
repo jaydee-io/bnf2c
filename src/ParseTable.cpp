@@ -35,6 +35,9 @@
 #include <iterator>
 #include <iomanip>
 #include <sstream>
+#include <cstring>
+
+#define CENTER(msg, maxSize)    std::setw((maxSize - ::strlen(msg)) / 2) << ' ' << msg << std::setw(maxSize - ((maxSize - ::strlen(msg)) / 2) - ::strlen(msg) - 1) << ' '
 
 ////////////////////////////////////////////////////////////////////////////////
 ParseTable::ParseTable(const Grammar & grammar, Options & options)
@@ -49,9 +52,9 @@ void ParseTable::generateStates(void)
     startSet.numState = 0;
     startSet.addRule(m_grammar.getStartRule());
     startSet.close(m_grammar);
-    m_statesSet.push_back(startSet);
+    m_states.push_back(startSet);
 
-    for(StatesSet::iterator it = m_statesSet.begin(); it != m_statesSet.end(); ++it)
+    for(States::iterator it = m_states.begin(); it != m_states.end(); ++it)
     {
         ParserState & state = *it;
         std::unordered_map<std::string, ParserState> newStates;
@@ -70,17 +73,17 @@ void ParseTable::generateStates(void)
         {
             ParserState & newState = newStatePair.second;
 
-            newState.numState = m_statesSet.size();
+            newState.numState = m_states.size();
             newState.close(m_grammar);
 
-            StatesSet::iterator it = std::find(m_statesSet.begin(), m_statesSet.end(), newState);
-            if(it == m_statesSet.end())
+            States::iterator it = std::find(m_states.begin(), m_states.end(), newState);
+            if(it == m_states.end())
             {
-                m_statesSet.push_back(std::move(newState));
+                m_states.push_back(std::move(newState));
 
                 for(Item & item : state.items)
                     if(item.nextState == &newState)
-                        item.nextState = &m_statesSet.back();
+                        item.nextState = &m_states.back();
             }
             else
             {
@@ -90,6 +93,13 @@ void ParseTable::generateStates(void)
             }
         }
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ParseTable::check(void)
+{
+    for(const ParserState & state : m_states)
+        state.check(errors);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +130,7 @@ void ParseTable::generateParseCode(std::ostream & os) const
     os << m_options.indent << "switch(" << m_options.topState << ")" << std::endl;
     os << m_options.indent << '{' << std::endl;
     m_options.indent++;
-    for(const ParserState & itemSet : m_statesSet)
+    for(const ParserState & itemSet : m_states)
         itemSet.generateActions(os, m_options, m_grammar);
     if(m_options.defaultSwitchStatement)
         os << m_options.indent << "default : return " << m_options.errorState << "; break;" << std::endl;
@@ -145,6 +155,7 @@ void ParseTable::printDebug(std::ostream & output) const
         output << "[" << it->second.numRule << "] " << it->second;
         if(!it->second.action.empty())
             output << std::endl << '"' << it->second.action << '"' << std::endl;
+        output << std::endl;
     }
     output << std::endl << std::endl;
 
@@ -152,7 +163,7 @@ void ParseTable::printDebug(std::ostream & output) const
     std::stringstream headerStream;
     int sizeTerminals       = 0;
     int sizeIntermediate    = 0;
-    std::size_t maxSizeIntermediate = std::to_string(m_statesSet.size()).length();
+    std::size_t maxSizeIntermediate = std::to_string(m_states.size()).length();
 
     for(const std::string & terminal : m_grammar.terminals)
     {
@@ -172,12 +183,12 @@ void ParseTable::printDebug(std::ostream & output) const
     }
 
     output << "Parse table :" << std::endl;
-    output << "     |" << std::setw((sizeTerminals    - 7) / 2) << ' ' << "Actions" << std::setw((sizeTerminals    - 7) / 2) << ' ' << '|';
-    output <<             std::setw((sizeIntermediate - 7) / 2) << ' ' << "Branchs" << std::setw((sizeIntermediate - 7) / 2) << ' ' << '|' << std::endl;
+    output << "     |" << CENTER("Actions", sizeTerminals) << '|';
+    output <<             CENTER("Branchs", sizeIntermediate) << '|' << std::endl;
     output << "State|" << headerStream.str() << std::endl;
     output << std::setfill('-') << std::setw(sizeTerminals + sizeIntermediate + 6) << '-' << std::setfill(' ') << std::endl;
 
-    for(const ParserState & itemSet : m_statesSet)
+    for(const ParserState & itemSet : m_states)
     {
         output << std::left << std::setw(5) << itemSet.numState << '|';
         itemSet.printDebugActions(output, m_grammar, m_options);
@@ -188,7 +199,7 @@ void ParseTable::printDebug(std::ostream & output) const
     output << std::endl;
 
     // Print items sets
-    for(const ParserState & itemSet : m_statesSet)
+    for(const ParserState & itemSet : m_states)
         output << itemSet << std::endl;
 }
 
@@ -201,7 +212,7 @@ void ParseTable::generateBranchSwitch(std::ostream & output) const
     output << m_options.indent << "switch(" << m_options.topState << ")" << std::endl;
     output << m_options.indent << '{' << std::endl;
     m_options.indent++;
-    for(const ParserState & itemSet : m_statesSet)
+    for(const ParserState & itemSet : m_states)
         itemSet.generateBranchesSwitch(output, m_options, m_grammar);
     if(m_options.defaultSwitchStatement)
         output << m_options.indent << "default : return " << m_options.errorState << "; break;" << std::endl;
@@ -217,9 +228,9 @@ void ParseTable::generateBranchTable(std::ostream & output) const
 {
     output << m_options.indent << "const " << m_options.stateType << " " << m_options.branchFunctionName << "[] = {" << std::endl;
     m_options.indent++;
-    for(StatesSet::const_iterator it = m_statesSet.begin(); it != m_statesSet.end(); ++it)
+    for(States::const_iterator it = m_states.begin(); it != m_states.end(); ++it)
     {
-        if(it != m_statesSet.begin())
+        if(it != m_states.begin())
             output << ", " << std::endl;
 
         it->generateBranchesTable(output, m_options, m_grammar);

@@ -32,6 +32,7 @@
 #include "Rule.h"
 #include "Grammar.h"
 #include "Options.h"
+#include "Errors.h"
 
 #include <list>
 #include <ostream>
@@ -41,7 +42,7 @@ class ParserState;
 
 struct Item
 {
-    enum class Type
+    enum class ActionType
     {
         SHIFT,
         REDUCE
@@ -52,7 +53,8 @@ struct Item
     const ParserState * nextState;
 
     bool operator ==(const Item & item) const;
-    Item::Type getType(void) const;
+    bool operator < (const Item & item) const;
+    Item::ActionType getType(void) const;
 };
 
 class ParserState
@@ -65,6 +67,8 @@ class ParserState
         bool contains(const Item & item) const;
         void close(const Grammar & grammar);
 
+        void check(Errors<GeneratingError> & errors) const;
+
         void generateActions       (std::ostream & os, Options & options, const Grammar & grammar) const;
         void generateBranchesSwitch(std::ostream & os, Options & options, const Grammar & grammar) const;
         void generateBranchesTable (std::ostream & os, Options & options, const Grammar & grammar) const;
@@ -75,7 +79,10 @@ class ParserState
         bool operator ==(const ParserState & set) const;
 
     protected :
-        void generateActionItems(std::ostream & os, Options & options, const Grammar & grammar) const;
+        void generateActionItems (std::ostream & os, Options & options, const Grammar & grammar) const;
+        void generateReduceAction(const Item & item, std::ostream & os, Options & options, const Grammar & grammar) const;
+        void generateShiftAction (const Item & item, std::ostream & os, Options & options, const Grammar & grammar) const;
+
         std::string checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const;
 
     public :
@@ -83,7 +90,9 @@ class ParserState
         int      numState;
 
     protected :
-        bool m_isClosed = false;
+        bool    m_isClosed = false;
+        Item *  m_reduceRule = nullptr;
+        bool    m_isAnAcceptRule = false;
 };
 
 std::ostream & operator <<(std::ostream & os, const Item & item);

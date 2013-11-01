@@ -23,7 +23,7 @@
    bnf2c:output:parse-function    = "parseFunction"
    bnf2c:output:branch-function   = "branchFunction"
 
-   bnf2c:generator:default-switch = "false"
+   bnf2c:generator:default-switch = "true"
    bnf2c:generator:branch-table   = "true"
 
    bnf2c:indent:string            = "    "
@@ -92,6 +92,19 @@ void pop_values(int nbValues)
 Value & get_value(int idx)
 {
     return valueStack[valueStack.size() - idx - 1];
+}
+
+void printStatesStack(void)
+{
+    std::stack<int> localStack(stateStack);
+
+    std::cout << "States = ";
+    while(!localStack.empty())
+    {
+        std::cout << ' ' << localStack.top();
+        localStack.pop();
+    }
+    std::cout << std::endl;
 }
 
 

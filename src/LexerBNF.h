@@ -37,13 +37,6 @@
 class LexerBNF
 {
     public :
-        typedef struct {
-            const char * input;
-
-            const char * lastNewLine;
-            int          line;
-            int          tabs;
-        } State;
 
         static const std::string BNF2C_TOKEN;
 
@@ -60,11 +53,13 @@ class LexerBNF
 
         std::string getCurrentLine(void) const;
 
-        const State & saveState(void) const;
-        void restoreState(const State & state);
-
     protected :
-        State           m_state;
+        const char * m_input;
+
+        const char * m_lastNewLine;
+        int          m_line;
+        int          m_tabs;
+
         std::ostream &  m_output;
 };
 

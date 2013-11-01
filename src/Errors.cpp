@@ -60,7 +60,7 @@ std::ostream & operator <<(std::ostream & os, const ParsingError & error)
         for(int i=0; i<error.nbTabs; i++)
             os << '\t';
         os << COLOR_GREEN COLOR_BOLD << std::setw(error.column - error.nbTabs) << std::setfill(' ') << std::right << '^';
-        os << std::setw(error.value.size() - 1) << std::setfill('-') << std::right << '^' << COLOR_RESET COLOR_NORMAL << std::endl;
+        os << std::setw(error.value.size() - 1) << std::setfill('-') << std::right << '^' << std::setfill(' ') << COLOR_RESET COLOR_NORMAL << std::endl;
     }
     else
     {

@@ -34,13 +34,11 @@ clean :
 
 %.cpp : %.bnf2c.cpp $(EXEC_DIR)/$(EXEC_BNF2C)
 	@echo "[BNF2C] $@"
-	@cat $< | $(EXEC_DIR)/$(EXEC_BNF2C) > $@
-#	@$(EXEC_DIR)/$(EXEC_BNF2C) $< -o $@
+	@$(EXEC_DIR)/$(EXEC_BNF2C) $< -o $@
 	
 %.c : %.bnf2c.c $(EXEC_DIR)/$(EXEC_BNF2C)
 	@echo "[BNF2C] $@"
-	@cat $< | $(EXEC_DIR)/$(EXEC_BNF2C) > $@
-#	@$(EXEC_DIR)/$(EXEC_BNF2C) $< -o $@
+	@$(EXEC_DIR)/$(EXEC_BNF2C) $< -o $@
 
 ###############################################################################
 # Targets

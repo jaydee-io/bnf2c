@@ -34,7 +34,7 @@
 
 /*!re2c
    re2c:define:YYCTYPE = "unsigned char";
-   re2c:define:YYCURSOR = m_state.input;
+   re2c:define:YYCURSOR = m_input;
    re2c:define:YYMARKER = marker;
    re2c:indent:top = 1;
    re2c:indent:string = "    ";
@@ -45,42 +45,42 @@ const std::string LexerBNF::BNF2C_TOKEN("/*!bnf2c");
 
 ////////////////////////////////////////////////////////////////////////////////
 LexerBNF::LexerBNF(const std::string & input, std::ostream & output)
-: m_state({input.c_str(), input.c_str(), 1, 0}), m_output(output)
+: m_input(input.c_str()), m_lastNewLine(input.c_str()), m_line(1), m_tabs(0), m_output(output)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 bool LexerBNF::moveToNextBnf2cBlock(void)
 {
-    const char * start = m_state.input;
+    const char * start = m_input;
 
-    while((m_state.input[0] != '\0') && (LexerBNF::BNF2C_TOKEN.compare(0, std::string::npos, m_state.input, LexerBNF::BNF2C_TOKEN.size()) != 0))
+    while((m_input[0] != '\0') && (LexerBNF::BNF2C_TOKEN.compare(0, std::string::npos, m_input, LexerBNF::BNF2C_TOKEN.size()) != 0))
     {
-        if(m_state.input[0] == '\n')
+        if(m_input[0] == '\n')
         {
-            if(m_state.input[1] == '\r')
-                m_state.input++;
+            if(m_input[1] == '\r')
+                m_input++;
 
-            m_state.lastNewLine = m_state.input + 1;
-            m_state.line++;
+            m_lastNewLine = m_input + 1;
+            m_line++;
         }
-        else if(m_state.input[0] == '\r')
+        else if(m_input[0] == '\r')
         {
-            if(m_state.input[1] == '\n')
-                m_state.input++;
+            if(m_input[1] == '\n')
+                m_input++;
 
-            m_state.lastNewLine = m_state.input + 1;
-            m_state.line++;
+            m_lastNewLine = m_input + 1;
+            m_line++;
         }
 
-        m_state.input++;
+        m_input++;
     }
 
-    m_output.write(start, m_state.input - start);
-    if(m_state.input[0] != '\0')
-        m_state.input += LexerBNF::BNF2C_TOKEN.size();
+    m_output.write(start, m_input - start);
+    if(m_input[0] != '\0')
+        m_input += LexerBNF::BNF2C_TOKEN.size();
 
-    return (m_state.input[0] != '\0');
+    return (m_input[0] != '\0');
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,8 +90,8 @@ void LexerBNF::nextToken(Token & token)
 
     for (;;)
     {
-        token.value  = m_state.input;
-        token.line   = m_state.line;
+        token.value  = m_input;
+        token.line   = m_line;
         token.column = getColumn();
 
         /*!re2c
@@ -100,9 +100,9 @@ void LexerBNF::nextToken(Token & token)
         typeName   = [a-zA-Z0-9_\-\.>]+;
 
         [ ]+ { continue; }
-        [\t] { m_state.tabs++; continue; }
+        [\t] { m_tabs++; continue; }
 
-        "\n\r"|"\r\n"|"\n"|"\r"  { token.type = TokenType::NEW_LINE; m_state.line++; m_state.lastNewLine = m_state.input; m_state.tabs = 0; break; }
+        "\n\r"|"\r\n"|"\n"|"\r"  { token.type = TokenType::NEW_LINE; m_line++; m_lastNewLine = m_input; m_tabs = 0; break; }
         "::="                    { token.type = TokenType::AFFECTATION; break; }
         "|"                      { token.type = TokenType::OR;          break; }
         "{"                      { token.type = TokenType::BRACE_OPEN;  break; }
@@ -117,12 +117,12 @@ void LexerBNF::nextToken(Token & token)
         '"'("\\\""|[^"])*'"'     { token.type = TokenType::PARAM_VALUE;  break; }
 
         "*\/"  {                  token.type = TokenType::END_OF_INPUT; break; }
-        "\000" { m_state.input--; token.type = TokenType::END_OF_INPUT; break; }
+        "\000" { m_input--; token.type = TokenType::END_OF_INPUT; break; }
         [^]    {                  token.type = TokenType::ERROR;        break; }
         */
     }
 
-    token.end = m_state.input;
+    token.end = m_input;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,83 +131,83 @@ bool LexerBNF::readRuleAction(std::string & ruleAction)
     int nBraces = 1;
 
     // Find start of action
-    while((nBraces > 0) && (m_state.input[0] != '\0'))
+    while((nBraces > 0) && (m_input[0] != '\0'))
     {
         // Skip unix-style new line
-        if(m_state.input[0] == '\n')
+        if(m_input[0] == '\n')
         {
-            if(m_state.input[1] == '\r')
-                m_state.input++;
+            if(m_input[1] == '\r')
+                m_input++;
 
-            m_state.lastNewLine = m_state.input + 1;
-            m_state.line++;
-            m_state.input++;
+            m_lastNewLine = m_input + 1;
+            m_line++;
+            m_input++;
             break;
         }
         // Skip windows-style new line
-        else if(m_state.input[0] == '\r')
+        else if(m_input[0] == '\r')
         {
-            if(m_state.input[1] == '\n')
-                m_state.input++;
+            if(m_input[1] == '\n')
+                m_input++;
 
-            m_state.lastNewLine = m_state.input + 1;
-            m_state.line++;
-            m_state.input++;
+            m_lastNewLine = m_input + 1;
+            m_line++;
+            m_input++;
             break;
         }
         // Skip spaces and tabulations
-        if((m_state.input[0] != ' ') && (m_state.input[0] != '\t'))
+        if((m_input[0] != ' ') && (m_input[0] != '\t'))
             break;
 
-        m_state.input++;
+        m_input++;
     }
-    const char * start = m_state.input;
+    const char * start = m_input;
 
     // Find end of action (skip trailing spaces, tabulations and new line)
-    const char * end = m_state.input;
-    while((nBraces > 0) && (m_state.input[0] != '\0'))
+    const char * end = m_input;
+    while((nBraces > 0) && (m_input[0] != '\0'))
     {
         // Increase braces count
-        if(m_state.input[0] == '{')
+        if(m_input[0] == '{')
         {
             nBraces++;
-            end = m_state.input;
+            end = m_input;
         }
         // Decrease braces count
-        else if(m_state.input[0] == '}')
+        else if(m_input[0] == '}')
         {
             nBraces--;
             if(nBraces > 0)
-                end = m_state.input;
+                end = m_input;
         }
         // Skip unix-style new line
-        else if(m_state.input[0] == '\n')
+        else if(m_input[0] == '\n')
         {
-            if(m_state.input[1] == '\r')
-                m_state.input++;
+            if(m_input[1] == '\r')
+                m_input++;
 
-            m_state.lastNewLine = m_state.input + 1;
-            m_state.line++;
+            m_lastNewLine = m_input + 1;
+            m_line++;
         }
         // Skip windows-style new line
-        else if(m_state.input[0] == '\r')
+        else if(m_input[0] == '\r')
         {
-            if(m_state.input[1] == '\n')
-                m_state.input++;
+            if(m_input[1] == '\n')
+                m_input++;
 
-            m_state.lastNewLine = m_state.input + 1;
-            m_state.line++;
+            m_lastNewLine = m_input + 1;
+            m_line++;
         }
         // Skip spaces and tabulations
-        else if((m_state.input[0] != ' ') && (m_state.input[0] != '\t'))
-            end = m_state.input;
+        else if((m_input[0] != ' ') && (m_input[0] != '\t'))
+            end = m_input;
 
-        m_state.input++;
+        m_input++;
     }
 
     if(nBraces == 0)
     {
-        m_state.input--;
+        m_input--;
         ruleAction.assign(start, end - start + 1);
         return true;
     }
@@ -218,43 +218,31 @@ bool LexerBNF::readRuleAction(std::string & ruleAction)
 ////////////////////////////////////////////////////////////////////////////////
 int LexerBNF::getLine(void) const
 {
-    return m_state.line;
+    return m_line;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 int LexerBNF::getColumn(void) const
 {
-    return m_state.input - m_state.lastNewLine + 1;
+    return m_input - m_lastNewLine + 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 int LexerBNF::getTabulations(void) const
 {
-    return m_state.tabs;
+    return m_tabs;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string LexerBNF::getCurrentLine(void) const
 {
     std::string currentLine;
-    const char * endLine = m_state.lastNewLine;
+    const char * endLine = m_lastNewLine;
 
     while((endLine[0] != '\0') && (endLine[0] != '\n') && (endLine[0] != '\r'))
         endLine++;
 
-    currentLine.assign(m_state.lastNewLine, endLine - m_state.lastNewLine);
+    currentLine.assign(m_lastNewLine, endLine - m_lastNewLine);
 
     return currentLine;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-const LexerBNF::State & LexerBNF::saveState(void) const
-{
-    return m_state;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void LexerBNF::restoreState(const LexerBNF::State & state)
-{
-    m_state = state;
 }

@@ -88,6 +88,12 @@ int main(int argc, char ** argv)
     // Generate parser states
     ParseTable table(grammar, options);
     table.generateStates();
+    table.check();
+    if(!table.errors.list.empty())
+    {
+        std::cerr << table.errors;
+        return 1;
+    }
 
     // Output generated code at the end of output file
     table.generateBranchesCode(outputStream);
