@@ -111,7 +111,7 @@ void LexerBNF::nextToken(Token & token)
 
         "<"identifier">"         { token.type = TokenType::INTERMEDIATE; break; }
         identifier               { token.type = TokenType::TERMINAL  ;   break; }
-        "#"[^\n]+                { token.type = TokenType::COMMENT;      break; }
+        "#"[^\n]*                { token.type = TokenType::COMMENT;      break; }
         "bnf2c:type<"typeName">" { token.type = TokenType::TYPE_NAME;    break; }
         "bnf2c:"paramName        { token.type = TokenType::PARAM_NAME;   break; }
         '"'("\\\""|[^"])*'"'     { token.type = TokenType::PARAM_VALUE;  break; }
