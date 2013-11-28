@@ -77,19 +77,19 @@ struct Options
         // Parser options
         std::string     stateType          = "int";
         std::string     topState           = "topState()";
-        std::string     popState           = "popStates(<NB_STATES>)";
+        std::string     popState           = "popStates(<NB_STATES>);";
         std::string     errorState         = "-1";
         std::string     acceptState        = "-2";
 
         std::string     valueType          = "ValueType";
-        std::string     pushValue          = "pushValue(<VALUE>)";
-        std::string     popValues          = "popValues(<NB_VALUES>)";
+        std::string     pushValue          = "pushValue(<VALUE>);";
+        std::string     popValues          = "popValues(<NB_VALUES>);";
         std::string     getValue           = "getValue(<VALUE_IDX>)";
 
         // Lexer options
         std::string     tokenType          = "int";
         std::string     tokenUnionName     = "token";
-        std::string     shiftToken         = "shiftToken()";
+        std::string     shiftToken         = "shiftToken();";
         std::string     tokenPrefix        = "";
         std::string     getTypeOfToken     = "<TOKEN>";
         std::string     endOfInputToken    = "END_OF_INPUT";
