@@ -318,7 +318,7 @@ void ParserState::generateActionItems(std::ostream & os, Options & options, cons
         return;
     }
 
-    // Regroup all the cases of an item
+    // Regroup all cases of an item
     std::map<Item, std::set<std::string> > cases;
     for(const std::string & terminal : grammar.terminals)
     {
@@ -338,6 +338,10 @@ void ParserState::generateActionItems(std::ostream & os, Options & options, cons
         if(it == items.end() && m_reduceRule)
             cases[*m_reduceRule].insert(terminal);
     }
+
+    // If there is a reduce rule (not the accept one), reduce also when current token is the end of input
+    if(!m_isAnAcceptRule && m_reduceRule)
+        cases[*m_reduceRule].insert(options.endOfInputToken);
 
     // Switch on terminal
     os << options.indent << "switch(" << checkedStringReplace(options.getTypeOfToken, Options::VAR_TOKEN, options.tokenName) << ")" << std::endl;
