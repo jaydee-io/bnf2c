@@ -1,2 +1,0 @@
-EXEC_TEST=bnf2cTest
-EXEC_BNF2C=bnf2c
