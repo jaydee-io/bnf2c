@@ -93,6 +93,12 @@ Symbol Grammar::addIntermediate(std::string && name)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+const std::string & Grammar::getIntermediateType(const std::string & name) const
+{
+    return intermediateTypes.at(name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void Grammar::replacePseudoVariables(Options & options)
 {
     for(RuleMap::value_type & pair : rules)
@@ -100,47 +106,31 @@ void Grammar::replacePseudoVariables(Options & options)
         Rule & rule = pair.second;
         if(!rule.action.empty())
         {
-            std::size_t pos = 0;
+            std::string replacement;
 
             // Replace return pseudo-variable '$$'
-            while((pos = rule.action.find(Options::VAR_EXTERNAL_RETURN, pos)) != std::string::npos)
-                rule.action.replace(pos, Options::VAR_EXTERNAL_RETURN.size(), Options::VAR_RETURN + '.' + intermediateTypes.at(rule.name));
+            replacement = checkedStringReplace(options.valueAsIntermediate, Options::VAR_VALUE, Options::VAR_RETURN);
+            replacement = checkedStringReplace(replacement, Options::VAR_TYPE, intermediateTypes.at(rule.name));
+            rule.action = checkedStringReplace(rule.action, Options::VAR_EXTERNAL_RETURN, replacement);
 
             // Replace pseudo-variables '$1', '$2', ... '$n'
-            // For now (21 september 2013), regexp is not implemented in libstdc++,
-            // so manually look for pseudo-variables 1 to 100
-            for(int i = 1; i <= 100; i++)
+            for(int i = 1; i <= rule.symbols.size(); i++)
             {
-                pos = 0;
-                std::string replacement(options.getValue);
-                while((pos = replacement.find(Options::VAR_VALUE_IDX, pos)) != std::string::npos)
-                    replacement.replace(pos, Options::VAR_VALUE_IDX.size(), std::to_string(rule.symbols.size() - i));
+                if(rule.symbols[i-1].type == Symbol::Type::INTERMEDIATE)
+                {
+                    replacement = checkedStringReplace(options.valueAsIntermediate, Options::VAR_VALUE, options.getValue);
+                    replacement = checkedStringReplace(replacement, Options::VAR_TYPE, intermediateTypes.at(rule.symbols[i-1].name));
+                }
+                else
+                {
+                    replacement = checkedStringReplace(options.valueAsToken, Options::VAR_VALUE, options.getValue);
+                    replacement = checkedStringReplace(replacement, Options::VAR_TYPE, options.tokenType);
+                }
 
-                if(i <= rule.symbols.size())
-                    replacement += "." + ((rule.symbols[i-1].type == Symbol::Type::INTERMEDIATE) ? intermediateTypes.at(rule.symbols[i-1].name) : options.tokenUnionName);
+                replacement = checkedStringReplace(replacement, Options::VAR_VALUE_IDX, std::to_string(rule.symbols.size() - i));
 
-                pos = 0;
-                std::string pseudoVar('$' + std::to_string(i));
-                while((pos = rule.action.find(pseudoVar, pos)) != std::string::npos)
-                    rule.action.replace(pos, pseudoVar.size(), replacement);
+                rule.action = checkedStringReplace(rule.action, '$' + std::to_string(i), replacement);
             }
-
-            /*
-            std::string replacement(options.getValue);
-            pos = replacement.find(Options::VAR_VALUE_IDX, pos);
-            if(std::string::npos != pos)
-                replacement.replace(0, Options::VAR_VALUE_IDX.size(), std::to_string(rule.symbols.size()) + " - \\1");
-
-            try
-            {
-                std::regex regexp("\\$([:digit:]+)");
-                std::regex_replace(rule.action, regexp, replacement);
-            }
-            catch (std::regex_error & e)
-            {
-                // TODO We should throw an exception...
-            }
-            */
         }
     }
 }
@@ -165,6 +155,23 @@ void Grammar::check(void)
     for(Dictionary::const_iterator intermediate = intermediates.begin(); intermediate != intermediates.end(); ++intermediate)
         if(intermediateTypes.find(*intermediate) == intermediateTypes.end())
             ADD_GENERATING_ERROR("Intermediate '" + (*intermediate) + "' has no type");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+std::string Grammar::checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const
+{
+    // Check that replacement string doesn't contains the pattern to avoid infinite loop
+    if(replacement.find(pattern) != std::string::npos)
+        return str;
+
+    // Replace each occurrence
+    std::string replacedStr(str);
+    std::size_t pos = 0;
+
+    while((pos = replacedStr.find(pattern, pos)) != std::string::npos)
+        replacedStr.replace(pos, pattern.size(), replacement);
+
+    return replacedStr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -117,9 +117,9 @@ void ParseTable::generateParseCode(std::ostream & os) const
 {
     // Function begin
     if(m_options.throwedExceptions.empty())
-        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(" << m_options.tokenType << ' ' << m_options.tokenName << ')' << std::endl;
+        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(const " << m_options.tokenType << ' ' << m_options.tokenName << ')' << std::endl;
     else
-        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(" << m_options.tokenType << ' ' << m_options.tokenName << ") throw(" << m_options.throwedExceptions << ")" << std::endl;
+        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(const " << m_options.tokenType << ' ' << m_options.tokenName << ") throw(" << m_options.throwedExceptions << ")" << std::endl;
     os << m_options.indent << '{' << std::endl;
     m_options.indent++;
 

@@ -96,7 +96,8 @@ const std::string Options::VAR_NB_VALUES      ("<NB_VALUES>");
 const std::string Options::VAR_EXTERNAL_RETURN("$$");
 const std::string Options::VAR_RETURN         ("yylval");
 const std::string Options::VAR_TOKEN          ("<TOKEN>");
-const std::string Options::VERSION            ("0.2");
+const std::string Options::VAR_TYPE           ("<TYPE>");
+const std::string Options::VERSION            ("0.3");
 
 const struct option Options::OPTIONS [] = {
     { "help",                   no_argument,       nullptr, 'h'},
@@ -114,10 +115,11 @@ const struct option Options::OPTIONS [] = {
     { "push-value-code",        required_argument, nullptr, 'g'},
     { "pop-values-code",        required_argument, nullptr, 'j'},
     { "get-value-code",         required_argument, nullptr, 'k'},
+    { "value-as-token",         required_argument, nullptr, 'm'},
+    { "value-as-intermediate",  required_argument, nullptr, 'm'},
 
     // Lexer options
     { "token-type",             required_argument, nullptr, 'y'},
-    { "token-union-name",       required_argument, nullptr, 'm'},
     { "shift-token-code",       required_argument, nullptr, 'c'},
     { "token-prefix",           required_argument, nullptr, 'r'},
     { "get-type-of-token-code", required_argument, nullptr, 'l'},
@@ -148,13 +150,14 @@ const std::vector<std::string> Options::OPTIONS_TEXT [] = {
         { "Code used to pop states from the stack" },
         { "State number used to specify an error" },
         { "State number used when parsing is done and the input is accepted" },
-        { "Type used for intermediate values" },
+        { "Type regrouping intermediate and token values" },
         { "Code used to push a new value on the stack" },
         { "Code used to pop values from the stack" },
         { "Code used to get the N-th value from the stack" },
+        { "Code used to get a value as token" },
+        { "Code used to get a value as intermediate" },
 
         { "Type used for tokens" },
-        { "Name of the value's union member used to store a token" },
         { "Code used to move lexer to the next token" },
         { "Prefix of token" },
         { "Code used to get the type of token" },
@@ -171,8 +174,8 @@ const std::vector<std::string> Options::OPTIONS_TEXT [] = {
 };
 
 #define NB_OPTIONS_COMMON    3
-#define NB_OPTIONS_PARSER    9
-#define NB_OPTIONS_LEXER     6
+#define NB_OPTIONS_PARSER    11
+#define NB_OPTIONS_LEXER     5
 #define NB_OPTIONS_GENERATOR 6
 #define NB_OPTIONS_FILE      1
 
@@ -212,33 +215,34 @@ void Options::parseArguments(int argc, char ** argv)
     {
         switch (option)
         {
-            case 's' : stateType.assign(optarg);          break;
-            case 't' : topState.assign(optarg);           break;
-            case 'p' : popState.assign(optarg);           break;
-            case 'e' : errorState.assign(optarg);         break;
-            case 'a' : acceptState.assign(optarg);        break;
+            case 's' : stateType.assign(optarg);           break;
+            case 't' : topState.assign(optarg);            break;
+            case 'p' : popState.assign(optarg);            break;
+            case 'e' : errorState.assign(optarg);          break;
+            case 'a' : acceptState.assign(optarg);         break;
 
-            case 'q' : valueType.assign(optarg);          break;
-            case 'g' : pushValue.assign(optarg);          break;
-            case 'j' : popValues.assign(optarg);          break;
-            case 'k' : getValue .assign(optarg);          break;
+            case 'q' : valueType.assign(optarg);           break;
+            case 'g' : pushValue.assign(optarg);           break;
+            case 'j' : popValues.assign(optarg);           break;
+            case 'k' : getValue.assign(optarg);            break;
+            case 'm' : valueAsToken.assign(optarg);        break;
+            case 'z' : valueAsIntermediate.assign(optarg); break;
 
-            case 'y' : tokenType.assign(optarg);          break;
-            case 'm' : tokenUnionName.assign(optarg);     break;
-            case 'c' : shiftToken.assign(optarg);         break;
-            case 'r' : tokenPrefix.assign(optarg);        break;
-            case 'l' : getTypeOfToken.assign(optarg);     break;
-            case 'f' : endOfInputToken.assign(optarg);    break;
+            case 'y' : tokenType.assign(optarg);           break;
+            case 'c' : shiftToken.assign(optarg);          break;
+            case 'r' : tokenPrefix.assign(optarg);         break;
+            case 'l' : getTypeOfToken.assign(optarg);      break;
+            case 'f' : endOfInputToken.assign(optarg);     break;
 
-            case 'i' : intermediateType.assign(optarg);   break;
-            case 'n' : parseFunctionName.assign(optarg);  break;
-            case 'b' : branchFunctionName.assign(optarg); break;
-            case 'x' : throwedExceptions.assign(optarg);  break;
+            case 'i' : intermediateType.assign(optarg);    break;
+            case 'n' : parseFunctionName.assign(optarg);   break;
+            case 'b' : branchFunctionName.assign(optarg);  break;
+            case 'x' : throwedExceptions.assign(optarg);   break;
 
-            case 'w' : defaultSwitchStatement = true;     break;
-            case 'u' : useTableForBranches    = true;     break;
+            case 'w' : defaultSwitchStatement = true;      break;
+            case 'u' : useTableForBranches    = true;      break;
 
-            case 'o' : m_outputFileName.assign(optarg);   break;
+            case 'o' : m_outputFileName.assign(optarg);    break;
 
             case 'd' :
             {
@@ -362,10 +366,11 @@ Options & Options::operator <<(const Options & options)
     SET_OPTION_IF_NOT_DEFAULT(pushValue);
     SET_OPTION_IF_NOT_DEFAULT(popValues);
     SET_OPTION_IF_NOT_DEFAULT(getValue);
+    SET_OPTION_IF_NOT_DEFAULT(valueAsToken);
+    SET_OPTION_IF_NOT_DEFAULT(valueAsIntermediate);
 
     // Lexer options
     SET_OPTION_IF_NOT_DEFAULT(tokenType);
-    SET_OPTION_IF_NOT_DEFAULT(tokenUnionName);
     SET_OPTION_IF_NOT_DEFAULT(shiftToken);
     SET_OPTION_IF_NOT_DEFAULT(tokenPrefix);
     SET_OPTION_IF_NOT_DEFAULT(getTypeOfToken);
@@ -394,19 +399,20 @@ Options & Options::operator <<(const Options & options)
 std::ostream & operator <<(std::ostream & os, const Options & options)
 {
     // Parser options
-    DISPLAY_OPTION(stateType  );
-    DISPLAY_OPTION(topState   );
-    DISPLAY_OPTION(popState   );
-    DISPLAY_OPTION(errorState );
-    DISPLAY_OPTION(acceptState);
-    DISPLAY_OPTION(valueType  );
-    DISPLAY_OPTION(pushValue  );
-    DISPLAY_OPTION(popValues  );
-    DISPLAY_OPTION(getValue   );
+    DISPLAY_OPTION(stateType          );
+    DISPLAY_OPTION(topState           );
+    DISPLAY_OPTION(popState           );
+    DISPLAY_OPTION(errorState         );
+    DISPLAY_OPTION(acceptState        );
+    DISPLAY_OPTION(valueType          );
+    DISPLAY_OPTION(pushValue          );
+    DISPLAY_OPTION(popValues          );
+    DISPLAY_OPTION(getValue           );
+    DISPLAY_OPTION(valueAsToken       );
+    DISPLAY_OPTION(valueAsIntermediate);
 
     // Lexer options
     DISPLAY_OPTION(tokenType      );
-    DISPLAY_OPTION(tokenUnionName );
     DISPLAY_OPTION(shiftToken     );
     DISPLAY_OPTION(tokenPrefix    );
     DISPLAY_OPTION(getTypeOfToken );

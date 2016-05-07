@@ -44,20 +44,21 @@ ParserBNF::ParserBNF(LexerBNF & lexer, Options & options, Grammar & grammar)
 : m_grammar(grammar), m_options(options), m_lexer(lexer)
 {
     // Parser options
-    m_stringParams["parser:state-type"]         = &m_options.stateType;
-    m_stringParams["parser:top-state"]          = &m_options.topState;
-    m_stringParams["parser:pop-state"]          = &m_options.popState;
-    m_stringParams["parser:error-state"]        = &m_options.errorState;
-    m_stringParams["parser:accept-state"]       = &m_options.acceptState;
+    m_stringParams["parser:state-type"]            = &m_options.stateType;
+    m_stringParams["parser:top-state"]             = &m_options.topState;
+    m_stringParams["parser:pop-state"]             = &m_options.popState;
+    m_stringParams["parser:error-state"]           = &m_options.errorState;
+    m_stringParams["parser:accept-state"]          = &m_options.acceptState;
 
-    m_stringParams["parser:value-type"]         = &m_options.valueType;
-    m_stringParams["parser:push-value"]         = &m_options.pushValue;
-    m_stringParams["parser:pop-values"]         = &m_options.popValues;
-    m_stringParams["parser:get-value"]          = &m_options.getValue;
+    m_stringParams["parser:value-type"]            = &m_options.valueType;
+    m_stringParams["parser:push-value"]            = &m_options.pushValue;
+    m_stringParams["parser:pop-values"]            = &m_options.popValues;
+    m_stringParams["parser:get-value"]             = &m_options.getValue;
+    m_stringParams["parser:value-as-token"]        = &m_options.valueAsToken;
+    m_stringParams["parser:value-as-intermediate"] = &m_options.valueAsIntermediate;
 
     // Lexer options
     m_stringParams["lexer:token-type"]          = &m_options.tokenType;
-    m_stringParams["lexer:token-union-name"]    = &m_options.tokenUnionName;
     m_stringParams["lexer:shift-token"]         = &m_options.shiftToken;
     m_stringParams["lexer:token-prefix"]        = &m_options.tokenPrefix;
     m_stringParams["lexer:get-type-of-token"]   = &m_options.getTypeOfToken;

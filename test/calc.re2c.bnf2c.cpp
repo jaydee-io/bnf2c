@@ -3,31 +3,33 @@
 #include <deque>
 
 /*!bnf2c
-   bnf2c:parser:top-state         = "stateStack.top()"
-   bnf2c:parser:pop-state         = "for(int i=0; i<<NB_STATES>; i++) stateStack.pop();"
-   bnf2c:parser:error-state       = "STATE_ERROR"
-   bnf2c:parser:accept-state      = "STATE_ACCEPT"
+   bnf2c:parser:top-state             = "stateStack.top()"
+   bnf2c:parser:pop-state             = "for(int i=0; i<<NB_STATES>; i++) stateStack.pop();"
+   bnf2c:parser:error-state           = "STATE_ERROR"
+   bnf2c:parser:accept-state          = "STATE_ACCEPT"
 
-   bnf2c:parser:value-type        = "Value"
-   bnf2c:parser:push-value        = "push_value(<VALUE>);"
-   bnf2c:parser:pop-values        = "pop_values(<NB_VALUES>);"
-   bnf2c:parser:get-value         = "get_value(<VALUE_IDX>)"
+   bnf2c:parser:value-type            = "Value"
+   bnf2c:parser:push-value            = "push_value(<VALUE>);"
+   bnf2c:parser:pop-values            = "pop_values(<NB_VALUES>);"
+   bnf2c:parser:get-value             = "get_value(<VALUE_IDX>)"
+   bnf2c:parser:value-as-token        = "<VALUE>.token"
+   bnf2c:parser:value-as-intermediate = "<VALUE>.<TYPE>"
 
-   bnf2c:lexer:token-type         = "Token"
-   bnf2c:lexer:shift-token        = "nextToken();"
-   bnf2c:lexer:token-prefix       = ""
-   bnf2c:lexer:get-type-of-token  = "<TOKEN>.type"
-   bnf2c:lexer:end-of-input-token = "EOI"
+   bnf2c:lexer:token-type             = "Token"
+   bnf2c:lexer:shift-token            = "nextToken();"
+   bnf2c:lexer:token-prefix           = ""
+   bnf2c:lexer:get-type-of-token      = "<TOKEN>.type"
+   bnf2c:lexer:end-of-input-token     = "EOI"
 
-   bnf2c:output:intermediate-type = "long long"
-   bnf2c:output:parse-function    = "parseFunction"
-   bnf2c:output:branch-function   = "branchFunction"
+   bnf2c:output:intermediate-type     = "long long"
+   bnf2c:output:parse-function        = "parseFunction"
+   bnf2c:output:branch-function       = "branchFunction"
 
-   bnf2c:generator:default-switch = "true"
-   bnf2c:generator:branch-table   = "true"
+   bnf2c:generator:default-switch     = "true"
+   bnf2c:generator:branch-table       = "true"
 
-   bnf2c:indent:string            = "    "
-   bnf2c:indent:top               = "0"
+   bnf2c:indent:string                = "    "
+   bnf2c:indent:top                   = "0"
 
    bnf2c:type<value> E START
 */

@@ -177,10 +177,9 @@ void ParserState::generateBranchesSwitch(std::ostream & os, Options & options, c
         {
             os << options.indent << "case " << grammar.intermediates.index(item.rule.symbols[item.dot].name) << " : ";
             if(item.nextState != nullptr)
-                os << "return " << item.nextState->numState << "; ";
+                os << "return " << item.nextState->numState << ";" << std::endl;
             else
-                os << "return " << options.errorState << "; ";
-            os << "break;" << std::endl;
+                os << "return " << options.errorState << ";" << std::endl;
             outCases.insert(os.str());
         }
     }
@@ -201,11 +200,12 @@ void ParserState::generateBranchesSwitch(std::ostream & os, Options & options, c
         if(options.defaultSwitchStatement)
         {
             options.indent++;
-            os << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
+            os << options.indent << "default : return " << options.errorState << ";" << std::endl;
             options.indent--;
         }
 
         os << options.indent << "}" << std::endl;
+        os << options.indent << "break;" << std::endl;
         options.indent--;
     }
 }
@@ -382,14 +382,15 @@ void ParserState::generateActionItems(std::ostream & os, Options & options, cons
 
     // Accept rule
     if(m_isAnAcceptRule)
-        os << options.indent << "case " << options.tokenPrefix << options.endOfInputToken << " : return " << options.acceptState << "; break;" << std::endl;
+        os << options.indent << "case " << options.tokenPrefix << options.endOfInputToken << " : return " << options.acceptState << ";" << std::endl;
 
     // Default switch statement
     if(options.defaultSwitchStatement)
-        os << options.indent << "default : return " << options.errorState << "; break;" << std::endl;
+        os << options.indent << "default : return " << options.errorState << ";" << std::endl;
 
     options.indent--;
     os << options.indent << "}" << std::endl;
+    os << options.indent << "break;" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -398,19 +399,20 @@ void ParserState::generateReduceAction(const Item & item, std::ostream & os, Opt
     os << options.indent << '{' << std::endl;
     options.indent++;
 
-    // Returned value
-    os << options.indent
-            << Options::VAR_RETURN << " = "
-            << checkedStringReplace(options.getValue, Options::VAR_VALUE_IDX, std::to_string(item.rule.symbols.size() - 1))
-            << ';' << std::endl;
-
+    // No action specified by user, assume "$$ = $1"
+    if(item.rule.action.empty())
+    {
+        std::string replacement = checkedStringReplace(options.getValue, Options::VAR_VALUE_IDX, std::to_string(item.rule.symbols.size() - 1));
+        replacement = checkedStringReplace(replacement, Options::VAR_TYPE, grammar.getIntermediateType(item.rule.name));
+        os << options.indent  << Options::VAR_RETURN << " = " << replacement << ';' << std::endl;
+    }
     // Rule action code
-    if(!item.rule.action.empty())
+    else
     {
         if(item.rule.action.find_first_of("\n\r") != std::string::npos)
-            os << std::endl << item.rule.action << std::endl << std::endl;
+            os << item.rule.action << std::endl << std::endl;
         else
-            os << std::endl << options.indent << item.rule.action << std::endl << std::endl;
+            os << options.indent << item.rule.action << std::endl << std::endl;
     }
 
     // Values stack
@@ -426,8 +428,6 @@ void ParserState::generateReduceAction(const Item & item, std::ostream & os, Opt
     else
         os << options.indent << "return " << options.branchFunctionName << "(" << grammar.intermediates.index(item.rule.name) << ");" << std::endl;
 
-    os << options.indent << "break;" << std::endl;
-
     options.indent--;
     os << options.indent << '}' << std::endl;
 }
@@ -435,14 +435,20 @@ void ParserState::generateReduceAction(const Item & item, std::ostream & os, Opt
 ////////////////////////////////////////////////////////////////////////////////
 void ParserState::generateShiftAction(const Item & item, std::ostream & os, Options & options, const Grammar & grammar) const
 {
-    os << Options::VAR_RETURN << '.' << options.tokenUnionName << " = " << options.tokenName << ';';
+    // Returned value
+    std::string replacement = checkedStringReplace(options.valueAsToken, Options::VAR_VALUE, Options::VAR_RETURN);
+    replacement = checkedStringReplace(replacement, Options::VAR_TYPE, options.tokenType);
+    os << replacement << " = " << options.tokenName << ';';
+
+    // Shift
     os << ' ' << options.shiftToken;
+
+    // Push returned value
     os << ' ' << checkedStringReplace(options.pushValue, Options::VAR_VALUE, Options::VAR_RETURN);
     if(item.nextState != nullptr)
-        os << " return " << item.nextState->numState << ';';
+        os << " return " << item.nextState->numState << ';' << std::endl;
     else
-        os << " return " << options.errorState << ';';
-    os << " break;" << std::endl;
+        os << " return " << options.errorState << ';' << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

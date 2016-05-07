@@ -72,33 +72,35 @@ struct Options
         static const std::string    VAR_EXTERNAL_RETURN;
         static const std::string    VAR_RETURN;
         static const std::string    VAR_TOKEN;
+        static const std::string    VAR_TYPE;
         static const std::string    VERSION;
 
         // Parser options
-        std::string     stateType          = "int";
-        std::string     topState           = "topState()";
-        std::string     popState           = "popStates(<NB_STATES>);";
-        std::string     errorState         = "-1";
-        std::string     acceptState        = "-2";
+        std::string     stateType           = "int";
+        std::string     topState            = "topState()";
+        std::string     popState            = "popStates(<NB_STATES>);";
+        std::string     errorState          = "-1";
+        std::string     acceptState         = "-2";
 
-        std::string     valueType          = "ValueType";
-        std::string     pushValue          = "pushValue(<VALUE>);";
-        std::string     popValues          = "popValues(<NB_VALUES>);";
-        std::string     getValue           = "getValue(<VALUE_IDX>)";
+        std::string     valueType           = "ValueType";
+        std::string     pushValue           = "pushValue(<VALUE>);";
+        std::string     popValues           = "popValues(<NB_VALUES>);";
+        std::string     getValue            = "getValue(<VALUE_IDX>).<TYPE>";
+        std::string     valueAsToken        = "<VALUE>.<TYPE>";
+        std::string     valueAsIntermediate = "<VALUE>.<TYPE>";
 
         // Lexer options
-        std::string     tokenType          = "int";
-        std::string     tokenUnionName     = "token";
-        std::string     shiftToken         = "shiftToken();";
-        std::string     tokenPrefix        = "";
-        std::string     getTypeOfToken     = "<TOKEN>";
-        std::string     endOfInputToken    = "END_OF_INPUT";
+        std::string     tokenType           = "int";
+        std::string     shiftToken          = "shiftToken();";
+        std::string     tokenPrefix         = "";
+        std::string     getTypeOfToken      = "<TOKEN>";
+        std::string     endOfInputToken     = "END_OF_INPUT";
 
         // Generated code options
-        std::string     intermediateType   = "int";
-        std::string     parseFunctionName  = "parse";
-        std::string     branchFunctionName = "branch";
-        std::string     throwedExceptions  = "";
+        std::string     intermediateType    = "int";
+        std::string     parseFunctionName   = "parse";
+        std::string     branchFunctionName  = "branch";
+        std::string     throwedExceptions   = "";
 
         bool            defaultSwitchStatement = false;
         bool            useTableForBranches    = false;

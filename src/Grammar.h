@@ -61,10 +61,15 @@ class Grammar
         Symbol addIntermediate(const std::string & name);
         Symbol addIntermediate(std::string && name);
 
+        const std::string & getIntermediateType(const std::string & name) const;
+
         void replacePseudoVariables(Options & options);
         void check(void);
 
         Errors<GeneratingError> errors;
+
+    private :
+        std::string checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const;
 
     public :
         RuleMap                     rules;
