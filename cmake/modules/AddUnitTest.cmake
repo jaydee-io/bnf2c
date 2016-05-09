@@ -1,3 +1,9 @@
+################################################################################
+#                                     BNF2C
+#
+# This file is distributed under the 4-clause Berkeley Software Distribution
+# License. See LICENSE for details.
+################################################################################
 enable_testing()
 
 macro(add_library_unittest unittest_name)

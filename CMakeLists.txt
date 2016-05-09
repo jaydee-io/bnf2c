@@ -1,3 +1,9 @@
+################################################################################
+#                                     BNF2C
+#
+# This file is distributed under the 4-clause Berkeley Software Distribution
+# License. See LICENSE for details.
+################################################################################
 cmake_minimum_required(VERSION 3.2)
 
 project(bnf2c)
