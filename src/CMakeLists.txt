@@ -17,4 +17,9 @@ set(SOURCES
 	main.cpp
 )
 
+add_compile_options(
+    -std=c++14
+    -Werror
+)
+
 add_executable(bnf2c ${SOURCES})

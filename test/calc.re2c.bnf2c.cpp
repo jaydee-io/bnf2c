@@ -1,28 +1,30 @@
+#include "gtest/gtest.h"
 #include <iostream>
 #include <stack>
 #include <deque>
 
+namespace calc {
 /*!bnf2c
-   bnf2c:parser:top-state             = "stateStack.top()"
-   bnf2c:parser:pop-state             = "for(int i=0; i<<NB_STATES>; i++) stateStack.pop();"
+   bnf2c:parser:top-state             = "calc::stateStack.top()"
+   bnf2c:parser:pop-state             = "for(int i=0; i<<NB_STATES>; i++) calc::stateStack.pop();"
    bnf2c:parser:error-state           = "STATE_ERROR"
    bnf2c:parser:accept-state          = "STATE_ACCEPT"
 
-   bnf2c:parser:value-type            = "Value"
-   bnf2c:parser:push-value            = "push_value(<VALUE>);"
-   bnf2c:parser:pop-values            = "pop_values(<NB_VALUES>);"
-   bnf2c:parser:get-value             = "get_value(<VALUE_IDX>)"
+   bnf2c:parser:value-type            = "calc::Value"
+   bnf2c:parser:push-value            = "calc::push_value(<VALUE>);"
+   bnf2c:parser:pop-values            = "calc::pop_values(<NB_VALUES>);"
+   bnf2c:parser:get-value             = "calc::get_value(<VALUE_IDX>)"
    bnf2c:parser:value-as-token        = "<VALUE>.token"
    bnf2c:parser:value-as-intermediate = "<VALUE>.<TYPE>"
 
-   bnf2c:lexer:token-type             = "Token"
+   bnf2c:lexer:token-type             = "calc::Token"
    bnf2c:lexer:shift-token            = "nextToken();"
-   bnf2c:lexer:token-prefix           = ""
+   bnf2c:lexer:token-prefix           = "calc::"
    bnf2c:lexer:get-type-of-token      = "<TOKEN>.type"
    bnf2c:lexer:end-of-input-token     = "EOI"
 
    bnf2c:output:intermediate-type     = "long long"
-   bnf2c:output:parse-function        = "parseFunction"
+   bnf2c:output:parse-function        = "calc::parseFunction"
    bnf2c:output:branch-function       = "branchFunction"
 
    bnf2c:generator:default-switch     = "true"
@@ -47,7 +49,7 @@ typedef enum {
 struct Token
 {
     T_TOKEN type;
-    char *  start;
+    const char *  start;
 
     long long number(void) const { return ::atoll(start); }
 };
@@ -66,7 +68,7 @@ int parseFunction(Token);
 std::stack<int>     stateStack;
 std::deque<Value>   valueStack;
 
-char * input;
+const char * input;
 
 Token token;
 
@@ -149,22 +151,17 @@ void nextToken(void)
       | <E> SUB  <E> { $$ = $1 - $3;     }
 */
 
-int main(int argc, char ** argv)
+TEST(Calc, AddSubMultiplyDivide)
 {
-    if(argc < 2)
-        return 1;
+	calc::input = "1+0+1*3+50/2+9+1+1-10";
 
-    input = argv[1];
-    nextToken();
+    calc::nextToken();
+    calc::stateStack.push(0);
+    while((calc::stateStack.top() != STATE_ERROR) && (calc::stateStack.top() != STATE_ACCEPT))
+        calc::stateStack.push(calc::parseFunction(calc::token));
 
-    stateStack.push(0);
-    while((stateStack.top() != STATE_ERROR) && (stateStack.top() != STATE_ACCEPT))
-        stateStack.push(parseFunction(token));
-
-    if(stateStack.top() == STATE_ERROR)
-        std::cout << "Error" << std::endl;
-    else
-        std::cout << "The result of \"" << argv[1] << "\" = " << valueStack.back().value << std::endl;
-
-    return 0;
+    EXPECT_EQ(STATE_ACCEPT, calc::stateStack.top()) << "An error has occured while parsing expression";
+    EXPECT_EQ(29, calc::valueStack.back().value);
 }
+
+} /* Namespace calc */

@@ -1,3 +1,4 @@
+#include "wikipedia.h"
 #include <stdio.h>
 
 /*!bnf2c
@@ -32,39 +33,6 @@
    bnf2c:type<value> B E START
    bnf2c:type<token> TOKEN
 */
-
-typedef enum {
-    MULT,
-    ADD,
-    ZERO,
-    ONE,
-    EOI,
-    ERROR
-} T_TOKEN;
-
-long long parseFunction(T_TOKEN);
-
-
-#define NB_STATES 256
-#define STATE_ERROR  -5
-#define STATE_ACCEPT -6
-
-long long stateStack[NB_STATES];
-int currentState;
-
-typedef union {
-    long    value;
-    T_TOKEN token;
-} T_VALUE;
-
-T_VALUE valueStack[NB_STATES];
-int nbValues;
-
-char * input;
-
-T_TOKEN token = EOI;
-
-
 
 int top(void)
 {
@@ -111,12 +79,12 @@ void nextToken(void)
 
 <E> ::= <E> MULT <B>
         {
-                // printf("Multiply %ld with %ld\n", $1, $3);
+                /* printf("Multiply %ld with %ld\n", $1, $3); */
                 $$ = $1 * $3;
         }
       | <E> ADD  <B>
         {
-                // printf("Add %ld with %ld\n", $1, $3);
+                /* printf("Add %ld with %ld\n", $1, $3); */
                 $$ = $1 + $3;
         }
       | <B>
@@ -126,23 +94,3 @@ void nextToken(void)
 <B> ::= ZERO { $$ = 0; }
 <B> ::= ONE  { $$ = 1; }
 */
-
-int main(int argc, char ** argv)
-{
-    if(argc < 2)
-        return 1;
-
-    input = argv[1];
-    nextToken();
-
-    pushState(0);
-    while((top() != STATE_ERROR) && (top() != STATE_ACCEPT))
-        pushState(parseFunction(token));
-
-    if(top() == STATE_ERROR)
-        printf("Error\n");
-    else
-        printf("The result of \"%s\" = %ld\n", argv[1], valueStack[nbValues - 1].value);
-
-    return 0;
-}
