@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __DICTIONARY_H__
-#define __DICTIONARY_H__
+#ifndef _DICTIONARY_H_
+#define _DICTIONARY_H_
 #include <string>
 #include <unordered_set>
 
@@ -25,4 +25,4 @@ class Dictionary : public std::unordered_set<std::string>
         std::size_t     m_maxStringLength = 0;
 };
 
-#endif /* __DICTIONARY_H__ */
+#endif /* _DICTIONARY_H_ */

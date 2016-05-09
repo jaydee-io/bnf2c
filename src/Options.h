@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __OPTIONS_H__
-#define __OPTIONS_H__
+#ifndef _OPTIONS_H_
+#define _OPTIONS_H_
 #include <string>
 #include <vector>
 #include <ostream>
@@ -114,4 +114,4 @@ struct Options
 
 std::ostream & operator <<(std::ostream & os, const Options & options);
 
-#endif /* __OPTIONS_H__ */
+#endif /* _OPTIONS_H_ */

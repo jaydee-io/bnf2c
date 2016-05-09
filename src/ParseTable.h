@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __PARSINGTABLE_H__
-#define __PARSINGTABLE_H__
+#ifndef _PARSINGTABLE_H_
+#define _PARSINGTABLE_H_
 #include "Grammar.h"
 #include "ParserState.h"
 #include "Options.h"
@@ -46,4 +46,4 @@ class ParseTable
         States          m_states;
 };
 
-#endif /* __PARSINGTABLE_H__ */
+#endif /* _PARSINGTABLE_H_ */

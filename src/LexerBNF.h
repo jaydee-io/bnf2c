@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __LEXERBNF_H__
-#define __LEXERBNF_H__
+#ifndef _LEXERBNF_H_
+#define _LEXERBNF_H_
 #include "Token.h"
 
 #include <string>
@@ -40,4 +40,4 @@ class LexerBNF
         std::ostream &  m_output;
 };
 
-#endif /* __LEXERBNF_H__ */
+#endif /* _LEXERBNF_H_ */

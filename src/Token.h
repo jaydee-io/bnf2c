@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __TOKEN_H__
-#define __TOKEN_H__
+#ifndef _TOKEN_H_
+#define _TOKEN_H_
 #include <string>
 #include <ostream>
 
@@ -52,4 +52,4 @@ struct Token
 std::ostream & operator<<(std::ostream & os, const TokenType tokenType);
 std::ostream & operator<<(std::ostream & os, const Token & token);
 
-#endif /* __TOKEN_H__ */
+#endif /* _TOKEN_H_ */

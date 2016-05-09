@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __SYMBOL_H__
-#define __SYMBOL_H__
+#ifndef _SYMBOL_H_
+#define _SYMBOL_H_
 #include "Dictionary.h"
 
 #include <vector>
@@ -31,4 +31,4 @@ typedef std::size_t         SymbolIterator;
 
 std::ostream & operator <<(std::ostream & os, const Symbol & symbol);
 
-#endif /* __SYMBOL_H__ */
+#endif /* _SYMBOL_H_ */

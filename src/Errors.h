@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __ERRORS_H__
-#define __ERRORS_H__
+#ifndef _ERRORS_H_
+#define _ERRORS_H_
 #include <string>
 #include <list>
 
@@ -57,4 +57,4 @@ std::ostream & operator <<(std::ostream & os, const Errors<ErrorType> & errors)
     return os;
 }
 
-#endif /* __ERRORS_H__ */
+#endif /* _ERRORS_H_ */

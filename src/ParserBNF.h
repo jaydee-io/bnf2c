@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __PARSERBNF_H__
-#define __PARSERBNF_H__
+#ifndef _PARSERBNF_H_
+#define _PARSERBNF_H_
 #include "LexerBNF.h"
 #include "Grammar.h"
 #include "Options.h"
@@ -50,4 +50,4 @@ class ParserBNF
         std::string     m_lastIntermediate;
 };
 
-#endif /* __PARSERBNF_H__ */
+#endif /* _PARSERBNF_H_ */

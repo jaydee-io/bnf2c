@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __RULE_H__
-#define __RULE_H__
+#ifndef _RULE_H_
+#define _RULE_H_
 #include "Symbol.h"
 #include "Dictionary.h"
 
@@ -32,4 +32,4 @@ class Rule
 
 std::ostream & operator <<(std::ostream & os, const Rule & rule);
 
-#endif /* __RULE_H__ */
+#endif /* _RULE_H_ */

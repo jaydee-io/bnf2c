@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GRAMMAR_H__
-#define __GRAMMAR_H__
+#ifndef _GRAMMAR_H_
+#define _GRAMMAR_H_
 #include "Rule.h"
 #include "Symbol.h"
 #include "Dictionary.h"
@@ -59,4 +59,4 @@ class Grammar
 
 std::ostream & operator <<(std::ostream & os, const Grammar & ruleSet);
 
-#endif /* __GRAMMAR_H__ */
+#endif /* _GRAMMAR_H_ */

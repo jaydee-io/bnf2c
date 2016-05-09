@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __PARSERSTATE_H__
-#define __PARSERSTATE_H__
+#ifndef _PARSERSTATE_H_
+#define _PARSERSTATE_H_
 #include "Rule.h"
 #include "Grammar.h"
 #include "Options.h"
@@ -75,4 +75,4 @@ class ParserState
 std::ostream & operator <<(std::ostream & os, const Item & item);
 std::ostream & operator <<(std::ostream & os, const ParserState & itemSet);
 
-#endif /* __PARSERSTATE_H__ */
+#endif /* _PARSERSTATE_H_ */
