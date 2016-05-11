@@ -29,3 +29,5 @@ add_compile_options(
 )
 
 add_executable(bnf2c ${SOURCES})
+
+install(TARGETS bnf2c DESTINATION bin)
