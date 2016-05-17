@@ -1,0 +1,38 @@
+////////////////////////////////////////////////////////////////////////////////
+//                                    BNF2C
+//
+// This file is distributed under the 4-clause Berkeley Software Distribution
+// License. See LICENSE for details.
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _STATE_GENERATOR_H_
+#define _STATE_GENERATOR_H_
+#include "ParserState.h"
+#include "Grammar.h"
+#include "Options.h"
+
+#include <ostream>
+
+class StateGenerator
+{
+    public :
+        StateGenerator(const ParserState & state, const Grammar & grammar, Options & options);
+
+        void printActionsTo       (std::ostream & os) const;
+        void printBranchesSwitchTo(std::ostream & os) const;
+        void printBranchesTableTo (std::ostream & os) const;
+
+    private :
+        void printActionItemsTo (std::ostream & os) const;
+        void printReduceActionTo(const Item & item, std::ostream & os) const;
+        void printShiftActionTo (const Item & item, std::ostream & os) const;
+
+        std::string checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const;
+
+    private :
+        const ParserState m_state;
+        const Grammar &   m_grammar;
+        Options &         m_options;
+};
+
+#endif /* _STATES_GENERATOR_H_ */
+

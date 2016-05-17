@@ -9,6 +9,7 @@
 #include "ParserBNF.h"
 #include "Grammar.h"
 #include "ParseTable.h"
+#include "generator/ParserGenerator.h"
 
 #include <string>
 #include <iostream>
@@ -73,9 +74,8 @@ int main(int argc, char ** argv)
     }
 
     // Output generated code at the end of output file
-    table.generateBranchesCode(outputStream);
-    outputStream << std::endl;
-    table.generateParseCode(outputStream);
+    ParserGenerator generator(table, grammar, options);
+    generator.printTo(outputStream);
 
     // Debug output
     if(options.debugLevel != DebugLevel::NONE)

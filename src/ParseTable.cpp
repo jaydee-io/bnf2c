@@ -80,49 +80,6 @@ void ParseTable::check(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParseTable::generateBranchesCode(std::ostream & os) const
-{
-    // Branches
-    if(m_options.useTableForBranches)
-        generateBranchTable(os);
-    else
-        generateBranchSwitch(os);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void ParseTable::generateParseCode(std::ostream & os) const
-{
-    // Function begin
-    if(m_options.throwedExceptions.empty())
-        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(const " << m_options.tokenType << ' ' << m_options.tokenName << ')' << std::endl;
-    else
-        os << m_options.indent << m_options.stateType << " " << m_options.parseFunctionName << "(const " << m_options.tokenType << ' ' << m_options.tokenName << ") throw(" << m_options.throwedExceptions << ")" << std::endl;
-    os << m_options.indent << '{' << std::endl;
-    m_options.indent++;
-
-    // Returned value
-    os << m_options.indent << m_options.valueType << ' ' << Options::VAR_RETURN << ';' << std::endl;
-
-    // Switch on state
-    os << m_options.indent << "switch(" << m_options.topState << ")" << std::endl;
-    os << m_options.indent << '{' << std::endl;
-    m_options.indent++;
-    for(const ParserState & itemSet : m_states)
-        itemSet.generateActions(os, m_options, m_grammar);
-    if(m_options.defaultSwitchStatement)
-        os << m_options.indent << "default : return " << m_options.errorState << "; break;" << std::endl;
-    m_options.indent--;
-    os << m_options.indent << '}' << std::endl;
-
-    // Return error
-    os << m_options.indent << "return " << m_options.errorState << ';' << std::endl;
-
-    // Function end
-    m_options.indent--;
-    os << m_options.indent << '}' << std::endl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 void ParseTable::printDebug(std::ostream & output) const
 {
     // Print rules
@@ -181,38 +138,7 @@ void ParseTable::printDebug(std::ostream & output) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParseTable::generateBranchSwitch(std::ostream & output) const
+const ParseTable::States & ParseTable::getStates(void) const
 {
-    output << m_options.indent << m_options.stateType << " " << m_options.branchFunctionName << "(" << m_options.intermediateType << " intermediate)" << std::endl;
-    output << m_options.indent << '{' << std::endl;
-    m_options.indent++;
-    output << m_options.indent << "switch(" << m_options.topState << ")" << std::endl;
-    output << m_options.indent << '{' << std::endl;
-    m_options.indent++;
-    for(const ParserState & itemSet : m_states)
-        itemSet.generateBranchesSwitch(output, m_options, m_grammar);
-    if(m_options.defaultSwitchStatement)
-        output << m_options.indent << "default : return " << m_options.errorState << "; break;" << std::endl;
-    m_options.indent--;
-    output << m_options.indent << '}' << std::endl;
-    output << m_options.indent << "return " << m_options.errorState << ';' << std::endl;
-    m_options.indent--;
-    output << m_options.indent << '}' << std::endl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void ParseTable::generateBranchTable(std::ostream & output) const
-{
-    output << m_options.indent << "const " << m_options.stateType << " " << m_options.branchFunctionName << "[] = {" << std::endl;
-    m_options.indent++;
-    for(States::const_iterator it = m_states.begin(); it != m_states.end(); ++it)
-    {
-        if(it != m_states.begin())
-            output << ", " << std::endl;
-
-        it->generateBranchesTable(output, m_options, m_grammar);
-    }
-    output << std::endl;
-    m_options.indent--;
-    output << m_options.indent << "};" << std::endl;
+    return m_states;
 }

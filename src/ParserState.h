@@ -31,6 +31,7 @@ struct Item
 
     bool operator ==(const Item & item) const;
     bool operator < (const Item & item) const;
+
     Item::ActionType getType(void) const;
 };
 
@@ -46,21 +47,13 @@ class ParserState
 
         void check(Errors<GeneratingError> & errors) const;
 
-        void generateActions       (std::ostream & os, Options & options, const Grammar & grammar) const;
-        void generateBranchesSwitch(std::ostream & os, Options & options, const Grammar & grammar) const;
-        void generateBranchesTable (std::ostream & os, Options & options, const Grammar & grammar) const;
+        bool isAnAcceptRule(void) const;
+        Item *  getReduceRule(void) const;
 
         void printDebugActions (std::ostream & os, const Grammar & grammar, const Options & options) const;
         void printDebugBranches(std::ostream & os, const Grammar & grammar, std::size_t size) const;
 
         bool operator ==(const ParserState & set) const;
-
-    protected :
-        void generateActionItems (std::ostream & os, Options & options, const Grammar & grammar) const;
-        void generateReduceAction(const Item & item, std::ostream & os, Options & options, const Grammar & grammar) const;
-        void generateShiftAction (const Item & item, std::ostream & os, Options & options, const Grammar & grammar) const;
-
-        std::string checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const;
 
     public :
         ItemList items;

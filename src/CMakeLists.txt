@@ -9,6 +9,8 @@ find_package(RE2C REQUIRED)
 add_lexer(LexerBNF.re2c.cpp)
 
 set(SOURCES
+    generator/ParserGenerator.cpp
+    generator/StateGenerator.cpp
 	Token.cpp
 	LexerBNF.cpp
 	ParserBNF.cpp

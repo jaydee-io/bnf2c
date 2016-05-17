@@ -18,7 +18,7 @@
 
 class ParseTable
 {
-    protected :
+    public :
         typedef std::list<ParserState> States;
 
     public :
@@ -27,14 +27,9 @@ class ParseTable
         void generateStates(void);
         void check(void);
 
-        void generateBranchesCode(std::ostream & os) const;
-        void generateParseCode(std::ostream & os) const;
-
         void printDebug(std::ostream & os) const;
 
-    protected :
-        void generateBranchSwitch(std::ostream & os) const;
-        void generateBranchTable (std::ostream & os) const;
+        const States & getStates(void) const;
 
     public :
         Errors<GeneratingError> errors;
