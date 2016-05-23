@@ -34,7 +34,7 @@ namespace calc {
    bnf2c:output:branch-function       = "branchFunction"
 
    bnf2c:generator:default-switch     = "true"
-   bnf2c:generator:branch-table       = "true"
+   bnf2c:generator:branch-table       = "false"
 
    bnf2c:indent:string                = "    "
    bnf2c:indent:top                   = "0"

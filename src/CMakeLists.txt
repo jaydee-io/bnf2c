@@ -11,6 +11,7 @@ add_lexer(LexerBNF.re2c.cpp)
 set(SOURCES
     generator/ParserGenerator.cpp
     generator/StateGenerator.cpp
+    generator/SwitchGenerator.cpp
 	Token.cpp
 	LexerBNF.cpp
 	ParserBNF.cpp

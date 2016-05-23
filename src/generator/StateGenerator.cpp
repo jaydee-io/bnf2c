@@ -10,7 +10,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 StateGenerator::StateGenerator(const ParserState & state, const Grammar & grammar, Options & options)
-: m_state(state), m_grammar(grammar), m_options(options)
+: m_state(state), m_grammar(grammar), m_options(options),
+    m_switchOnIntermediate(m_options.indent, m_options.intermediateName, m_options.defaultSwitchStatement ? "return " + m_options.errorState + ";" : ""), 
+    m_switchOnTerminal(m_options.indent, checkedStringReplace(m_options.getTypeOfToken, Options::VAR_TOKEN, m_options.tokenName), m_options.defaultSwitchStatement ? "return " + m_options.errorState + ";" : "")
 {
 }
 
@@ -52,19 +54,11 @@ void StateGenerator::printBranchesSwitchTo(std::ostream & os) const
         m_options.indent++;
 
         os << std::endl;
-        os << m_options.indent << "switch(" << m_options.intermediateName << ")" << std::endl;
-        os << m_options.indent << "{" << std::endl;
+        m_switchOnIntermediate.printBeginTo(os);
         for(const std::string & str : outCases)
             os << str;
+        m_switchOnIntermediate.printEndTo(os);
 
-        if(m_options.defaultSwitchStatement)
-        {
-            m_options.indent++;
-            os << m_options.indent << "default : return " << m_options.errorState << ";" << std::endl;
-            m_options.indent--;
-        }
-
-        os << m_options.indent << "}" << std::endl;
         os << m_options.indent << "break;" << std::endl;
         m_options.indent--;
     }
@@ -127,9 +121,7 @@ void StateGenerator::printActionItemsTo(std::ostream & os) const
         cases[*m_state.getReduceRule()].insert(m_options.endOfInputToken);
 
     // Switch on terminal
-    os << m_options.indent << "switch(" << checkedStringReplace(m_options.getTypeOfToken, Options::VAR_TOKEN, m_options.tokenName) << ")" << std::endl;
-    os << m_options.indent << "{" << std::endl;
-    m_options.indent++;
+    m_switchOnTerminal.printBeginTo(os);
 
     for(const std::pair<const Item, std::set<std::string> > & casesOfItem : cases)
     {
@@ -167,12 +159,7 @@ void StateGenerator::printActionItemsTo(std::ostream & os) const
     if(m_state.isAnAcceptRule())
         os << m_options.indent << "case " << m_options.tokenPrefix << m_options.endOfInputToken << " : return " << m_options.acceptState << ";" << std::endl;
 
-    // Default switch statement
-    if(m_options.defaultSwitchStatement)
-        os << m_options.indent << "default : return " << m_options.errorState << ";" << std::endl;
-
-    m_options.indent--;
-    os << m_options.indent << "}" << std::endl;
+    m_switchOnTerminal.printEndTo(os);
     os << m_options.indent << "break;" << std::endl;
 }
 

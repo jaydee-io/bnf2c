@@ -10,6 +10,7 @@
 #include "Grammar.h"
 #include "Options.h"
 #include "generator/StateGenerator.h"
+#include "generator/SwitchGenerator.h"
 
 #include <vector>
 #include <ostream>
@@ -34,6 +35,7 @@ class ParserGenerator
     private :
         std::vector<StateGenerator> m_stateGenerators;
         Options &                   m_options;
+        SwitchGenerator             m_switchOnStates;
 };
 
 #endif /* _PARSER_GENERATOR_H_ */

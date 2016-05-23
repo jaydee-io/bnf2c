@@ -8,7 +8,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 ParserGenerator::ParserGenerator(const ParseTable & table, const Grammar & grammar, Options & options)
-: m_options(options)
+: m_options(options),
+    m_switchOnStates(m_options.indent, m_options.topState, m_options.defaultSwitchStatement ? "return " + m_options.errorState + ";" : "")
 {
     m_stateGenerators.reserve(table.getStates().size());
     for(const ParserState & state : table.getStates())
@@ -43,15 +44,10 @@ void ParserGenerator::printParseCodeTo(std::ostream & os) const
     os << m_options.indent << m_options.valueType << ' ' << Options::VAR_RETURN << ';' << std::endl;
 
     // Switch on state
-    os << m_options.indent << "switch(" << m_options.topState << ")" << std::endl;
-    os << m_options.indent << '{' << std::endl;
-    m_options.indent++;
+    m_switchOnStates.printBeginTo(os);
     for(const StateGenerator & generator : m_stateGenerators)
         generator.printActionsTo(os);
-    if(m_options.defaultSwitchStatement)
-        os << m_options.indent << "default : return " << m_options.errorState << "; break;" << std::endl;
-    m_options.indent--;
-    os << m_options.indent << '}' << std::endl;
+    m_switchOnStates.printEndTo(os);
 
     // Return error
     os << m_options.indent << "return " << m_options.errorState << ';' << std::endl;
@@ -65,15 +61,10 @@ void ParserGenerator::printBranchSwitchTo(std::ostream & os) const
     os << m_options.indent << m_options.stateType << " " << m_options.branchFunctionName << "(" << m_options.intermediateType << " intermediate)" << std::endl;
     os << m_options.indent << '{' << std::endl;
     m_options.indent++;
-    os << m_options.indent << "switch(" << m_options.topState << ")" << std::endl;
-    os << m_options.indent << '{' << std::endl;
-    m_options.indent++;
+    m_switchOnStates.printBeginTo(os);
     for(const StateGenerator & generator : m_stateGenerators)
         generator.printBranchesSwitchTo(os);
-    if(m_options.defaultSwitchStatement)
-        os << m_options.indent << "default : return " << m_options.errorState << "; break;" << std::endl;
-    m_options.indent--;
-    os << m_options.indent << '}' << std::endl;
+    m_switchOnStates.printEndTo(os);
     os << m_options.indent << "return " << m_options.errorState << ';' << std::endl;
 
     printFunctionEndTo(os);
