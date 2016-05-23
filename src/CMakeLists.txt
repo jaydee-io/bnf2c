@@ -12,6 +12,7 @@ set(SOURCES
     generator/ParserGenerator.cpp
     generator/StateGenerator.cpp
     generator/SwitchGenerator.cpp
+    generator/FunctionGenerator.cpp
 	Token.cpp
 	LexerBNF.cpp
 	ParserBNF.cpp

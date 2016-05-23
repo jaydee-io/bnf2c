@@ -11,6 +11,7 @@
 #include "Options.h"
 #include "generator/StateGenerator.h"
 #include "generator/SwitchGenerator.h"
+#include "generator/FunctionGenerator.h"
 
 #include <vector>
 #include <ostream>
@@ -29,12 +30,12 @@ class ParserGenerator
         void printBranchSwitchTo(std::ostream & os) const;
         void printBranchTableTo (std::ostream & os) const;
 
-        void printFunctionBeginTo(std::ostream & os, const std::string & funcName, const std::string & paramType, const std::string & paramName, const std::string & exceptions) const;
-        void printFunctionEndTo  (std::ostream & os) const;
-
     private :
         std::vector<StateGenerator> m_stateGenerators;
         Options &                   m_options;
+
+        FunctionGenerator           m_parseFunction;
+        FunctionGenerator           m_branchFunction;
         SwitchGenerator             m_switchOnStates;
 };
 
