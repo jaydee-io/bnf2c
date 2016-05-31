@@ -7,12 +7,12 @@
 find_package(RE2C REQUIRED)
 
 set(SOURCES
-	Dictionary.cpp
-	Symbol.cpp
-	Rule.cpp
-	Grammar.cpp
-	ParserState.cpp
-	ParseTable.cpp
+    Dictionary.cpp
+    Symbol.cpp
+    Rule.cpp
+    Grammar.cpp
+    ParserState.cpp
+    ParseTable.cpp
 )
 
 add_compile_options(

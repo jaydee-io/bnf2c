@@ -9,9 +9,9 @@ find_package(RE2C REQUIRED)
 add_lexer(LexerBNF.re2c.cpp)
 
 set(SOURCES
-	Token.cpp
-	LexerBNF.cpp
-	ParserBNF.cpp
+    Token.cpp
+    LexerBNF.cpp
+    ParserBNF.cpp
 )
 
 add_compile_options(

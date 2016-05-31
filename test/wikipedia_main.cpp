@@ -19,7 +19,7 @@ T_TOKEN token = EOI;
 
 TEST(Wikipedia, AddAndMultiply)
 {
-	input = "1+0+1*1+1+1+1+1+1*1";
+    input = "1+0+1*1+1+1+1+1+1*1";
 
     nextToken();
     pushState(0);

@@ -6,10 +6,10 @@
 ################################################################################
 
 set(SOURCES
-	Options.cpp
-	Streams.cpp
-	Errors.cpp
-	main.cpp
+    Options.cpp
+    Streams.cpp
+    Errors.cpp
+    main.cpp
 )
 
 add_compile_options(

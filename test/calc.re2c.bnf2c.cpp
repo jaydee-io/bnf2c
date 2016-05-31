@@ -159,7 +159,7 @@ void nextToken(void)
 
 TEST(Calc, AddSubMultiplyDivide)
 {
-	calc::input = "1+0+1*3+50/2+9+1+1-10";
+    calc::input = "1+0+1*3+50/2+9+1+1-10";
 
     calc::nextToken();
     calc::stateStack.push(0);

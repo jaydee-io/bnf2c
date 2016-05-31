@@ -11,7 +11,7 @@ macro(add_library_unittest unittest_name)
     include_directories(${CMAKE_SOURCE_DIR}/utils/unittest/googletest/include)
     add_executable(${unittest_name} ${ARGN})
     target_link_libraries(${unittest_name} gtest gtest_main)
-	add_dependencies(${unittest_name} bnf2c)
+    add_dependencies(${unittest_name} bnf2c)
 
     # Add test to test suite
     add_test(NAME ${unittest_name} COMMAND ${unittest_name} --gtest_color=true)

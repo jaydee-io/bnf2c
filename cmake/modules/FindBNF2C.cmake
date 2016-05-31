@@ -41,7 +41,7 @@ function(add_parser)
 
         add_custom_command(
             OUTPUT ${OUTPUT_FILE}
-			COMMAND ${BNF2C_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/${PARSER_SRC} > ${OUTPUT_FILE}
+            COMMAND ${BNF2C_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/${PARSER_SRC} > ${OUTPUT_FILE}
             DEPENDS ${PARSER_SRC}
             COMMENT "Building parser source ${OUTPUT_FILE}"
         )
