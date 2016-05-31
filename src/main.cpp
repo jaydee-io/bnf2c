@@ -5,6 +5,7 @@
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
 #include "Options.h"
+#include "Streams.h"
 #include "bnf2c-parser/LexerBNF.h"
 #include "bnf2c-parser/ParserBNF.h"
 #include "core/Grammar.h"
@@ -22,10 +23,6 @@ int main(int argc, char ** argv)
     Options cmdLineOptions;
     cmdLineOptions.parseArguments(argc, argv);
 
-    // Open input & output file
-    std::istream & inputStream = cmdLineOptions.inputStream();
-    std::ostream & outputStream = cmdLineOptions.outputStream();
-
     // Check for command line errors
     if(!cmdLineOptions.errors.list.empty())
     {
@@ -34,21 +31,24 @@ int main(int argc, char ** argv)
         return cmdLineOptions.errors.exitCode;
     }
 
+    // Open input & output file
+    Streams streams(cmdLineOptions.inputFileName, cmdLineOptions.outputFileName);
+
     // Read input file
     std::string inputBuffer;
-    inputBuffer.assign((std::istreambuf_iterator<char>(inputStream)), std::istreambuf_iterator<char>());
+    inputBuffer.assign((std::istreambuf_iterator<char>(streams.inputStream())), std::istreambuf_iterator<char>());
 
     // Start parser
-    Options     options;
     Grammar     grammar;
-    LexerBNF    lexer(inputBuffer, outputStream);
-    ParserBNF   parser(lexer, options, grammar);
+    LexerBNF    lexer(inputBuffer, streams.outputStream());
+    ParserBNF   parser(lexer, grammar);
 
     // Find each "bnf2c" block and parse it
     while(lexer.moveToNextBnf2cBlock())
         parser.parseBnf2cBlock();
 
     // Command line options prevails over in file options
+    Options options = parser.getInFileOptions();
     options << cmdLineOptions;
 
     // Check grammar
@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
 
     // Output generated code at the end of output file
     ParserGenerator generator(table, grammar, options);
-    generator.printTo(outputStream);
+    generator.printTo(streams.outputStream());
 
     // Debug output
     if(options.debugLevel != DebugLevel::NONE)

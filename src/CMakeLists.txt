@@ -7,6 +7,7 @@
 
 set(SOURCES
 	Options.cpp
+	Streams.cpp
 	Errors.cpp
 	main.cpp
 )

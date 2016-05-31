@@ -219,7 +219,7 @@ void Options::parseArguments(int argc, char ** argv)
             case 'w' : defaultSwitchStatement = true;      break;
             case 'u' : useTableForBranches    = true;      break;
 
-            case 'o' : m_outputFileName.assign(optarg);    break;
+            case 'o' : outputFileName.assign(optarg);    break;
 
             case 'd' :
             {
@@ -259,7 +259,7 @@ void Options::parseArguments(int argc, char ** argv)
     delete [] shortOptions;
 
     if (optind < argc)
-        m_inputFileName.assign(argv[optind]);
+        inputFileName.assign(argv[optind]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -294,38 +294,6 @@ void Options::usage(void)
 
     std::cout << std::endl << "File :" << std::endl;
     USAGE_OPTION(NB_OPTIONS_FILE);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-std::istream & Options::inputStream(void)
-{
-    if(m_inputFileName.empty())
-        return std::cin;
-    else
-    {
-        m_inputFileStream.open(m_inputFileName);
-
-        if(m_inputFileStream.fail())
-            ADD_COMMAND_LINE_PARSING_ERROR(1, "Unable to open input file \"" << m_inputFileName << "\"");
-
-        return m_inputFileStream;
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-std::ostream & Options::outputStream(void)
-{
-    if(m_outputFileName.empty())
-        return std::cout;
-    else
-    {
-        m_outputFileStream.open(m_outputFileName);
-
-        if(m_outputFileStream.fail())
-            ADD_COMMAND_LINE_PARSING_ERROR(1, "Unable to open output file \"" << m_outputFileName << "\"");
-
-        return m_outputFileStream;
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -365,8 +333,8 @@ Options & Options::operator <<(const Options & options)
     SET_OPTION_IF_NOT_DEFAULT(debugLevel);
 
     SET_OPTION_IF_NOT_DEFAULT(indent);
-    SET_OPTION_IF_NOT_DEFAULT(m_inputFileName);
-    SET_OPTION_IF_NOT_DEFAULT(m_outputFileName);
+    SET_OPTION_IF_NOT_DEFAULT(inputFileName);
+    SET_OPTION_IF_NOT_DEFAULT(outputFileName);
 
     return (*this);
 }

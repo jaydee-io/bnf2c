@@ -82,6 +82,9 @@ struct Options
         bool            defaultSwitchStatement = false;
         bool            useTableForBranches    = false;
 
+        std::string     inputFileName;
+        std::string     outputFileName;
+
         // Internal
         std::string                     tokenName        = "yytoken";
         std::string                     intermediateName = "intermediate";
@@ -95,21 +98,12 @@ struct Options
         void parseArguments(int argc, char ** argv);
         static void usage(void);
 
-        std::istream & inputStream(void);
-        std::ostream & outputStream(void);
-
         // Overwrite option if the corresponding option in "options" is not default
         Options & operator <<(const Options & options);
 
     protected :
         static const struct option            OPTIONS [];
         static const std::vector<std::string> OPTIONS_TEXT [];
-
-        std::string     m_inputFileName;
-        std::string     m_outputFileName;
-
-        std::ifstream   m_inputFileStream;
-        std::ofstream   m_outputFileStream;
 };
 
 std::ostream & operator <<(std::ostream & os, const Options & options);

@@ -17,8 +17,8 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////
-ParserBNF::ParserBNF(LexerBNF & lexer, Options & options, Grammar & grammar)
-: m_grammar(grammar), m_options(options), m_lexer(lexer)
+ParserBNF::ParserBNF(LexerBNF & lexer, Grammar & grammar)
+: m_grammar(grammar), m_lexer(lexer)
 {
     // Parser options
     m_stringParams["parser:state-type"]            = &m_options.stateType;
