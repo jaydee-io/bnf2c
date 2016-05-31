@@ -7,9 +7,9 @@
 #ifndef _PARSERBNF_H_
 #define _PARSERBNF_H_
 #include "LexerBNF.h"
-#include "Grammar.h"
 #include "Options.h"
-#include "Rule.h"
+#include "core/Grammar.h"
+#include "core/Rule.h"
 #include "Errors.h"
 
 #include <string>

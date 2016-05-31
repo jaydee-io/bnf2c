@@ -4,11 +4,14 @@
 # This file is distributed under the 4-clause Berkeley Software Distribution
 # License. See LICENSE for details.
 ################################################################################
+find_package(RE2C REQUIRED)
+
+add_lexer(LexerBNF.re2c.cpp)
 
 set(SOURCES
-	Options.cpp
-	Errors.cpp
-	main.cpp
+	Token.cpp
+	LexerBNF.cpp
+	ParserBNF.cpp
 )
 
 add_compile_options(
@@ -16,12 +19,5 @@ add_compile_options(
     -Werror
 )
 
-add_executable(bnf2c ${SOURCES})
+add_library(bnf2c-parser STATIC ${SOURCES})
 
-target_link_libraries(bnf2c
-    bnf2c-parser
-    bnf2c-generator
-    bnf2c-core
-)
-
-install(TARGETS bnf2c DESTINATION bin)

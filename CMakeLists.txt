@@ -8,12 +8,18 @@ cmake_minimum_required(VERSION 3.2)
 
 project(bnf2c)
 
-set(BNF2C_PATH "${CMAKE_SOURCE_DIR}")
-set(BNF2C_CMAKE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
-set(BNF2C_BUILD_PATH "${CMAKE_BINARY_DIR}")
+set(BNF2C_PATH         "${CMAKE_SOURCE_DIR}")
+set(BNF2C_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/src")
+set(BNF2C_CMAKE_PATH   "${CMAKE_SOURCE_DIR}/cmake/modules")
+set(BNF2C_BUILD_PATH   "${CMAKE_BINARY_DIR}")
 
 list(APPEND CMAKE_MODULE_PATH "${BNF2C_CMAKE_PATH}")
 
+include_directories(${BNF2C_INCLUDE_PATH})
+
+add_subdirectory(src/bnf2c-parser)
+add_subdirectory(src/core)
+add_subdirectory(src/generator)
 add_subdirectory(src)
 
 # Tests

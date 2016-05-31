@@ -46,7 +46,7 @@ void ParserGenerator::printParseCodeTo(std::ostream & os) const
 
     // Switch on state
     m_switchOnStates.printBeginTo(os);
-    for(const StateGenerator & generator : m_stateGenerators)
+    for(const auto & generator : m_stateGenerators)
         generator.printActionsTo(os);
     m_switchOnStates.printEndTo(os);
 
@@ -59,7 +59,7 @@ void ParserGenerator::printBranchSwitchTo(std::ostream & os) const
     m_branchFunction.printBeginTo(os);
 
     m_switchOnStates.printBeginTo(os);
-    for(const StateGenerator & generator : m_stateGenerators)
+    for(const auto & generator : m_stateGenerators)
         generator.printBranchesSwitchTo(os);
     m_switchOnStates.printEndTo(os);
 
@@ -71,12 +71,14 @@ void ParserGenerator::printBranchTableTo(std::ostream & os) const
 {
     os << m_options.indent << "const " << m_options.stateType << " " << m_options.branchFunctionName << "[] = {" << std::endl;
     m_options.indent++;
-    for(std::vector<StateGenerator>::const_iterator it = m_stateGenerators.begin(); it != m_stateGenerators.end(); ++it)
+    bool firstGenerator = true;
+    for(const auto & generator : m_stateGenerators)
     {
-        if(it != m_stateGenerators.begin())
+        if(!firstGenerator)
             os << ", " << std::endl;
 
-        it->printBranchesTableTo(os);
+        generator.printBranchesTableTo(os);
+        firstGenerator = false;
     }
     os << std::endl;
     m_options.indent--;

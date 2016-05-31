@@ -9,8 +9,8 @@
 #include <string>
 #include <list>
 
-#include "LexerBNF.h"
-#include "Token.h"
+#include "bnf2c-parser/LexerBNF.h"
+#include "bnf2c-parser/Token.h"
 
 // Command line parsing error
 struct CommandLineParsingError

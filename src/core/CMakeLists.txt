@@ -4,11 +4,15 @@
 # This file is distributed under the 4-clause Berkeley Software Distribution
 # License. See LICENSE for details.
 ################################################################################
+find_package(RE2C REQUIRED)
 
 set(SOURCES
-	Options.cpp
-	Errors.cpp
-	main.cpp
+	Dictionary.cpp
+	Symbol.cpp
+	Rule.cpp
+	Grammar.cpp
+	ParserState.cpp
+	ParseTable.cpp
 )
 
 add_compile_options(
@@ -16,12 +20,5 @@ add_compile_options(
     -Werror
 )
 
-add_executable(bnf2c ${SOURCES})
+add_library(bnf2c-core STATIC ${SOURCES})
 
-target_link_libraries(bnf2c
-    bnf2c-parser
-    bnf2c-generator
-    bnf2c-core
-)
-
-install(TARGETS bnf2c DESTINATION bin)

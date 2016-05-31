@@ -5,10 +5,10 @@
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
 #include "Options.h"
-#include "LexerBNF.h"
-#include "ParserBNF.h"
-#include "Grammar.h"
-#include "ParseTable.h"
+#include "bnf2c-parser/LexerBNF.h"
+#include "bnf2c-parser/ParserBNF.h"
+#include "core/Grammar.h"
+#include "core/ParseTable.h"
 #include "generator/ParserGenerator.h"
 
 #include <string>

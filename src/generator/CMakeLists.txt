@@ -6,9 +6,10 @@
 ################################################################################
 
 set(SOURCES
-	Options.cpp
-	Errors.cpp
-	main.cpp
+    ParserGenerator.cpp
+    StateGenerator.cpp
+    SwitchGenerator.cpp
+    FunctionGenerator.cpp
 )
 
 add_compile_options(
@@ -16,12 +17,5 @@ add_compile_options(
     -Werror
 )
 
-add_executable(bnf2c ${SOURCES})
+add_library(bnf2c-generator STATIC ${SOURCES})
 
-target_link_libraries(bnf2c
-    bnf2c-parser
-    bnf2c-generator
-    bnf2c-core
-)
-
-install(TARGETS bnf2c DESTINATION bin)

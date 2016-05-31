@@ -6,8 +6,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _PARSER_GENERATOR_H_
 #define _PARSER_GENERATOR_H_
-#include "ParseTable.h"
-#include "Grammar.h"
+#include "core/ParseTable.h"
+#include "core/Grammar.h"
 #include "Options.h"
 #include "generator/StateGenerator.h"
 #include "generator/SwitchGenerator.h"
