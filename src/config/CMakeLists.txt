@@ -6,11 +6,10 @@
 ################################################################################
 
 set(SOURCES
-    ParserGenerator.cpp
-    StateGenerator.cpp
-    SwitchGenerator.cpp
-    FunctionGenerator.cpp
+    ParameterizedString.cpp
+    Options.cpp
 )
 
-add_library(bnf2c-generator STATIC ${SOURCES})
+add_library(bnf2c-config STATIC ${SOURCES})
+
 

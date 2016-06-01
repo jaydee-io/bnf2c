@@ -23,22 +23,22 @@ ParserBNF::ParserBNF(LexerBNF & lexer, Grammar & grammar)
     // Parser options
     m_stringParams["parser:state-type"]            = &m_options.stateType;
     m_stringParams["parser:top-state"]             = &m_options.topState;
-    m_stringParams["parser:pop-state"]             = &m_options.popState;
+    m_parameterizedStringParams["parser:pop-state"] = &m_options.popState;
     m_stringParams["parser:error-state"]           = &m_options.errorState;
     m_stringParams["parser:accept-state"]          = &m_options.acceptState;
 
     m_stringParams["parser:value-type"]            = &m_options.valueType;
-    m_stringParams["parser:push-value"]            = &m_options.pushValue;
-    m_stringParams["parser:pop-values"]            = &m_options.popValues;
-    m_stringParams["parser:get-value"]             = &m_options.getValue;
-    m_stringParams["parser:value-as-token"]        = &m_options.valueAsToken;
-    m_stringParams["parser:value-as-intermediate"] = &m_options.valueAsIntermediate;
+    m_parameterizedStringParams["parser:push-value"] = &m_options.pushValue;
+    m_parameterizedStringParams["parser:pop-values"] = &m_options.popValues;
+    m_parameterizedStringParams["parser:get-value"] = &m_options.getValue;
+    m_parameterizedStringParams["parser:value-as-token"] = &m_options.valueAsToken;
+    m_parameterizedStringParams["parser:value-as-intermediate"] = &m_options.valueAsIntermediate;
 
     // Lexer options
     m_stringParams["lexer:token-type"]          = &m_options.tokenType;
     m_stringParams["lexer:shift-token"]         = &m_options.shiftToken;
     m_stringParams["lexer:token-prefix"]        = &m_options.tokenPrefix;
-    m_stringParams["lexer:get-type-of-token"]   = &m_options.getTypeOfToken;
+    m_parameterizedStringParams["lexer:get-type-of-token"] = &m_options.getTypeOfToken;
     m_stringParams["lexer:end-of-input-token"]  = &m_options.endOfInputToken;
 
     // Generated code options
@@ -216,15 +216,24 @@ void ParserBNF::parseParameter(void)
 
     std::stringstream ss(m_token.valueToParameterValue());
 
+    // Lookup in parameterized string map
+    ParameterizedStringParamMap::iterator itParameterizedString = m_parameterizedStringParams.find(paramName);
+    if(itParameterizedString != m_parameterizedStringParams.end())
+    {
+        (*itParameterizedString->second) = ss.str();
+
+        // Check "popState" special parameter
+        if(m_options.popState.toString().find(Vars::NB_STATES) == std::string::npos)
+            ADD_PARSING_ERROR("Parameter \"" << paramName << "\" must contains the keyword " << Vars::NB_STATES << " to be replaced by the number of states to be poped");
+
+        return;
+    }
+
     // Lookup in string map
     StringParamMap::iterator itString = m_stringParams.find(paramName);
     if(itString != m_stringParams.end())
     {
         (*itString->second) = ss.str();
-
-        // Check "popState" special parameter
-        if(m_options.popState.find(Options::VAR_NB_STATES) == std::string::npos)
-            ADD_PARSING_ERROR("Parameter \"" << paramName << "\" must contains the keyword " << Options::VAR_NB_STATES << " to be replaced by the number of states to be poped");
 
         return;
     }

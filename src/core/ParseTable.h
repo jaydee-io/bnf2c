@@ -8,7 +8,7 @@
 #define _PARSINGTABLE_H_
 #include "Grammar.h"
 #include "ParserState.h"
-#include "Options.h"
+#include "config/Options.h"
 #include "Errors.h"
 
 #include <list>

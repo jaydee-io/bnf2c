@@ -15,10 +15,5 @@ set(SOURCES
     ParseTable.cpp
 )
 
-add_compile_options(
-    -std=c++14
-    -Werror
-)
-
 add_library(bnf2c-core STATIC ${SOURCES})
 

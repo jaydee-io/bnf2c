@@ -83,31 +83,35 @@ void Grammar::replacePseudoVariables(Options & options)
         Rule & rule = pair.second;
         if(!rule.action.empty())
         {
-            std::string replacement;
-
             // Replace return pseudo-variable '$$'
-            replacement = checkedStringReplace(options.valueAsIntermediate, Options::VAR_VALUE, Options::VAR_RETURN);
-            replacement = checkedStringReplace(replacement, Options::VAR_TYPE, intermediateTypes.at(rule.name));
-            rule.action = checkedStringReplace(rule.action, Options::VAR_EXTERNAL_RETURN, replacement);
+            ParameterizedString replacement = options.valueAsIntermediate
+                .replaceParam(Vars::VALUE, Vars::RETURN)
+                .replaceParam(Vars::TYPE, intermediateTypes.at(rule.name));
+            ParameterizedString parameterizedAction = ParameterizedString(rule.action)
+                .replaceParam(Vars::EXTERNAL_RETURN, replacement.toString());
 
             // Replace pseudo-variables '$1', '$2', ... '$n'
             for(int i = 1; i <= rule.symbols.size(); i++)
             {
                 if(rule.symbols[i-1].type == Symbol::Type::INTERMEDIATE)
                 {
-                    replacement = checkedStringReplace(options.valueAsIntermediate, Options::VAR_VALUE, options.getValue);
-                    replacement = checkedStringReplace(replacement, Options::VAR_TYPE, intermediateTypes.at(rule.symbols[i-1].name));
+                    replacement = options.valueAsIntermediate
+                        .replaceParam(Vars::VALUE, options.getValue.toString())
+                        .replaceParam(Vars::TYPE, intermediateTypes.at(rule.symbols[i-1].name))
+                        .replaceParam(Vars::VALUE_IDX, std::to_string(rule.symbols.size() - i));
                 }
                 else
                 {
-                    replacement = checkedStringReplace(options.valueAsToken, Options::VAR_VALUE, options.getValue);
-                    replacement = checkedStringReplace(replacement, Options::VAR_TYPE, options.tokenType);
+                    replacement = options.valueAsToken
+                        .replaceParam(Vars::VALUE, options.getValue.toString())
+                        .replaceParam(Vars::TYPE,  options.tokenType)
+                        .replaceParam(Vars::VALUE_IDX, std::to_string(rule.symbols.size() - i));
                 }
 
-                replacement = checkedStringReplace(replacement, Options::VAR_VALUE_IDX, std::to_string(rule.symbols.size() - i));
-
-                rule.action = checkedStringReplace(rule.action, '$' + std::to_string(i), replacement);
+                parameterizedAction = parameterizedAction.replaceParam('$' + std::to_string(i), replacement.toString());
             }
+
+            rule.action = parameterizedAction.toString();
         }
     }
 }
@@ -132,23 +136,6 @@ void Grammar::check(void)
     for(Dictionary::const_iterator intermediate = intermediates.begin(); intermediate != intermediates.end(); ++intermediate)
         if(intermediateTypes.find(*intermediate) == intermediateTypes.end())
             ADD_GENERATING_ERROR("Intermediate '" + (*intermediate) + "' has no type");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-std::string Grammar::checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const
-{
-    // Check that replacement string doesn't contains the pattern to avoid infinite loop
-    if(replacement.find(pattern) != std::string::npos)
-        return str;
-
-    // Replace each occurrence
-    std::string replacedStr(str);
-    std::size_t pos = 0;
-
-    while((pos = replacedStr.find(pattern, pos)) != std::string::npos)
-        replacedStr.replace(pos, pattern.size(), replacement);
-
-    return replacedStr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -17,12 +17,20 @@ list(APPEND CMAKE_MODULE_PATH "${BNF2C_CMAKE_PATH}")
 
 include_directories(${BNF2C_INCLUDE_PATH})
 
-add_subdirectory(src/bnf2c-parser)
-add_subdirectory(src/core)
-add_subdirectory(src/generator)
-add_subdirectory(src)
-
 # Tests
 enable_testing() # Need to be in top level CMakeLists.txt
 add_subdirectory(utils/unittest/googletest)
 add_subdirectory(test)
+
+# Global compil flags
+add_compile_options(
+    -std=c++14
+    -Werror
+)
+
+# All bnf2c modules
+add_subdirectory(src/bnf2c-parser)
+add_subdirectory(src/core)
+add_subdirectory(src/config)
+add_subdirectory(src/generator)
+add_subdirectory(src)

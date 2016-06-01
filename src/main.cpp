@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#include "Options.h"
 #include "Streams.h"
+#include "config/Options.h"
 #include "bnf2c-parser/LexerBNF.h"
 #include "bnf2c-parser/ParserBNF.h"
 #include "core/Grammar.h"

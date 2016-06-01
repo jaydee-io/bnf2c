@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _FUNCTION_GENERATOR_H_
 #define _FUNCTION_GENERATOR_H_
-#include "Options.h"
+#include "config/Options.h"
 #include <ostream>
 
 class FunctionGenerator

@@ -7,7 +7,8 @@
 #ifndef _PARSERBNF_H_
 #define _PARSERBNF_H_
 #include "LexerBNF.h"
-#include "Options.h"
+#include "config/ParameterizedString.h"
+#include "config/Options.h"
 #include "core/Grammar.h"
 #include "core/Rule.h"
 #include "Errors.h"
@@ -20,6 +21,7 @@
 class ParserBNF
 {
     protected :
+        typedef std::unordered_map<std::string, ParameterizedString *>  ParameterizedStringParamMap;
         typedef std::unordered_map<std::string, std::string *>  StringParamMap;
         typedef std::unordered_map<std::string, bool *>         BoolParamMap;
         typedef std::unordered_map<std::string, unsigned int *> UintParamMap;
@@ -45,6 +47,7 @@ class ParserBNF
         LexerBNF &      m_lexer;
         Token           m_token;
 
+        ParameterizedStringParamMap  m_parameterizedStringParams;
         StringParamMap  m_stringParams;
         BoolParamMap    m_boolParams;
         UintParamMap    m_uintParams;

@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _SWITCH_GENERATOR_H_
 #define _SWITCH_GENERATOR_H_
-#include "Options.h"
+#include "config/Options.h"
 #include <ostream>
 
 class SwitchGenerator

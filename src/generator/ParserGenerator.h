@@ -8,7 +8,7 @@
 #define _PARSER_GENERATOR_H_
 #include "core/ParseTable.h"
 #include "core/Grammar.h"
-#include "Options.h"
+#include "config/Options.h"
 #include "generator/StateGenerator.h"
 #include "generator/SwitchGenerator.h"
 #include "generator/FunctionGenerator.h"

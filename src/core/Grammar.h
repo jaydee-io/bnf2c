@@ -9,7 +9,7 @@
 #include "Rule.h"
 #include "Symbol.h"
 #include "Dictionary.h"
-#include "Options.h"
+#include "config/Options.h"
 #include "Errors.h"
 
 #include <unordered_map>
@@ -44,9 +44,6 @@ class Grammar
         void check(void);
 
         Errors<GeneratingError> errors;
-
-    private :
-        std::string checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const;
 
     public :
         RuleMap                     rules;

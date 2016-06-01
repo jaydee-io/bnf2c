@@ -8,7 +8,7 @@
 #define _STATE_GENERATOR_H_
 #include "core/ParserState.h"
 #include "core/Grammar.h"
-#include "Options.h"
+#include "config/Options.h"
 #include "generator/SwitchGenerator.h"
 
 #include <ostream>
@@ -26,8 +26,6 @@ class StateGenerator
         void printActionItemsTo (std::ostream & os) const;
         void printReduceActionTo(const Item & item, std::ostream & os) const;
         void printShiftActionTo (const Item & item, std::ostream & os) const;
-
-        std::string checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const;
 
     private :
         const ParserState m_state;

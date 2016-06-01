@@ -8,7 +8,7 @@
 #define _PARSERSTATE_H_
 #include "Rule.h"
 #include "Grammar.h"
-#include "Options.h"
+#include "config/Options.h"
 #include "Errors.h"
 
 #include <list>

@@ -65,15 +65,7 @@ std::ostream & operator <<(std::ostream & os, const Indenter & indenter)
     } while(false)
 
 ////////////////////////////////////////////////////////////////////////////////
-Options     Options::DEFAULT;
-const std::string Options::VAR_NB_STATES      ("<NB_STATES>");
-const std::string Options::VAR_VALUE          ("<VALUE>");
-const std::string Options::VAR_VALUE_IDX      ("<VALUE_IDX>");
-const std::string Options::VAR_NB_VALUES      ("<NB_VALUES>");
-const std::string Options::VAR_EXTERNAL_RETURN("$$");
-const std::string Options::VAR_RETURN         ("yylval");
-const std::string Options::VAR_TOKEN          ("<TOKEN>");
-const std::string Options::VAR_TYPE           ("<TYPE>");
+Options Options::DEFAULT;
 const std::string Options::VERSION            ("0.3");
 
 const struct option Options::OPTIONS [] = {
@@ -194,21 +186,21 @@ void Options::parseArguments(int argc, char ** argv)
         {
             case 's' : stateType.assign(optarg);           break;
             case 't' : topState.assign(optarg);            break;
-            case 'p' : popState.assign(optarg);            break;
+            case 'p' : popState = optarg;                  break;
             case 'e' : errorState.assign(optarg);          break;
             case 'a' : acceptState.assign(optarg);         break;
 
             case 'q' : valueType.assign(optarg);           break;
-            case 'g' : pushValue.assign(optarg);           break;
-            case 'j' : popValues.assign(optarg);           break;
-            case 'k' : getValue.assign(optarg);            break;
-            case 'm' : valueAsToken.assign(optarg);        break;
-            case 'z' : valueAsIntermediate.assign(optarg); break;
+            case 'g' : pushValue = optarg;                 break;
+            case 'j' : popValues = optarg;                 break;
+            case 'k' : getValue = optarg;                  break;
+            case 'm' : valueAsToken = optarg;              break;
+            case 'z' : valueAsIntermediate = optarg;       break;
 
             case 'y' : tokenType.assign(optarg);           break;
             case 'c' : shiftToken.assign(optarg);          break;
             case 'r' : tokenPrefix.assign(optarg);         break;
-            case 'l' : getTypeOfToken.assign(optarg);      break;
+            case 'l' : getTypeOfToken = optarg;            break;
             case 'f' : endOfInputToken.assign(optarg);     break;
 
             case 'i' : intermediateType.assign(optarg);    break;

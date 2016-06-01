@@ -12,7 +12,7 @@
 StateGenerator::StateGenerator(const ParserState & state, const Grammar & grammar, Options & options)
 : m_state(state), m_grammar(grammar), m_options(options),
     m_switchOnIntermediate(m_options.indent, m_options.intermediateName, m_options.defaultSwitchStatement ? "return " + m_options.errorState + ";" : ""), 
-    m_switchOnTerminal(m_options.indent, checkedStringReplace(m_options.getTypeOfToken, Options::VAR_TOKEN, m_options.tokenName), m_options.defaultSwitchStatement ? "return " + m_options.errorState + ";" : "")
+    m_switchOnTerminal(m_options.indent, m_options.getTypeOfToken.replaceParam(Vars::TOKEN, m_options.tokenName).toString(), m_options.defaultSwitchStatement ? "return " + m_options.errorState + ";" : "")
 {
 }
 
@@ -172,9 +172,10 @@ void StateGenerator::printReduceActionTo(const Item & item, std::ostream & os) c
     // No action specified by user, assume "$$ = $1"
     if(item.rule.action.empty())
     {
-        std::string replacement = checkedStringReplace(m_options.getValue, Options::VAR_VALUE_IDX, std::to_string(item.rule.symbols.size() - 1));
-        replacement = checkedStringReplace(replacement, Options::VAR_TYPE, m_grammar.getIntermediateType(item.rule.name));
-        os << m_options.indent  << Options::VAR_RETURN << " = " << replacement << ';' << std::endl;
+        ParameterizedString replacement = m_options.getValue
+            .replaceParam(Vars::VALUE_IDX, std::to_string(item.rule.symbols.size() - 1))
+            .replaceParam(Vars::TYPE,      m_grammar.getIntermediateType(item.rule.name));
+        os << m_options.indent  << Vars::RETURN << " = " << replacement << ';' << std::endl;
     }
     // Rule action code
     else
@@ -186,11 +187,11 @@ void StateGenerator::printReduceActionTo(const Item & item, std::ostream & os) c
     }
 
     // Values stack
-    os << m_options.indent << checkedStringReplace(m_options.popValues, Options::VAR_NB_VALUES, std::to_string(item.rule.symbols.size()))  << std::endl;
-    os << m_options.indent << checkedStringReplace(m_options.pushValue, Options::VAR_VALUE,     Options::VAR_RETURN)                       << std::endl;
+    os << m_options.indent << m_options.popValues.replaceParam(Vars::NB_VALUES, std::to_string(item.rule.symbols.size()))  << std::endl;
+    os << m_options.indent << m_options.pushValue.replaceParam(Vars::VALUE,     Vars::RETURN)                       << std::endl;
 
     // States stack
-    os << m_options.indent << checkedStringReplace(m_options.popState, Options::VAR_NB_STATES, std::to_string(item.rule.symbols.size())) << std::endl;
+    os << m_options.indent << m_options.popState.replaceParam(Vars::NB_STATES, std::to_string(item.rule.symbols.size())) << std::endl;
 
     // New state
     if(m_options.useTableForBranches)
@@ -206,34 +207,19 @@ void StateGenerator::printReduceActionTo(const Item & item, std::ostream & os) c
 void StateGenerator::printShiftActionTo(const Item & item, std::ostream & os) const
 {
     // Returned value
-    std::string replacement = checkedStringReplace(m_options.valueAsToken, Options::VAR_VALUE, Options::VAR_RETURN);
-    replacement = checkedStringReplace(replacement, Options::VAR_TYPE, m_options.tokenType);
+    ParameterizedString replacement = m_options.valueAsToken
+        .replaceParam(Vars::VALUE, Vars::RETURN)
+        .replaceParam(Vars::TYPE,  m_options.tokenType);
     os << replacement << " = " << m_options.tokenName << ';';
 
     // Shift
     os << ' ' << m_options.shiftToken;
 
     // Push returned value
-    os << ' ' << checkedStringReplace(m_options.pushValue, Options::VAR_VALUE, Options::VAR_RETURN);
+    os << ' ' << m_options.pushValue.replaceParam(Vars::VALUE, Vars::RETURN);
     if(item.nextState != nullptr)
         os << " return " << item.nextState->numState << ';' << std::endl;
     else
         os << " return " << m_options.errorState << ';' << std::endl;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-std::string StateGenerator::checkedStringReplace(const std::string & str, const std::string & pattern, const std::string & replacement) const
-{
-    // Check that replacement string doesn't contains the pattern to avoid infinite loop
-    if(replacement.find(pattern) != std::string::npos)
-        return str;
-
-    // Replace each occurrence
-    std::string replacedStr(str);
-    std::size_t pos = 0;
-
-    while((pos = replacedStr.find(pattern, pos)) != std::string::npos)
-        replacedStr.replace(pos, pattern.size(), replacement);
-
-    return replacedStr;
-}
