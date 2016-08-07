@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <regex>
+#include <sstream>
 
 
 #define ADD_GENERATING_ERROR(message)\
