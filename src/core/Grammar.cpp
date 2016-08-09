@@ -45,28 +45,28 @@ Grammar::RuleRange Grammar::operator[](const std::string & name) const
 ////////////////////////////////////////////////////////////////////////////////
 Symbol Grammar::addTerminal(const std::string & name)
 {
-    terminals.add(name);
+    terminals.insert(name);
     return Symbol({Symbol::Type::TERMINAL, name});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Symbol Grammar::addTerminal(std::string && name)
 {
-    terminals.add(name);
+    terminals.insert(name);
     return Symbol({Symbol::Type::TERMINAL, name});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Symbol Grammar::addIntermediate(const std::string & name)
 {
-    intermediates.add(name);
+    intermediates.insert(name);
     return Symbol({Symbol::Type::INTERMEDIATE, name});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Symbol Grammar::addIntermediate(std::string && name)
 {
-    intermediates.add(name);
+    intermediates.insert(name);
     return Symbol({Symbol::Type::INTERMEDIATE, name});
 }
 
@@ -74,6 +74,12 @@ Symbol Grammar::addIntermediate(std::string && name)
 const std::string & Grammar::getIntermediateType(const std::string & name) const
 {
     return intermediateTypes.at(name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+size_t Grammar::getIntermediateIndex(const std::string & name) const
+{
+    return std::distance(intermediates.begin(), std::find(intermediates.begin(), intermediates.end(), name));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +127,7 @@ void Grammar::replacePseudoVariables(Options & options)
 void Grammar::check(void)
 {
     // Check start rule
-    if(intermediates.contains(Grammar::START_RULE))
+    if(std::find(intermediates.begin(), intermediates.end(), Grammar::START_RULE) != intermediates.end())
     {
         Grammar::RuleMap::size_type nbStartsRules = rules.count(Grammar::START_RULE);
 

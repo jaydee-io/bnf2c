@@ -37,7 +37,7 @@ void StateGenerator::printBranchesSwitchTo(std::ostream & os) const
 
         if((item.dot < item.rule.symbols.size()) && (item.rule.symbols[item.dot].type == Symbol::Type::INTERMEDIATE))
         {
-            os << m_options.indent << "case " << m_grammar.intermediates.index(item.rule.symbols[item.dot].name) << " : ";
+            os << m_options.indent << "case " << m_grammar.getIntermediateIndex(item.rule.symbols[item.dot].name) << " : ";
             if(item.nextState != nullptr)
                 os << "return " << item.nextState->numState << ";" << std::endl;
             else
@@ -68,14 +68,14 @@ void StateGenerator::printBranchesSwitchTo(std::ostream & os) const
 void StateGenerator::printBranchesTableTo(std::ostream & os) const
 {
     os << m_options.indent;
-    for(Dictionary::const_iterator itIntermediate = m_grammar.intermediates.begin(); itIntermediate != m_grammar.intermediates.end(); ++itIntermediate)
+    for(const auto & intermediate : m_grammar.intermediates)
     {
-        if(itIntermediate != m_grammar.intermediates.begin())
+        if(intermediate != *m_grammar.intermediates.begin())
             os << ", ";
 
         ParserState::ItemList::const_iterator itItem;
         for(itItem = m_state.items.begin(); itItem != m_state.items.end(); ++itItem)
-            if((itItem->dot < itItem->rule.symbols.size()) && (itItem->rule.symbols[itItem->dot].name == *itIntermediate))
+            if((itItem->dot < itItem->rule.symbols.size()) && (itItem->rule.symbols[itItem->dot].name == intermediate))
                 break;
 
         if(itItem != m_state.items.end() && (itItem->nextState != nullptr))
@@ -195,9 +195,9 @@ void StateGenerator::printReduceActionTo(const Item & item, std::ostream & os) c
 
     // New state
     if(m_options.useTableForBranches)
-        os << m_options.indent << "return " << m_options.branchFunctionName << "[(" << m_grammar.intermediates.size() << "*" << m_options.topState << ") + " << m_grammar.intermediates.index(item.rule.name) << "];" << std::endl;
+        os << m_options.indent << "return " << m_options.branchFunctionName << "[(" << m_grammar.intermediates.size() << "*" << m_options.topState << ") + " << m_grammar.getIntermediateIndex(item.rule.name) << "];" << std::endl;
     else
-        os << m_options.indent << "return " << m_options.branchFunctionName << "(" << m_grammar.intermediates.index(item.rule.name) << ");" << std::endl;
+        os << m_options.indent << "return " << m_options.branchFunctionName << "(" << m_grammar.getIntermediateIndex(item.rule.name) << ");" << std::endl;
 
     m_options.indent--;
     os << m_options.indent << '}' << std::endl;

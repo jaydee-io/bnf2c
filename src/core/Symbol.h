@@ -6,8 +6,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _SYMBOL_H_
 #define _SYMBOL_H_
-#include "Dictionary.h"
-
 #include <vector>
 #include <iostream>
 #include <string>

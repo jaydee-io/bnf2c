@@ -7,7 +7,6 @@
 #ifndef _RULE_H_
 #define _RULE_H_
 #include "Symbol.h"
-#include "Dictionary.h"
 
 #include <ostream>
 #include <string>

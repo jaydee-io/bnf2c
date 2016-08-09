@@ -7,7 +7,6 @@
 find_package(RE2C REQUIRED)
 
 set(SOURCES
-    Dictionary.cpp
     Symbol.cpp
     Rule.cpp
     Grammar.cpp
