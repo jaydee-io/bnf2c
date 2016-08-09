@@ -9,6 +9,7 @@ find_package(RE2C REQUIRED)
 set(SOURCES
     Symbol.cpp
     Rule.cpp
+    Item.cpp
     Grammar.cpp
     ParserState.cpp
     ParseTable.cpp

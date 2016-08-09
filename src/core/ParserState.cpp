@@ -5,6 +5,8 @@
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
 #include "ParserState.h"
+#include "Grammar.h"
+#include "Rule.h"
 
 #include <map>
 #include <unordered_set>
@@ -13,39 +15,9 @@
 #include <iomanip>
 
 ////////////////////////////////////////////////////////////////////////////////
-bool Item::operator ==(const Item & item) const
-{
-    if(&item == this)
-        return true;
-
-    return (dot == item.dot) && (rule == item.rule);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-bool Item::operator <(const Item & item) const
-{
-    if(&item == this)
-        return false;
-
-    if(rule.numRule != item.rule.numRule)
-        return (rule.numRule < item.rule.numRule);
-    else
-        return (dot < item.dot);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-Item::ActionType Item::getType(void) const
-{
-    if(dot >= rule.symbols.size())
-        return ActionType::REDUCE;
-    else
-        return ActionType::SHIFT;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 void ParserState::addRule(const Rule & rule, const SymbolIterator dot)
 {
-    items.push_back(Item({rule, dot, nullptr}));
+    items.emplace_back(rule, dot, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,41 +29,36 @@ bool ParserState::contains(const Item & item) const
 ////////////////////////////////////////////////////////////////////////////////
 void ParserState::close(const Grammar & grammar)
 {
-    if(!m_isClosed)
+    std::unordered_set<std::string>  symbolsAlreadyClosed;
+
+    for(auto & item : items)
     {
-        std::unordered_set<std::string>  symbolsAlreadyClosed;
-
-        for(ItemList::iterator it = items.begin(); it != items.end(); ++it)
+        // Check for a reduce or an accept rule
+        if(item.getType() == Item::ActionType::REDUCE)
         {
-            // Check for a reduce or an accept rule
-            if(it->getType() == Item::ActionType::REDUCE)
-            {
-                if(it->rule.numRule > 1)
-                    m_reduceRule = &(*it);
-                else
-                    m_isAnAcceptRule = true;
-            }
+            if(item.rule.numRule > 1)
+                m_reduceRule = &item;
+            else
+                m_isAnAcceptRule = true;
+        }
 
-            // Close the item set
-            if(it->dot < it->rule.symbols.size())
-            {
-                const Symbol & symbol = it->rule.symbols[it->dot];
+        // Close the item set
+        if(item.dot < item.rule.symbols.size())
+        {
+            const Symbol & symbol = item.rule.symbols[item.dot];
 
-                if(symbol.type == Symbol::Type::INTERMEDIATE)
+            if(symbol.type == Symbol::Type::INTERMEDIATE)
+            {
+                if(symbolsAlreadyClosed.find(symbol.name) == symbolsAlreadyClosed.end())
                 {
-                    if(symbolsAlreadyClosed.find(symbol.name) == symbolsAlreadyClosed.end())
-                    {
-                        symbolsAlreadyClosed.insert(symbol.name);
+                    symbolsAlreadyClosed.insert(symbol.name);
 
-                        Grammar::RuleRange range = grammar[symbol.name];
-                        for(Grammar::RuleIterator ruleIt = range.first; ruleIt != range.second; ++ruleIt)
-                            addRule(ruleIt->second);
-                    }
+                    Grammar::RuleRange range = grammar[symbol.name];
+                    for(Grammar::RuleIterator ruleIt = range.first; ruleIt != range.second; ++ruleIt)
+                        addRule(ruleIt->second);
                 }
             }
         }
-
-        m_isClosed = true;
     }
 }
 
@@ -221,30 +188,6 @@ bool ParserState::operator ==(const ParserState & set) const
     return items == set.items;
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-std::ostream & operator <<(std::ostream & os, const Item & item)
-{
-    if(item.getType() == Item::ActionType::REDUCE)
-        os << "[R" << item.rule.numRule << "] ";
-    else if(item.getType() == Item::ActionType::SHIFT)
-        os << "[S" << (item.nextState != nullptr ? item.nextState->numState : -1) << "] ";
-
-    os << "<" << item.rule.name << "> ::=";
-
-    for(SymbolIterator it = 0; it < item.rule.symbols.size(); ++it)
-    {
-        if(it == item.dot)
-            os << " •" << item.rule.symbols[it];
-        else
-            os << " " << item.rule.symbols[it];
-    }
-
-    if(item.dot == item.rule.symbols.size())
-        os << " •";
-
-    return os;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator <<(std::ostream & os, const ParserState & itemSet)

@@ -6,34 +6,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _PARSERSTATE_H_
 #define _PARSERSTATE_H_
-#include "Rule.h"
-#include "Grammar.h"
+#include "Item.h"
 #include "config/Options.h"
 #include "Errors.h"
 
 #include <list>
 #include <ostream>
-#include <string>
 
-class ParserState;
-
-struct Item
-{
-    enum class ActionType
-    {
-        SHIFT,
-        REDUCE
-    };
-
-    const Rule &        rule;
-    SymbolIterator      dot;
-    const ParserState * nextState;
-
-    bool operator ==(const Item & item) const;
-    bool operator < (const Item & item) const;
-
-    Item::ActionType getType(void) const;
-};
+class Rule;
+class Grammar;
 
 class ParserState
 {
@@ -60,7 +41,6 @@ class ParserState
         int      numState;
 
     protected :
-        bool    m_isClosed = false;
         Item *  m_reduceRule = nullptr;
         bool    m_isAnAcceptRule = false;
 };
