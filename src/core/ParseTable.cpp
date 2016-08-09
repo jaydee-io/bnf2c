@@ -25,51 +25,53 @@ ParseTable::ParseTable(const Grammar & grammar, Options & options)
 ////////////////////////////////////////////////////////////////////////////////
 void ParseTable::generateStates(void)
 {
-    ParserState startSet;
-    startSet.numState = 0;
-    startSet.addRule(m_grammar.getStartRule());
-    startSet.close(m_grammar);
-    m_states.push_back(startSet);
+    ParserState startState;
+    startState.addRule(m_grammar.getStartRule());
 
-    for(States::iterator it = m_states.begin(); it != m_states.end(); ++it)
+    addNewState(std::forward<ParserState>(startState));
+
+    for(auto & state : m_states)
     {
-        ParserState & state = *it;
-        std::unordered_map<std::string, ParserState> newStates;
+        auto allSuccessors = createSuccessorStates(state);
 
-        for(Item & item : state.items)
+        for(auto & successorPair : allSuccessors)
         {
-            if(item.dot < item.rule.symbols.size())
-            {
-                ParserState & newState = newStates[item.rule.symbols[item.dot].name];
-                newState.addRule(item.rule, item.dot + 1);
-                item.nextState = &newState;
-            }
-        }
-
-        for(std::pair<const std::string, ParserState> & newStatePair : newStates)
-        {
-            ParserState & newState = newStatePair.second;
-
-            newState.numState = m_states.size();
-            newState.close(m_grammar);
-
-            States::iterator it = std::find(m_states.begin(), m_states.end(), newState);
-            if(it == m_states.end())
-            {
-                m_states.push_back(std::move(newState));
-
-                for(Item & item : state.items)
-                    if(item.nextState == &newState)
-                        item.nextState = &m_states.back();
-            }
-            else
-            {
-                for(Item & item : state.items)
-                    if(item.nextState == &newState)
-                        item.nextState = &(*it);
-            }
+            auto & successor = addNewState(std::move(successorPair.second));
+            state.assignSuccessors(successorPair.first, successor);
         }
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+ParserState & ParseTable::addNewState(ParserState && state)
+{
+    state.numState = m_states.size();
+    state.close(m_grammar);
+
+    return addOrMergeState(std::forward<ParserState>(state));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+std::unordered_map<std::string, ParserState> ParseTable::createSuccessorStates(const ParserState & state)
+{
+    std::unordered_map<std::string, ParserState> allSuccessors;
+
+    // Create a new state for each successing symbol of the current state
+    for(const auto & item : state.items)
+        if(item.dot < item.rule.symbols.size())
+            allSuccessors[item.getDottedSymbol().name].addRule(item.rule, item.dot + 1);
+
+    return allSuccessors;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+ParserState & ParseTable::addOrMergeState(ParserState && state)
+{
+    auto itState = std::find(m_states.begin(), m_states.end(), state);
+    if(itState == m_states.end())
+        return *m_states.insert(itState, std::forward<ParserState>(state));
+    else
+        return *itState;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

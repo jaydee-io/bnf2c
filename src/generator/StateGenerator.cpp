@@ -1,4 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
+//ol isIntermediate(void) const { return type == Type::INTERMED
 //                                    BNF2C
 //
 // This file is distributed under the 4-clause Berkeley Software Distribution
@@ -35,9 +36,9 @@ void StateGenerator::printBranchesSwitchTo(std::ostream & os) const
     {
         std::stringstream os;
 
-        if((item.dot < item.rule.symbols.size()) && (item.rule.symbols[item.dot].type == Symbol::Type::INTERMEDIATE))
+        if((item.dot < item.rule.symbols.size()) && item.getDottedSymbol().isIntermediate())
         {
-            os << m_options.indent << "case " << m_grammar.getIntermediateIndex(item.rule.symbols[item.dot].name) << " : ";
+            os << m_options.indent << "case " << m_grammar.getIntermediateIndex(item.getDottedSymbol().name) << " : ";
             if(item.nextState != nullptr)
                 os << "return " << item.nextState->numState << ";" << std::endl;
             else
@@ -75,7 +76,7 @@ void StateGenerator::printBranchesTableTo(std::ostream & os) const
 
         ParserState::ItemList::const_iterator itItem;
         for(itItem = m_state.items.begin(); itItem != m_state.items.end(); ++itItem)
-            if((itItem->dot < itItem->rule.symbols.size()) && (itItem->rule.symbols[itItem->dot].name == intermediate))
+            if((itItem->dot < itItem->rule.symbols.size()) && (itItem->getDottedSymbol().name == intermediate))
                 break;
 
         if(itItem != m_state.items.end() && (itItem->nextState != nullptr))
@@ -89,7 +90,8 @@ void StateGenerator::printBranchesTableTo(std::ostream & os) const
 void StateGenerator::printActionItemsTo(std::ostream & os) const
 {
     // If the first action is a reduce (not the accept one) whatever the terminal, don't generate a switch
-    if((m_state.items.size() >= 1) && (m_state.items.begin()->getType() == Item::ActionType::REDUCE) && !m_state.isAnAcceptRule())
+    auto & firstItem = m_state.items.front();
+    if(m_state.items.size() >= 1 && firstItem.isReduce() && firstItem.rule.numRule > 1)
     {
         printReduceActionTo(*m_state.items.begin(), os);
         return;
@@ -104,7 +106,7 @@ void StateGenerator::printActionItemsTo(std::ostream & os) const
         // Shift rule
         for(it = m_state.items.begin(); it != m_state.items.end(); ++it)
         {
-            if((it->getType() == Item::ActionType::SHIFT) && (it->rule.symbols[it->dot].name == terminal))
+            if(it->isShift() && (it->getDottedSymbol().name == terminal))
             {
                 cases[*it].insert(terminal);
                 break;
@@ -112,13 +114,13 @@ void StateGenerator::printActionItemsTo(std::ostream & os) const
         }
 
         // Reduce
-        if(it == m_state.items.end() && m_state.getReduceRule())
-            cases[*m_state.getReduceRule()].insert(terminal);
+        if(it == m_state.items.end() && firstItem.isReduce() && firstItem.rule.numRule > 1)
+            cases[firstItem].insert(terminal);
     }
 
     // If there is a reduce rule (not the accept one), reduce also when current token is the end of input
-    if(!m_state.isAnAcceptRule() && m_state.getReduceRule())
-        cases[*m_state.getReduceRule()].insert(m_options.endOfInputToken);
+    if(firstItem.isReduce() && firstItem.rule.numRule > 1)
+        cases[firstItem].insert(m_options.endOfInputToken);
 
     // Switch on terminal
     m_switchOnTerminal.printBeginTo(os);
@@ -135,7 +137,7 @@ void StateGenerator::printActionItemsTo(std::ostream & os) const
         }
 
         // Shift action
-        if((casesOfItem.first.getType() == Item::ActionType::SHIFT) && (casesOfItem.first.rule.symbols[casesOfItem.first.dot].type == Symbol::Type::TERMINAL))
+        if(casesOfItem.first.isShift() && casesOfItem.first.getDottedSymbol().isTerminal())
         {
             if(casesOfItem.second.size() == 1)
                 printShiftActionTo(casesOfItem.first, os);
@@ -148,7 +150,7 @@ void StateGenerator::printActionItemsTo(std::ostream & os) const
             }
         }
         // Reduce action
-        else if(casesOfItem.first.getType() == Item::ActionType::REDUCE)
+        else if(casesOfItem.first.isReduce())
         {
             os << std::endl;
             printReduceActionTo(casesOfItem.first, os);
@@ -156,7 +158,7 @@ void StateGenerator::printActionItemsTo(std::ostream & os) const
     }
 
     // Accept rule
-    if(m_state.isAnAcceptRule())
+    if(firstItem.isReduce() && firstItem.rule.numRule == 1)
         os << m_options.indent << "case " << m_options.tokenPrefix << m_options.endOfInputToken << " : return " << m_options.acceptState << ";" << std::endl;
 
     m_switchOnTerminal.printEndTo(os);

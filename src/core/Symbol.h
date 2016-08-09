@@ -21,6 +21,9 @@ struct Symbol
     Type        type;
     std::string name;
 
+    bool isTerminal(void)     const { return type == Type::TERMINAL; }
+    bool isIntermediate(void) const { return type == Type::INTERMEDIATE; }
+
     bool operator ==(const Symbol & symbol) const;
 };
 

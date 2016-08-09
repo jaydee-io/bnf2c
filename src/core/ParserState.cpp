@@ -5,11 +5,8 @@
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
 #include "ParserState.h"
-#include "Grammar.h"
 #include "Rule.h"
 
-#include <map>
-#include <unordered_set>
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
@@ -29,37 +26,36 @@ bool ParserState::contains(const Item & item) const
 ////////////////////////////////////////////////////////////////////////////////
 void ParserState::close(const Grammar & grammar)
 {
-    std::unordered_set<std::string>  symbolsAlreadyClosed;
-
     for(auto & item : items)
     {
-        // Check for a reduce or an accept rule
-        if(item.getType() == Item::ActionType::REDUCE)
-        {
-            if(item.rule.numRule > 1)
-                m_reduceRule = &item;
-            else
-                m_isAnAcceptRule = true;
-        }
+        if(item.dot == item.rule.symbols.size())
+            continue;
 
-        // Close the item set
-        if(item.dot < item.rule.symbols.size())
-        {
-            const Symbol & symbol = item.rule.symbols[item.dot];
+        const Symbol & symbol = item.getDottedSymbol();
 
-            if(symbol.type == Symbol::Type::INTERMEDIATE)
-            {
-                if(symbolsAlreadyClosed.find(symbol.name) == symbolsAlreadyClosed.end())
-                {
-                    symbolsAlreadyClosed.insert(symbol.name);
-
-                    Grammar::RuleRange range = grammar[symbol.name];
-                    for(Grammar::RuleIterator ruleIt = range.first; ruleIt != range.second; ++ruleIt)
-                        addRule(ruleIt->second);
-                }
-            }
-        }
+        if(symbolNeedsToBeClosed(symbol))
+            addRules(grammar[symbol.name]);
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+bool ParserState::symbolNeedsToBeClosed(const Symbol & symbol)
+{
+    if(symbol.isIntermediate() && symbolsAlreadyClosed.find(symbol.name) == symbolsAlreadyClosed.end())
+    {
+        symbolsAlreadyClosed.insert(symbol.name);
+        return true;
+    }
+
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ParserState::assignSuccessors(const std::string & nextSymbol, const ParserState & nextState)
+{
+    for(auto & item : items)
+        if(item.isNextSymbolEqualTo(nextSymbol))
+            item.nextState = &nextState;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +72,7 @@ void ParserState::check(Errors<GeneratingError> & errors) const
     for(const Item & item : items)
     {
         // Check for a reduce or an accept rule
-        if(item.getType() == Item::ActionType::REDUCE)
+        if(item.isReduce())
         {
             if(item.rule.numRule > 1)
             {
@@ -99,21 +95,9 @@ void ParserState::check(Errors<GeneratingError> & errors) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool ParserState::isAnAcceptRule(void) const
-{
-    return m_isAnAcceptRule;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-Item * ParserState::getReduceRule(void) const
-{
-    return m_reduceRule;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
 void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar, const Options & options) const
 {
+    auto & firstItem = items.front();
     for(const std::string & terminal : grammar.terminals)
     {
         ItemList::const_iterator it;
@@ -121,7 +105,7 @@ void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar, 
         // Shift rule
         for(it = items.begin(); it != items.end(); ++it)
         {
-            if((it->getType() == Item::ActionType::SHIFT) && (it->rule.symbols[it->dot].name == terminal))
+            if(it->isShift() && (it->rule.symbols[it->dot].name == terminal))
             {
                 os << 'S' << std::setw(terminal.length() - 1) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
                 break;
@@ -131,15 +115,15 @@ void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar, 
         // Reduce
         if(it == items.end())
         {
-            if(m_reduceRule)
-                os << 'R' << std::setw(terminal.length() - 1) << std::left << m_reduceRule->rule.numRule << '|';
+            if(firstItem.isReduce() && firstItem.rule.numRule > 1)
+                os << 'R' << std::setw(terminal.length() - 1) << std::left << firstItem.rule.numRule << '|';
             else
                 os << std::setw(terminal.length() + 1) << std::right << '|';
         }
     }
 
     // End of input special token
-    if(m_isAnAcceptRule)
+    if(firstItem.isReduce() && firstItem.rule.numRule == 1)
     {
         // Accept rule
         os << std::setw(options.endOfInputToken.length()) << std::left << "ACC" << '|';
@@ -147,8 +131,8 @@ void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar, 
     else
     {
         // Reduce
-        if(m_reduceRule)
-            os << 'R' << std::setw(options.endOfInputToken.length() - 1) << std::left << m_reduceRule->rule.numRule << '|';
+        if(firstItem.isReduce() && firstItem.rule.numRule > 1)
+            os << 'R' << std::setw(options.endOfInputToken.length() - 1) << std::left << firstItem.rule.numRule << '|';
         else
             os << std::setw(options.endOfInputToken.length() + 1) << std::right << '|';
     }
@@ -166,7 +150,7 @@ void ParserState::printDebugBranches(std::ostream & os, const Grammar & grammar,
             {
                 const Symbol & symbol = it->rule.symbols[it->dot];
 
-                if((it->getType() == Item::ActionType::SHIFT) && (symbol.type == Symbol::Type::INTERMEDIATE) && (symbol.name == intermediate))
+                if(it->isShift() && symbol.isIntermediate() && (symbol.name == intermediate))
                 {
                     os << std::setw(std::max(intermediate.length(), size)) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
                     break;
@@ -186,6 +170,13 @@ bool ParserState::operator ==(const ParserState & set) const
         return true;
 
     return items == set.items;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ParserState::addRules(const Grammar::RuleRange & ruleRange)
+{
+    for(Grammar::RuleIterator ruleIt = ruleRange.first; ruleIt != ruleRange.second; ++ruleIt)
+        addRule(ruleIt->second);
 }
 
 

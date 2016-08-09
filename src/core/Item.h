@@ -32,6 +32,11 @@ struct Item
     bool operator < (const Item & item) const;
 
     Item::ActionType getType(void) const;
+    bool isShift(void)  const { return getType() == ActionType::SHIFT; }
+    bool isReduce(void) const { return getType() == ActionType::REDUCE; }
+
+    const Symbol & getDottedSymbol(void) const;
+    bool isNextSymbolEqualTo(const std::string & name);
 };
 
 std::ostream & operator <<(std::ostream & os, const Item & item);

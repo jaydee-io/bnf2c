@@ -8,6 +8,7 @@
 #define _PARSINGTABLE_H_
 #include "Grammar.h"
 #include "ParserState.h"
+#include "Symbol.h"
 #include "config/Options.h"
 #include "Errors.h"
 
@@ -35,6 +36,10 @@ class ParseTable
         Errors<GeneratingError> errors;
 
     protected :
+        ParserState & addNewState(ParserState && state);
+        std::unordered_map<std::string, ParserState> createSuccessorStates(const ParserState & state);
+        ParserState & addOrMergeState(ParserState && state);
+
         const Grammar & m_grammar;
         Options &       m_options;
 

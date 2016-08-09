@@ -60,14 +60,14 @@ Symbol Grammar::addTerminal(std::string && name)
 Symbol Grammar::addIntermediate(const std::string & name)
 {
     intermediates.insert(name);
-    return Symbol({Symbol::Type::INTERMEDIATE, name});
+    return Symbol({ Symbol::Type::INTERMEDIATE, name });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Symbol Grammar::addIntermediate(std::string && name)
 {
     intermediates.insert(name);
-    return Symbol({Symbol::Type::INTERMEDIATE, name});
+    return Symbol({ Symbol::Type::INTERMEDIATE, std::forward<std::string>(name) });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ void Grammar::replacePseudoVariables(Options & options)
         // Replace pseudo-variables '$1', '$2', ... '$n'
         for(int i = 1; i <= rule.symbols.size(); i++)
         {
-            if(rule.symbols[i-1].type == Symbol::Type::INTERMEDIATE)
+            if(rule.symbols[i-1].isIntermediate())
             {
                 replacement = options.valueAsIntermediate
                     .replaceParam(Vars::VALUE, options.getValue.toString())

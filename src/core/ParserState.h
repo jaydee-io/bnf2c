@@ -7,14 +7,15 @@
 #ifndef _PARSERSTATE_H_
 #define _PARSERSTATE_H_
 #include "Item.h"
+#include "Grammar.h"
 #include "config/Options.h"
 #include "Errors.h"
 
+#include <unordered_set>
 #include <list>
 #include <ostream>
 
 class Rule;
-class Grammar;
 
 class ParserState
 {
@@ -25,11 +26,9 @@ class ParserState
         void addRule(const Rule & rule, const SymbolIterator dot = 0);
         bool contains(const Item & item) const;
         void close(const Grammar & grammar);
+        void assignSuccessors(const std::string & nextSymbol, const ParserState & nextState);
 
         void check(Errors<GeneratingError> & errors) const;
-
-        bool isAnAcceptRule(void) const;
-        Item *  getReduceRule(void) const;
 
         void printDebugActions (std::ostream & os, const Grammar & grammar, const Options & options) const;
         void printDebugBranches(std::ostream & os, const Grammar & grammar, std::size_t size) const;
@@ -40,9 +39,11 @@ class ParserState
         ItemList items;
         int      numState;
 
-    protected :
-        Item *  m_reduceRule = nullptr;
-        bool    m_isAnAcceptRule = false;
+    private :
+        void addRules(const Grammar::RuleRange & ruleRange);
+        bool symbolNeedsToBeClosed(const Symbol & symbol);
+
+        std::unordered_set<std::string>  symbolsAlreadyClosed;
 };
 
 std::ostream & operator <<(std::ostream & os, const Item & item);

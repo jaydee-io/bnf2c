@@ -50,11 +50,23 @@ Item::ActionType Item::getType(void) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+const Symbol & Item::getDottedSymbol(void) const
+{
+    return rule.symbols[dot];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+bool Item::isNextSymbolEqualTo(const std::string & name)
+{
+    return dot < rule.symbols.size() && getDottedSymbol().name == name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator <<(std::ostream & os, const Item & item)
 {
-    if(item.getType() == Item::ActionType::REDUCE)
+    if(item.isReduce())
         os << "[R" << item.rule.numRule << "] ";
-    else if(item.getType() == Item::ActionType::SHIFT)
+    else if(item.isShift())
         os << "[S" << (item.nextState != nullptr ? item.nextState->numState : -1) << "] ";
 
     os << "<" << item.rule.name << "> ::=";
@@ -72,4 +84,3 @@ std::ostream & operator <<(std::ostream & os, const Item & item)
 
     return os;
 }
-
