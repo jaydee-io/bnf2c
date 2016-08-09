@@ -74,7 +74,7 @@ void LexerBNF::nextToken(Token & token)
         /*!re2c
         identifier = [a-zA-Z0-9_\-]+;
         paramName  = [a-zA-Z0-9_\-:]+;
-        typeName   = [a-zA-Z0-9_\-\.>]+;
+        typeName   = [a-zA-Z0-9_\-\.:<>]+;
 
         [ ]+ { continue; }
         [\t] { m_tabs++; continue; }

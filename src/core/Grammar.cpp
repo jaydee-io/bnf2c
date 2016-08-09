@@ -88,38 +88,38 @@ void Grammar::replacePseudoVariables(Options & options)
     for(RuleMap::value_type & pair : rules)
     {
         Rule & rule = pair.second;
-        if(!rule.action.empty())
+        if(rule.action.empty())
+            rule.action = options.defaultAction.toString();
+
+        // Replace return pseudo-variable '$$'
+        ParameterizedString replacement = options.valueAsIntermediate
+            .replaceParam(Vars::VALUE, Vars::RETURN)
+            .replaceParam(Vars::TYPE, intermediateTypes.at(rule.name));
+        ParameterizedString parameterizedAction = ParameterizedString(rule.action)
+            .replaceParam(Vars::EXTERNAL_RETURN, replacement.toString());
+
+        // Replace pseudo-variables '$1', '$2', ... '$n'
+        for(int i = 1; i <= rule.symbols.size(); i++)
         {
-            // Replace return pseudo-variable '$$'
-            ParameterizedString replacement = options.valueAsIntermediate
-                .replaceParam(Vars::VALUE, Vars::RETURN)
-                .replaceParam(Vars::TYPE, intermediateTypes.at(rule.name));
-            ParameterizedString parameterizedAction = ParameterizedString(rule.action)
-                .replaceParam(Vars::EXTERNAL_RETURN, replacement.toString());
-
-            // Replace pseudo-variables '$1', '$2', ... '$n'
-            for(int i = 1; i <= rule.symbols.size(); i++)
+            if(rule.symbols[i-1].type == Symbol::Type::INTERMEDIATE)
             {
-                if(rule.symbols[i-1].type == Symbol::Type::INTERMEDIATE)
-                {
-                    replacement = options.valueAsIntermediate
-                        .replaceParam(Vars::VALUE, options.getValue.toString())
-                        .replaceParam(Vars::TYPE, intermediateTypes.at(rule.symbols[i-1].name))
-                        .replaceParam(Vars::VALUE_IDX, std::to_string(rule.symbols.size() - i));
-                }
-                else
-                {
-                    replacement = options.valueAsToken
-                        .replaceParam(Vars::VALUE, options.getValue.toString())
-                        .replaceParam(Vars::TYPE,  options.tokenType)
-                        .replaceParam(Vars::VALUE_IDX, std::to_string(rule.symbols.size() - i));
-                }
-
-                parameterizedAction = parameterizedAction.replaceParam('$' + std::to_string(i), replacement.toString());
+                replacement = options.valueAsIntermediate
+                    .replaceParam(Vars::VALUE, options.getValue.toString())
+                    .replaceParam(Vars::TYPE, intermediateTypes.at(rule.symbols[i-1].name))
+                    .replaceParam(Vars::VALUE_IDX, std::to_string(rule.symbols.size() - i));
+            }
+            else
+            {
+                replacement = options.valueAsToken
+                    .replaceParam(Vars::VALUE, options.getValue.toString())
+                    .replaceParam(Vars::TYPE,  options.tokenType)
+                    .replaceParam(Vars::VALUE_IDX, std::to_string(rule.symbols.size() - i));
             }
 
-            rule.action = parameterizedAction.toString();
+            parameterizedAction = parameterizedAction.replaceParam('$' + std::to_string(i), replacement.toString());
         }
+
+        rule.action = parameterizedAction.toString();
     }
 }
 

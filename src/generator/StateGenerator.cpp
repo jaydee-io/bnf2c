@@ -169,22 +169,12 @@ void StateGenerator::printReduceActionTo(const Item & item, std::ostream & os) c
     os << m_options.indent << '{' << std::endl;
     m_options.indent++;
 
-    // No action specified by user, assume "$$ = $1"
-    if(item.rule.action.empty())
-    {
-        ParameterizedString replacement = m_options.getValue
-            .replaceParam(Vars::VALUE_IDX, std::to_string(item.rule.symbols.size() - 1))
-            .replaceParam(Vars::TYPE,      m_grammar.getIntermediateType(item.rule.name));
-        os << m_options.indent  << Vars::RETURN << " = " << replacement << ';' << std::endl;
-    }
     // Rule action code
-    else
-    {
-        if(item.rule.action.find_first_of("\n\r") != std::string::npos)
-            os << item.rule.action << std::endl << std::endl;
-        else
-            os << m_options.indent << item.rule.action << std::endl << std::endl;
-    }
+    os << m_options.indent << m_options.valueType << ' ' << Vars::RETURN << ';' << std::endl << std::endl;
+
+    if(item.rule.action.find_first_of("\n\r") == std::string::npos)
+        os << m_options.indent;
+    os << item.rule.action << std::endl << std::endl;
 
     // Values stack
     os << m_options.indent << m_options.popValues.replaceParam(Vars::NB_VALUES, std::to_string(item.rule.symbols.size()))  << std::endl;
@@ -206,17 +196,12 @@ void StateGenerator::printReduceActionTo(const Item & item, std::ostream & os) c
 ////////////////////////////////////////////////////////////////////////////////
 void StateGenerator::printShiftActionTo(const Item & item, std::ostream & os) const
 {
-    // Returned value
-    ParameterizedString replacement = m_options.valueAsToken
-        .replaceParam(Vars::VALUE, Vars::RETURN)
-        .replaceParam(Vars::TYPE,  m_options.tokenType);
-    os << replacement << " = " << m_options.tokenName << ';';
+    // Push token
+    os << m_options.pushValue.replaceParam(Vars::VALUE, m_options.tokenName);
 
     // Shift
     os << ' ' << m_options.shiftToken;
 
-    // Push returned value
-    os << ' ' << m_options.pushValue.replaceParam(Vars::VALUE, Vars::RETURN);
     if(item.nextState != nullptr)
         os << " return " << item.nextState->numState << ';' << std::endl;
     else

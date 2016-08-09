@@ -41,9 +41,6 @@ void ParserGenerator::printParseCodeTo(std::ostream & os) const
 {
     m_parseFunction.printBeginTo(os);
 
-    // Returned value
-    os << m_options.indent << m_options.valueType << ' ' << Vars::RETURN << ';' << std::endl;
-
     // Switch on state
     m_switchOnStates.printBeginTo(os);
     for(const auto & generator : m_stateGenerators)

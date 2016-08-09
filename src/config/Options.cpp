@@ -85,7 +85,8 @@ const struct option Options::OPTIONS [] = {
     { "pop-values-code",        required_argument, nullptr, 'j'},
     { "get-value-code",         required_argument, nullptr, 'k'},
     { "value-as-token",         required_argument, nullptr, 'm'},
-    { "value-as-intermediate",  required_argument, nullptr, 'm'},
+    { "value-as-intermediate",  required_argument, nullptr, 'z'},
+    { "default-action",         required_argument, nullptr, 'D'},
 
     // Lexer options
     { "token-type",             required_argument, nullptr, 'y'},
@@ -125,6 +126,7 @@ const std::vector<std::string> Options::OPTIONS_TEXT [] = {
         { "Code used to get the N-th value from the stack" },
         { "Code used to get a value as token" },
         { "Code used to get a value as intermediate" },
+        { "Default action to execute when no action specified" },
 
         { "Type used for tokens" },
         { "Code used to move lexer to the next token" },
@@ -143,7 +145,7 @@ const std::vector<std::string> Options::OPTIONS_TEXT [] = {
 };
 
 #define NB_OPTIONS_COMMON    3
-#define NB_OPTIONS_PARSER    11
+#define NB_OPTIONS_PARSER    12
 #define NB_OPTIONS_LEXER     5
 #define NB_OPTIONS_GENERATOR 6
 #define NB_OPTIONS_FILE      1
@@ -196,6 +198,7 @@ void Options::parseArguments(int argc, char ** argv)
             case 'k' : getValue = optarg;                  break;
             case 'm' : valueAsToken = optarg;              break;
             case 'z' : valueAsIntermediate = optarg;       break;
+            case 'D' : defaultAction = optarg;             break;
 
             case 'y' : tokenType.assign(optarg);           break;
             case 'c' : shiftToken.assign(optarg);          break;
@@ -305,6 +308,7 @@ Options & Options::operator <<(const Options & options)
     SET_OPTION_IF_NOT_DEFAULT(getValue);
     SET_OPTION_IF_NOT_DEFAULT(valueAsToken);
     SET_OPTION_IF_NOT_DEFAULT(valueAsIntermediate);
+    SET_OPTION_IF_NOT_DEFAULT(defaultAction);
 
     // Lexer options
     SET_OPTION_IF_NOT_DEFAULT(tokenType);
@@ -347,6 +351,7 @@ std::ostream & operator <<(std::ostream & os, const Options & options)
     DISPLAY_OPTION(getValue           );
     DISPLAY_OPTION(valueAsToken       );
     DISPLAY_OPTION(valueAsIntermediate);
+    DISPLAY_OPTION(defaultAction      );
 
     // Lexer options
     DISPLAY_OPTION(tokenType      );

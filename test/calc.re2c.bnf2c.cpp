@@ -17,7 +17,7 @@ namespace calc {
    bnf2c:parser:accept-state          = "STATE_ACCEPT"
 
    bnf2c:parser:value-type            = "calc::Value"
-   bnf2c:parser:push-value            = "calc::push_value(<VALUE>);"
+   bnf2c:parser:push-value            = "calc::push_value(calc::Value(<VALUE>));"
    bnf2c:parser:pop-values            = "calc::pop_values(<NB_VALUES>);"
    bnf2c:parser:get-value             = "calc::get_value(<VALUE_IDX>)"
    bnf2c:parser:value-as-token        = "<VALUE>.token"
@@ -64,6 +64,9 @@ union Value
 {
     long long   value;
     Token       token;
+
+    Value(void) { }
+    Value(const Token & token) : token(token) { }
 };
 
 int parseFunction(Token);
@@ -89,7 +92,7 @@ const char * tokenName [] = {
     "ERROR"
 };
 
-void push_value(Value & value)
+void push_value(const Value & value)
 {
     valueStack.push_back(value);
 }

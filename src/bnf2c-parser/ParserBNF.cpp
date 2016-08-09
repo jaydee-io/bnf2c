@@ -33,6 +33,7 @@ ParserBNF::ParserBNF(LexerBNF & lexer, Grammar & grammar)
     m_parameterizedStringParams["parser:get-value"] = &m_options.getValue;
     m_parameterizedStringParams["parser:value-as-token"] = &m_options.valueAsToken;
     m_parameterizedStringParams["parser:value-as-intermediate"] = &m_options.valueAsIntermediate;
+    m_parameterizedStringParams["parser:default-action"] = &m_options.defaultAction;
 
     // Lexer options
     m_stringParams["lexer:token-type"]          = &m_options.tokenType;

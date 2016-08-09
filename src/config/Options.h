@@ -58,6 +58,7 @@ struct Options
         ParameterizedString getValue            = "getValue(<VALUE_IDX>).<TYPE>";
         ParameterizedString valueAsToken        = "<VALUE>.<TYPE>";
         ParameterizedString valueAsIntermediate = "<VALUE>.<TYPE>";
+        ParameterizedString defaultAction       = "$$ = $1;";
 
         // Lexer options
         std::string         tokenType       = "int";

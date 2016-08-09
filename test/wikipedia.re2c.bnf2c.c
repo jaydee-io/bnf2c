@@ -15,7 +15,7 @@
    bnf2c:parser:accept-state          = "STATE_ACCEPT"
 
    bnf2c:parser:value-type            = "T_VALUE"
-   bnf2c:parser:push-value            = "valueStack[nbValues++] = <VALUE>;"
+   bnf2c:parser:push-value            = "valueStack[nbValues++] = (T_VALUE) <VALUE>;"
    bnf2c:parser:pop-values            = "nbValues -= <NB_VALUES>;"
    bnf2c:parser:get-value             = "valueStack[nbValues - <VALUE_IDX> - 1]"
    bnf2c:parser:value-as-token        = "<VALUE>.token"
