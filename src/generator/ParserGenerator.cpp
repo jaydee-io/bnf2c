@@ -7,15 +7,15 @@
 #include "generator/ParserGenerator.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-ParserGenerator::ParserGenerator(const ParseTable & table, const Grammar & grammar, Options & options)
+ParserGenerator::ParserGenerator(const Parser & table, const Grammar & grammar, Options & options)
 : m_options(options),
     m_parseFunction(m_options.indent,  m_options.stateType, m_options.parseFunctionName, m_options.tokenType, m_options.tokenName, m_options.throwedExceptions, m_options.errorState),
     m_branchFunction(m_options.indent, m_options.stateType, m_options.branchFunctionName, m_options.intermediateType, "intermediate", "", m_options.errorState),
     m_switchOnStates(m_options.indent, m_options.topState, m_options.defaultSwitchStatement ? "return " + m_options.errorState + ";" : "")
 {
     m_stateGenerators.reserve(table.getStates().size());
-    for(const ParserState & state : table.getStates())
-        m_stateGenerators.emplace_back(state, grammar, options);
+    for(const auto & state : table.getStates())
+        m_stateGenerators.emplace_back(*state, grammar, options);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

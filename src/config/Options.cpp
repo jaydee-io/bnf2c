@@ -74,6 +74,7 @@ const struct option Options::OPTIONS [] = {
     { "debug",                  required_argument, nullptr, 'd'},
 
     // Parser options
+    { "parser-type",            required_argument, nullptr, 'T'},
     { "state-type",             required_argument, nullptr, 's'},
     { "top-state-code",         required_argument, nullptr, 't'},
     { "pop-state-code",         required_argument, nullptr, 'p'},
@@ -115,6 +116,7 @@ const std::vector<std::string> Options::OPTIONS_TEXT [] = {
           "  - 2 : Debug parser",
           "  - 3 : Debug lexer" },
 
+        { "Type of generated parser : LR0, LR1 or LALR1" },
         { "Type used for generated states" },
         { "Code used to get the state on top of the stack" },
         { "Code used to pop states from the stack" },
@@ -145,7 +147,7 @@ const std::vector<std::string> Options::OPTIONS_TEXT [] = {
 };
 
 #define NB_OPTIONS_COMMON    3
-#define NB_OPTIONS_PARSER    12
+#define NB_OPTIONS_PARSER    13
 #define NB_OPTIONS_LEXER     5
 #define NB_OPTIONS_GENERATOR 6
 #define NB_OPTIONS_FILE      1
@@ -186,6 +188,7 @@ void Options::parseArguments(int argc, char ** argv)
     {
         switch (option)
         {
+            case 'T' : parserType.assign(optarg);          break;
             case 's' : stateType.assign(optarg);           break;
             case 't' : topState.assign(optarg);            break;
             case 'p' : popState = optarg;                  break;
@@ -296,6 +299,7 @@ void Options::usage(void)
 Options & Options::operator <<(const Options & options)
 {
     // Parser options
+    SET_OPTION_IF_NOT_DEFAULT(parserType);
     SET_OPTION_IF_NOT_DEFAULT(stateType);
     SET_OPTION_IF_NOT_DEFAULT(topState);
     SET_OPTION_IF_NOT_DEFAULT(popState);
@@ -340,6 +344,7 @@ Options & Options::operator <<(const Options & options)
 std::ostream & operator <<(std::ostream & os, const Options & options)
 {
     // Parser options
+    DISPLAY_OPTION(parserType         );
     DISPLAY_OPTION(stateType          );
     DISPLAY_OPTION(topState           );
     DISPLAY_OPTION(popState           );

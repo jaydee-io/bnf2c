@@ -28,11 +28,11 @@ class StateGenerator
         void printShiftActionTo (const Item & item, std::ostream & os) const;
 
     private :
-        const ParserState m_state;
-        const Grammar &   m_grammar;
-        Options &         m_options;
-        SwitchGenerator   m_switchOnIntermediate;
-        SwitchGenerator   m_switchOnTerminal;
+        const ParserState & m_state;
+        const Grammar &     m_grammar;
+        Options &           m_options;
+        SwitchGenerator     m_switchOnIntermediate;
+        SwitchGenerator     m_switchOnTerminal;
 };
 
 #endif /* _STATES_GENERATOR_H_ */

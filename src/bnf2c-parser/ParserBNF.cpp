@@ -21,6 +21,8 @@ ParserBNF::ParserBNF(LexerBNF & lexer, Grammar & grammar)
 : m_grammar(grammar), m_lexer(lexer)
 {
     // Parser options
+    m_stringParams["parser:parser-type"]            = &m_options.parserType;
+
     m_stringParams["parser:state-type"]            = &m_options.stateType;
     m_stringParams["parser:top-state"]             = &m_options.topState;
     m_parameterizedStringParams["parser:pop-state"] = &m_options.popState;

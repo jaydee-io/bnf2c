@@ -46,6 +46,7 @@ struct Options
         static const std::string VERSION;
 
         // Parser options
+        std::string         parserType      = "LR0";
         std::string         stateType       = "int";
         std::string         topState        = "topState()";
         ParameterizedString popState        = "popStates(<NB_STATES>);";

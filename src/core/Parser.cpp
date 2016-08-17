@@ -4,7 +4,7 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#include "ParseTable.h"
+#include "Parser.h"
 
 #include <unordered_map>
 #include <string>
@@ -14,22 +14,16 @@
 #include <sstream>
 #include <cstring>
 
-#define CENTER(msg, maxSize)    std::setw((maxSize - ::strlen(msg)) / 2) << ' ' << msg << std::setw(maxSize - ((maxSize - ::strlen(msg)) / 2) - ::strlen(msg) - 1) << ' '
-
 ////////////////////////////////////////////////////////////////////////////////
-ParseTable::ParseTable(const Grammar & grammar, Options & options)
+Parser::Parser(const Grammar & grammar, Options & options)
 : m_grammar(grammar), m_options(options)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParseTable::generateStates(void)
+void Parser::generateStates(void)
 {
-    ParserState startState;
-    startState.addRule(m_grammar.getStartRule());
-
-    addNewState(std::forward<ParserState>(startState));
-
+    addNewState(createStartState());
     for(auto & state : m_states)
     {
         auto allSuccessors = createSuccessorStates(state);
@@ -37,52 +31,41 @@ void ParseTable::generateStates(void)
         for(auto & successorPair : allSuccessors)
         {
             auto & successor = addNewState(std::move(successorPair.second));
-            state.assignSuccessors(successorPair.first, successor);
+            state->assignSuccessors(successorPair.first, *successor);
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-ParserState & ParseTable::addNewState(ParserState && state)
+Parser::StatePtr & Parser::addNewState(Parser::StatePtr && state)
 {
-    state.numState = m_states.size();
-    state.close(m_grammar);
+    state->numState = m_states.size();
+    state->close(m_grammar);
 
-    return addOrMergeState(std::forward<ParserState>(state));
+    return addOrMergeState(std::forward<Parser::StatePtr>(state));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::unordered_map<std::string, ParserState> ParseTable::createSuccessorStates(const ParserState & state)
+Parser::StatePtr & Parser::addOrMergeState(Parser::StatePtr && state)
 {
-    std::unordered_map<std::string, ParserState> allSuccessors;
-
-    // Create a new state for each successing symbol of the current state
-    for(const auto & item : state.items)
-        if(item.dot < item.rule.symbols.size())
-            allSuccessors[item.getDottedSymbol().name].addRule(item.rule, item.dot + 1);
-
-    return allSuccessors;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-ParserState & ParseTable::addOrMergeState(ParserState && state)
-{
-    auto itState = std::find(m_states.begin(), m_states.end(), state);
+    auto itState = std::find_if(m_states.begin(), m_states.end(), [&state](const auto & rhs) -> bool { return *state == *rhs; });
     if(itState == m_states.end())
-        return *m_states.insert(itState, std::forward<ParserState>(state));
+        return *m_states.insert(itState, std::forward<Parser::StatePtr>(state));
     else
         return *itState;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParseTable::check(void)
+void Parser::check(void)
 {
-    for(const ParserState & state : m_states)
-        state.check(errors);
+    for(const auto & state : m_states)
+        state->check(errors);
 }
 
+#define CENTER(msg, maxSize)    std::setw((maxSize - ::strlen(msg)) / 2) << ' ' << msg << std::setw(maxSize - ((maxSize - ::strlen(msg)) / 2) - ::strlen(msg) - 1) << ' '
+
 ////////////////////////////////////////////////////////////////////////////////
-void ParseTable::printDebug(std::ostream & output) const
+void Parser::printDebug(std::ostream & output) const
 {
     // Print rules
     output << "Rules :" << std::endl;
@@ -119,28 +102,28 @@ void ParseTable::printDebug(std::ostream & output) const
     }
 
     output << "Parse table :" << std::endl;
-    output << "     |" << CENTER("Actions", sizeTerminals) << '|';
-    output <<             CENTER("Branchs", sizeIntermediate) << '|' << std::endl;
+    output << "     |" << CENTER("Actions", std::max(sizeTerminals, 7)) << '|';
+    output <<             CENTER("Branchs", std::max(sizeIntermediate, 7)) << '|' << std::endl;
     output << "State|" << headerStream.str() << std::endl;
     output << std::setfill('-') << std::setw(sizeTerminals + sizeIntermediate + 6) << '-' << std::setfill(' ') << std::endl;
 
-    for(const ParserState & itemSet : m_states)
+    for(const auto & state : m_states)
     {
-        output << std::left << std::setw(5) << itemSet.numState << '|';
-        itemSet.printDebugActions(output, m_grammar, m_options);
-        itemSet.printDebugBranches(output, m_grammar, maxSizeIntermediate);
+        output << std::left << std::setw(5) << state->numState << '|';
+        state->printDebugActions(output, m_grammar, m_options);
+        state->printDebugBranches(output, m_grammar, maxSizeIntermediate);
 
         output << std::endl;
     }
     output << std::endl;
 
     // Print items sets
-    for(const ParserState & itemSet : m_states)
-        output << itemSet << std::endl;
+    for(const auto & state : m_states)
+        output << *state << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-const ParseTable::States & ParseTable::getStates(void) const
+const Parser::States & Parser::getStates(void) const
 {
     return m_states;
 }

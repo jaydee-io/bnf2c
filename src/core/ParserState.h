@@ -7,7 +7,6 @@
 #ifndef _PARSERSTATE_H_
 #define _PARSERSTATE_H_
 #include "Item.h"
-#include "Grammar.h"
 #include "config/Options.h"
 #include "Errors.h"
 
@@ -15,7 +14,7 @@
 #include <list>
 #include <ostream>
 
-class Rule;
+class Grammar;
 
 class ParserState
 {
@@ -23,9 +22,8 @@ class ParserState
         typedef std::list<Item> ItemList;
 
     public :
-        void addRule(const Rule & rule, const SymbolIterator dot = 0);
         bool contains(const Item & item) const;
-        void close(const Grammar & grammar);
+        virtual void close(const Grammar & grammar) = 0;
         void assignSuccessors(const std::string & nextSymbol, const ParserState & nextState);
 
         void check(Errors<GeneratingError> & errors) const;
@@ -39,8 +37,7 @@ class ParserState
         ItemList items;
         int      numState;
 
-    private :
-        void addRules(const Grammar::RuleRange & ruleRange);
+    protected :
         bool symbolNeedsToBeClosed(const Symbol & symbol);
 
         std::unordered_set<std::string>  symbolsAlreadyClosed;

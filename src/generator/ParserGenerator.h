@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _PARSER_GENERATOR_H_
 #define _PARSER_GENERATOR_H_
-#include "core/ParseTable.h"
+#include "core/Parser.h"
 #include "core/Grammar.h"
 #include "config/Options.h"
 #include "generator/StateGenerator.h"
@@ -19,7 +19,7 @@
 class ParserGenerator
 {
     public :
-        ParserGenerator(const ParseTable & table, const Grammar & grammar, Options & options);
+        ParserGenerator(const Parser & table, const Grammar & grammar, Options & options);
 
         void printTo(std::ostream & os) const;
 

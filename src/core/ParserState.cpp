@@ -5,49 +5,16 @@
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
 #include "ParserState.h"
-#include "Rule.h"
+#include "Grammar.h"
 
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::addRule(const Rule & rule, const SymbolIterator dot)
-{
-    items.emplace_back(rule, dot, nullptr);
-}
-
-////////////////////////////////////////////////////////////////////////////////
 bool ParserState::contains(const Item & item) const
 {
     return std::find(items.begin(), items.end(), item) != items.end();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void ParserState::close(const Grammar & grammar)
-{
-    for(auto & item : items)
-    {
-        if(item.dot == item.rule.symbols.size())
-            continue;
-
-        const Symbol & symbol = item.getDottedSymbol();
-
-        if(symbolNeedsToBeClosed(symbol))
-            addRules(grammar[symbol.name]);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-bool ParserState::symbolNeedsToBeClosed(const Symbol & symbol)
-{
-    if(symbol.isIntermediate() && symbolsAlreadyClosed.find(symbol.name) == symbolsAlreadyClosed.end())
-    {
-        symbolsAlreadyClosed.insert(symbol.name);
-        return true;
-    }
-
-    return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -173,10 +140,15 @@ bool ParserState::operator ==(const ParserState & set) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::addRules(const Grammar::RuleRange & ruleRange)
+bool ParserState::symbolNeedsToBeClosed(const Symbol & symbol)
 {
-    for(Grammar::RuleIterator ruleIt = ruleRange.first; ruleIt != ruleRange.second; ++ruleIt)
-        addRule(ruleIt->second);
+    if(symbol.isIntermediate() && symbolsAlreadyClosed.find(symbol.name) == symbolsAlreadyClosed.end())
+    {
+        symbolsAlreadyClosed.insert(symbol.name);
+        return true;
+    }
+
+    return false;
 }
 
 

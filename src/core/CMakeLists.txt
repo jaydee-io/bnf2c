@@ -12,7 +12,9 @@ set(SOURCES
     Item.cpp
     Grammar.cpp
     ParserState.cpp
-    ParseTable.cpp
+    Parser.cpp
+    LR0/LR0Parser.cpp
+    LR0/LR0State.cpp
 )
 
 add_library(bnf2c-core STATIC ${SOURCES})

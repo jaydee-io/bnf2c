@@ -9,12 +9,14 @@
 #include "bnf2c-parser/LexerBNF.h"
 #include "bnf2c-parser/ParserBNF.h"
 #include "core/Grammar.h"
-#include "core/ParseTable.h"
+#include "core/Parser.h"
+#include "core/LR0/LR0Parser.h"
 #include "generator/ParserGenerator.h"
 
 #include <string>
 #include <iostream>
 #include <cstring>
+#include <memory>
 
 ////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char ** argv)
@@ -40,22 +42,22 @@ int main(int argc, char ** argv)
 
     // Start parser
     Grammar     grammar;
-    LexerBNF    lexer(inputBuffer, streams.outputStream());
-    ParserBNF   parser(lexer, grammar);
+    LexerBNF    bnfLexer(inputBuffer, streams.outputStream());
+    ParserBNF   bnfParser(bnfLexer, grammar);
 
     // Find each "bnf2c" block and parse it
-    while(lexer.moveToNextBnf2cBlock())
-        parser.parseBnf2cBlock();
+    while(bnfLexer.moveToNextBnf2cBlock())
+        bnfParser.parseBnf2cBlock();
 
     // Command line options prevails over in file options
-    Options options = parser.getInFileOptions();
+    Options options = bnfParser.getInFileOptions();
     options << cmdLineOptions;
 
     // Check grammar
     grammar.check();
-    if(!parser.errors.list.empty() || !grammar.errors.list.empty())
+    if(!bnfParser.errors.list.empty() || !grammar.errors.list.empty())
     {
-        std::cerr << parser.errors;
+        std::cerr << bnfParser.errors;
         std::cerr << grammar.errors;
         return 1;
     }
@@ -64,22 +66,24 @@ int main(int argc, char ** argv)
     grammar.replacePseudoVariables(options);
 
     // Generate parser states
-    ParseTable table(grammar, options);
-    table.generateStates();
-    table.check();
-    if(!table.errors.list.empty())
+    std::unique_ptr<Parser> parser;
+    if(options.parserType == "LR0")
+        parser = std::make_unique<LR0Parser>(grammar, options);
+    parser->generateStates();
+    parser->check();
+    if(!parser->errors.list.empty())
     {
-        std::cerr << table.errors;
+        std::cerr << parser->errors;
         return 1;
     }
 
     // Output generated code at the end of output file
-    ParserGenerator generator(table, grammar, options);
+    ParserGenerator generator(*parser, grammar, options);
     generator.printTo(streams.outputStream());
 
     // Debug output
     if(options.debugLevel != DebugLevel::NONE)
-        table.printDebug(std::cerr);
+        parser->printDebug(std::cerr);
 
     return 0;
 }
