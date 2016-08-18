@@ -13,15 +13,13 @@
 #include "Errors.h"
 
 #include <list>
-#include <memory>
 #include <cstdint>
 #include <ostream>
 
 class Parser
 {
     public :
-        using StatePtr = std::unique_ptr<ParserState>;
-        using States   = std::list<StatePtr>;
+        using States = std::list<ParserState::Ptr>;
 
     public :
         Parser(const Grammar & grammar, Options & options);
@@ -37,21 +35,27 @@ class Parser
         Errors<GeneratingError> errors;
 
     protected :
-        StatePtr & addNewState(StatePtr && state);
-        StatePtr & addOrMergeState(StatePtr && state);
+        ParserState::Ptr & addNewState(ParserState::Ptr && state);
+        ParserState::Ptr & addOrMergeState(ParserState::Ptr && state);
 
-        virtual StatePtr createStartState(void) = 0;
-        virtual std::unordered_map<std::string, StatePtr> createSuccessorStates(const StatePtr & state) = 0;
+        virtual ParserState::Ptr createStartState(void) = 0;
+        virtual std::unordered_map<std::string, ParserState::Ptr> createSuccessorStates(const ParserState::Ptr & state) = 0;
 
         template<typename StateType>
-        StateType & getStateAs(std::unordered_map<std::string, Parser::StatePtr> & successors, const std::string & name)
+        static StateType & fetchOrInsertState(std::unordered_map<std::string, ParserState::Ptr> & successors, const std::string & name)
         {
             auto & statePtr = successors[name];
 
             if(!statePtr)
                 statePtr = std::make_unique<StateType>();
 
-            return *reinterpret_cast<StateType *>(statePtr.get());
+            return state_cast<StateType>(statePtr);
+        }
+
+        template<typename StateType>
+        static StateType & state_cast(const ParserState::Ptr & state)
+        {
+            return *reinterpret_cast<StateType *>(state.get());
         }
 
         const Grammar & m_grammar;

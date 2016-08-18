@@ -37,22 +37,25 @@ void Parser::generateStates(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Parser::StatePtr & Parser::addNewState(Parser::StatePtr && state)
+ParserState::Ptr & Parser::addNewState(ParserState::Ptr && state)
 {
     state->numState = m_states.size();
     state->close(m_grammar);
 
-    return addOrMergeState(std::forward<Parser::StatePtr>(state));
+    return addOrMergeState(std::forward<ParserState::Ptr>(state));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Parser::StatePtr & Parser::addOrMergeState(Parser::StatePtr && state)
+ParserState::Ptr & Parser::addOrMergeState(ParserState::Ptr && newState)
 {
-    auto itState = std::find_if(m_states.begin(), m_states.end(), [&state](const auto & rhs) -> bool { return *state == *rhs; });
-    if(itState == m_states.end())
-        return *m_states.insert(itState, std::forward<Parser::StatePtr>(state));
+    auto mergeableSate = std::find_if(m_states.begin(), m_states.end(), [&newState](const auto & state) -> bool { return state->isMergeableWith(newState); });
+    if(mergeableSate == m_states.end())
+        return *m_states.insert(mergeableSate, std::forward<ParserState::Ptr>(newState));
     else
-        return *itState;
+    {
+        (*mergeableSate)->merge(newState);
+        return *mergeableSate;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

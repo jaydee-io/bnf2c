@@ -14,8 +14,14 @@
 #include <iomanip>
 
 ////////////////////////////////////////////////////////////////////////////////
-Item::Item(const Rule & rule, SymbolIterator dot, const ParserState * nextState)
-: rule(rule), dot(dot), nextState(nextState)
+Item::Item(const Rule & rule, SymbolList::const_iterator dottedSymbol, const ParserState * nextState)
+: rule(rule), dottedSymbol(dottedSymbol), nextState(nextState)
+{
+}
+
+////////////////////////////////////////////////////////////////////////////////
+Item::Item(const Rule & rule, SymbolList::const_iterator dottedSymbol, const ParserState * nextState, SymbolSet && lookaheads)
+: rule(rule), dottedSymbol(dottedSymbol), nextState(nextState), lookaheads(std::forward<SymbolSet>(lookaheads))
 {
 }
 
@@ -25,7 +31,9 @@ bool Item::operator ==(const Item & item) const
     if(&item == this)
         return true;
 
-    return (dot == item.dot) && (rule == item.rule);
+    return dottedSymbol == item.dottedSymbol &&
+           rule == item.rule &&
+           lookaheads == item.lookaheads;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,28 +45,28 @@ bool Item::operator <(const Item & item) const
     if(rule.numRule != item.rule.numRule)
         return (rule.numRule < item.rule.numRule);
     else
-        return (dot < item.dot);
+        return (dottedSymbol < item.dottedSymbol);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Item::ActionType Item::getType(void) const
 {
-    if(dot >= rule.symbols.size())
+    if(isDotAtEnd())
         return ActionType::REDUCE;
     else
         return ActionType::SHIFT;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-const Symbol & Item::getDottedSymbol(void) const
+bool Item::isDotAtEnd(void) const
 {
-    return rule.symbols[dot];
+    return dottedSymbol == rule.symbols.end();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 bool Item::isNextSymbolEqualTo(const std::string & name)
 {
-    return dot < rule.symbols.size() && getDottedSymbol().name == name;
+    return !isDotAtEnd() && dottedSymbol->name == name;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,16 +79,30 @@ std::ostream & operator <<(std::ostream & os, const Item & item)
 
     os << "<" << item.rule.name << "> ::=";
 
-    for(SymbolIterator it = 0; it < item.rule.symbols.size(); ++it)
+    for(auto symbolIt = item.rule.symbols.begin(); symbolIt != item.rule.symbols.end(); ++symbolIt)
     {
-        if(it == item.dot)
-            os << " •" << item.rule.symbols[it];
+        if(symbolIt == item.dottedSymbol)
+            os << " •" << *symbolIt;
         else
-            os << " " << item.rule.symbols[it];
+            os << " " << *symbolIt;
     }
 
-    if(item.dot == item.rule.symbols.size())
+    if(item.dottedSymbol == item.rule.symbols.end())
         os << " •";
+
+    if(!item.lookaheads.empty())
+    {
+        os << ", ";
+        for(auto itSymbol = item.lookaheads.begin(); itSymbol != item.lookaheads.end(); ++itSymbol)
+        {
+            os << *itSymbol;
+
+            auto nextSymbol = itSymbol;
+            ++nextSymbol;
+            if(nextSymbol != item.lookaheads.end())
+                os << '/';
+        }
+    }
 
     return os;
 }

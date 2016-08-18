@@ -10,6 +10,7 @@
 #include "config/Options.h"
 #include "Errors.h"
 
+#include <memory>
 #include <unordered_set>
 #include <list>
 #include <ostream>
@@ -19,19 +20,20 @@ class Grammar;
 class ParserState
 {
     public :
-        typedef std::list<Item> ItemList;
+        using Ptr = std::unique_ptr<ParserState>;
+        using ItemList = std::list<Item>;
 
     public :
         bool contains(const Item & item) const;
-        virtual void close(const Grammar & grammar) = 0;
         void assignSuccessors(const std::string & nextSymbol, const ParserState & nextState);
+        virtual void close(const Grammar & grammar) = 0;
+        virtual bool isMergeableWith(const Ptr & state) = 0;
+        virtual void merge(Ptr & state) { /* By default, do nothing */ }
 
         void check(Errors<GeneratingError> & errors) const;
 
         void printDebugActions (std::ostream & os, const Grammar & grammar, const Options & options) const;
         void printDebugBranches(std::ostream & os, const Grammar & grammar, std::size_t size) const;
-
-        bool operator ==(const ParserState & set) const;
 
     public :
         ItemList items;
@@ -40,7 +42,7 @@ class ParserState
     protected :
         bool symbolNeedsToBeClosed(const Symbol & symbol);
 
-        std::unordered_set<std::string>  symbolsAlreadyClosed;
+        SymbolSet symbolsAlreadyClosed;
 };
 
 std::ostream & operator <<(std::ostream & os, const Item & item);

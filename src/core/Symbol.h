@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 struct Symbol
 {
@@ -25,11 +26,25 @@ struct Symbol
     bool isIntermediate(void) const { return type == Type::INTERMEDIATE; }
 
     bool operator ==(const Symbol & symbol) const;
+    bool operator !=(const Symbol & symbol) const;
 };
 
-typedef std::vector<Symbol> SymbolList;
-typedef std::size_t         SymbolIterator;
+using SymbolList = std::vector<Symbol>;
+using SymbolSet = std::unordered_set<Symbol>;
 
 std::ostream & operator <<(std::ostream & os, const Symbol & symbol);
+
+namespace std {
+
+template <> 
+struct hash<Symbol>
+{
+    size_t operator()(const Symbol & symbol) const
+    {
+        return (size_t) symbol.type + std::hash<std::string>()(symbol.name);
+    }
+};
+
+}
 
 #endif /* _SYMBOL_H_ */

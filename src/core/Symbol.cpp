@@ -16,6 +16,12 @@ bool Symbol::operator ==(const Symbol & symbol) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+bool Symbol::operator !=(const Symbol & symbol) const
+{
+    return !operator ==(symbol);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator <<(std::ostream & os, const Symbol & symbol)
 {
     switch(symbol.type)

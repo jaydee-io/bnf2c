@@ -8,6 +8,7 @@
 #define _ITEM_H_
 #include "Symbol.h"
 
+#include <unordered_set>
 #include <ostream>
 
 class Rule;
@@ -21,12 +22,16 @@ struct Item
         REDUCE
     };
 
-    const Rule &        rule;
-    SymbolIterator      dot;
+
+    const Rule & rule;
+    SymbolList::const_iterator dottedSymbol;
     const ParserState * nextState;
+    SymbolSet lookaheads;
+
 
     Item(void) = default;
-    Item(const Rule & rule, SymbolIterator dot, const ParserState * nextState);
+    Item(const Rule & rule, SymbolList::const_iterator dot, const ParserState * nextState);
+    Item(const Rule & rule, SymbolList::const_iterator dot, const ParserState * nextState, SymbolSet && lookahead);
 
     bool operator ==(const Item & item) const;
     bool operator < (const Item & item) const;
@@ -35,7 +40,7 @@ struct Item
     bool isShift(void)  const { return getType() == ActionType::SHIFT; }
     bool isReduce(void) const { return getType() == ActionType::REDUCE; }
 
-    const Symbol & getDottedSymbol(void) const;
+    bool isDotAtEnd(void) const;
     bool isNextSymbolEqualTo(const std::string & name);
 };
 

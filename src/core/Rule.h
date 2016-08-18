@@ -20,7 +20,10 @@ class Rule
         void addSymbol(const Symbol & symbol);
         void addSymbol(Symbol && symbol);
 
+        SymbolList remainingSymbolsAfter(SymbolList::const_iterator symbol) const;
+
         bool operator ==(const Rule & rule) const;
+        bool operator !=(const Rule & rule) const;
 
     public :
         std::string name;

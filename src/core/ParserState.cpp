@@ -72,7 +72,7 @@ void ParserState::printDebugActions(std::ostream & os, const Grammar & grammar, 
         // Shift rule
         for(it = items.begin(); it != items.end(); ++it)
         {
-            if(it->isShift() && (it->rule.symbols[it->dot].name == terminal))
+            if(it->isShift() && it->dottedSymbol->name == terminal)
             {
                 os << 'S' << std::setw(terminal.length() - 1) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
                 break;
@@ -115,9 +115,9 @@ void ParserState::printDebugBranches(std::ostream & os, const Grammar & grammar,
             ItemList::const_iterator it;
             for(it = items.begin(); it != items.end(); ++it)
             {
-                const Symbol & symbol = it->rule.symbols[it->dot];
+                const Symbol & symbol = *it->dottedSymbol;
 
-                if(it->isShift() && symbol.isIntermediate() && (symbol.name == intermediate))
+                if(it->isShift() && symbol.isIntermediate() && symbol.name == intermediate)
                 {
                     os << std::setw(std::max(intermediate.length(), size)) << std::left << (it->nextState != nullptr ? it->nextState->numState : -1) << '|';
                     break;
@@ -131,20 +131,11 @@ void ParserState::printDebugBranches(std::ostream & os, const Grammar & grammar,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool ParserState::operator ==(const ParserState & set) const
-{
-    if(&set == this)
-        return true;
-
-    return items == set.items;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 bool ParserState::symbolNeedsToBeClosed(const Symbol & symbol)
 {
-    if(symbol.isIntermediate() && symbolsAlreadyClosed.find(symbol.name) == symbolsAlreadyClosed.end())
+    if(symbol.isIntermediate() && symbolsAlreadyClosed.find(symbol) == symbolsAlreadyClosed.end())
     {
-        symbolsAlreadyClosed.insert(symbol.name);
+        symbolsAlreadyClosed.insert(symbol);
         return true;
     }
 

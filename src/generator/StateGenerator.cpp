@@ -36,9 +36,9 @@ void StateGenerator::printBranchesSwitchTo(std::ostream & os) const
     {
         std::stringstream os;
 
-        if((item.dot < item.rule.symbols.size()) && item.getDottedSymbol().isIntermediate())
+        if(!item.isDotAtEnd() && item.dottedSymbol->isIntermediate())
         {
-            os << m_options.indent << "case " << m_grammar.getIntermediateIndex(item.getDottedSymbol().name) << " : ";
+            os << m_options.indent << "case " << m_grammar.getIntermediateIndex(item.dottedSymbol->name) << " : ";
             if(item.nextState != nullptr)
                 os << "return " << item.nextState->numState << ";" << std::endl;
             else
@@ -76,7 +76,7 @@ void StateGenerator::printBranchesTableTo(std::ostream & os) const
 
         ParserState::ItemList::const_iterator itItem;
         for(itItem = m_state.items.begin(); itItem != m_state.items.end(); ++itItem)
-            if((itItem->dot < itItem->rule.symbols.size()) && (itItem->getDottedSymbol().name == intermediate))
+            if(!itItem->isDotAtEnd() && itItem->dottedSymbol->name == intermediate)
                 break;
 
         if(itItem != m_state.items.end() && (itItem->nextState != nullptr))
@@ -106,7 +106,7 @@ void StateGenerator::printActionItemsTo(std::ostream & os) const
         // Shift rule
         for(it = m_state.items.begin(); it != m_state.items.end(); ++it)
         {
-            if(it->isShift() && (it->getDottedSymbol().name == terminal))
+            if(it->isShift() && it->dottedSymbol->name == terminal)
             {
                 cases[*it].insert(terminal);
                 break;
@@ -137,7 +137,7 @@ void StateGenerator::printActionItemsTo(std::ostream & os) const
         }
 
         // Shift action
-        if(casesOfItem.first.isShift() && casesOfItem.first.getDottedSymbol().isTerminal())
+        if(casesOfItem.first.isShift() && casesOfItem.first.dottedSymbol->isTerminal())
         {
             if(casesOfItem.second.size() == 1)
                 printShiftActionTo(casesOfItem.first, os);

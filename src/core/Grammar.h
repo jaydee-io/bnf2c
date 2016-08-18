@@ -42,6 +42,9 @@ class Grammar
         const std::string & getIntermediateType(const std::string & name) const;
         size_t getIntermediateIndex(const std::string & name) const;
 
+        SymbolSet first(const SymbolList & list) const;
+        SymbolSet follow(const Symbol & symbol) const;
+
         void replacePseudoVariables(Options & options);
         void check(void);
 
