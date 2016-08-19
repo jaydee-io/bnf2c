@@ -12,6 +12,7 @@
 #include "core/Parser.h"
 #include "core/LR0/LR0Parser.h"
 #include "core/LR1/LR1Parser.h"
+#include "core/LALR1/LALR1Parser.h"
 #include "generator/ParserGenerator.h"
 
 #include <string>
@@ -72,6 +73,8 @@ int main(int argc, char ** argv)
         parser = std::make_unique<LR0Parser>(grammar, options);
     else if(options.parserType == "LR1")
         parser = std::make_unique<LR1Parser>(grammar, options);
+    else if(options.parserType == "LALR1")
+        parser = std::make_unique<LALR1Parser>(grammar, options);
     parser->generateStates();
     parser->check();
     if(!parser->errors.list.empty())

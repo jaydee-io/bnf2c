@@ -17,6 +17,8 @@ set(SOURCES
     LR0/LR0State.cpp
     LR1/LR1Parser.cpp
     LR1/LR1State.cpp
+    LALR1/LALR1Parser.cpp
+    LALR1/LALR1State.cpp
 )
 
 add_library(bnf2c-core STATIC ${SOURCES})

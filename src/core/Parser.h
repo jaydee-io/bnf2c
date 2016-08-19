@@ -49,13 +49,7 @@ class Parser
             if(!statePtr)
                 statePtr = std::make_unique<StateType>();
 
-            return state_cast<StateType>(statePtr);
-        }
-
-        template<typename StateType>
-        static StateType & state_cast(const ParserState::Ptr & state)
-        {
-            return *reinterpret_cast<StateType *>(state.get());
+            return *reinterpret_cast<StateType *>(statePtr.get());
         }
 
         const Grammar & m_grammar;
