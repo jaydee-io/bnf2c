@@ -7,6 +7,7 @@
 #ifndef _LEXERBNF_H_
 #define _LEXERBNF_H_
 #include "Token.h"
+#include "LexerState.h"
 
 #include <string>
 #include <ostream>
@@ -14,28 +15,25 @@
 class LexerBNF
 {
     public :
-
         static const std::string BNF2C_TOKEN;
 
-    public :
         LexerBNF(const std::string & input, std::ostream & output);
 
         bool moveToNextBnf2cBlock(void);
-        void nextToken(Token & token);
+
+        Token nextToken(void);
+        Token nextTokenSkippedComments(void);
+
         bool readRuleAction(std::string & ruleAction);
 
-        int getLine(void) const;
-        int getColumn(void) const;
-        int getTabulations(void) const;
-
-        std::string getCurrentLine(void) const;
+        const LexerState & getState(void);
+        const LexerState & getLastState(void);
 
     protected :
-        const char * m_input;
+        Token newToken(const TokenType type);
 
-        const char * m_lastNewLine;
-        int          m_line;
-        int          m_tabs;
+        LexerState m_state;
+        LexerState m_lastState;
 
         std::ostream &  m_output;
 };

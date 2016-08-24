@@ -42,17 +42,16 @@ std::ostream & operator<<(std::ostream & os, const TokenType tokenType)
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator<<(std::ostream & os, const Token & token)
 {
-    os << std::left << std::setw(17) << token.type;
-    os << " ["    << std::right << std::setw(2) << token.valueSize() << "]";
-    os << " at L" << std::right << std::setw(2) << token.line << ":C" << std::right << std::setw(2) << token.column;
+    os << std::left << std::setw(17) << token.getType();
+    os << " ["    << std::right << std::setw(2) << token.getLength() << "]";
 
-    switch(token.type)
+    switch(token.getType())
     {
-        case TokenType::INTERMEDIATE : os << " \"" << token.valueToIntermediate()   << "\""; break;
-        case TokenType::TERMINAL     : os << " \"" << token.valueToTerminal()       << "\""; break;
-        case TokenType::COMMENT      : os << " \"" << token.valueToComment()        << "\""; break;
-        case TokenType::PARAM_NAME   : os << " \"" << token.valueToParameterName()  << "\""; break;
-        case TokenType::PARAM_VALUE  : os << " \"" << token.valueToParameterValue() << "\""; break;
+        case TokenType::INTERMEDIATE : os << " \"" << token.toIntermediate()   << "\""; break;
+        case TokenType::TERMINAL     : os << " \"" << token.toTerminal()       << "\""; break;
+        case TokenType::COMMENT      : os << " \"" << token.toComment()        << "\""; break;
+        case TokenType::PARAM_NAME   : os << " \"" << token.toParameterName()  << "\""; break;
+        case TokenType::PARAM_VALUE  : os << " \"" << token.toParameterValue() << "\""; break;
         default : break;
     }
 
@@ -60,62 +59,99 @@ std::ostream & operator<<(std::ostream & os, const Token & token)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-long Token::valueSize(void) const
+Token::Token(void)
+: type(TokenType::ERROR), start(nullptr), end(nullptr)
+{ }
+
+////////////////////////////////////////////////////////////////////////////////
+Token::Token(TokenType type, const char * start, const char * end) throw(std::runtime_error)
+: type(type), start(start), end(end)
 {
-    return (end - value);
+    if(!start)
+        throw std::runtime_error("Wrong start of token");
+
+    if(!end)
+        throw std::runtime_error("Wrong end of token");
+
+    if(start > end)
+        throw std::runtime_error("Inverted start/end of token");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::valueToVerbatim(void) const
+bool Token::operator ==(const Token & token) const
 {
-    if((value != nullptr) && (end != nullptr))
-        return std::string(value, end - value);
+    return type == token.type && start == token.start && end == token.end;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+bool Token::operator !=(const Token & token) const
+{
+    return !(*this == token);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+TokenType Token::getType(void) const
+{
+    return type;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+unsigned long Token::getLength(void) const
+{
+    return (end - start);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+std::string Token::toVerbatim(void) const throw(std::runtime_error)
+{
+    if((start != nullptr) && (end != nullptr))
+        return std::string(start, end - start);
     else
-        return std::string("value error");
+        throw std::runtime_error("Unable to convert token to verbatim text");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::valueToComment(void) const
+std::string Token::toComment(void) const throw(std::runtime_error)
 {
-    if((value != nullptr) && (end != nullptr))
-        return std::string(value, end - value);
+    if((start != nullptr) && (end != nullptr))
+        return std::string(start, end - start);
     else
-        return std::string("value error");
+        throw std::runtime_error("Unable to convert token to comment");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::valueToIntermediate(void) const
+std::string Token::toIntermediate(void) const throw(std::runtime_error)
 {
-    if((value != nullptr) && (end != nullptr))
-        return std::string(value + 1, end - value - 2);
+    if((start != nullptr) && (end != nullptr))
+        return std::string(start + 1, end - start - 2);
     else
-        return std::string("value error");
+        throw std::runtime_error("Unable to convert token to intermediate name");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::valueToTerminal(void) const
+std::string Token::toTerminal(void) const throw(std::runtime_error)
 {
-    if((value != nullptr) && (end != nullptr))
-        return std::string(value, end - value);
+    if((start != nullptr) && (end != nullptr))
+        return std::string(start, end - start);
     else
-        return std::string("value error");
+        throw std::runtime_error("Unable to convert token to terminal name");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::valueToParameterName(void) const
+std::string Token::toParameterName(void) const throw(std::runtime_error)
 {
-    if((value != nullptr) && (end != nullptr))
-        return std::string(value + PARAM_NAME_PREFIX_SIZE, end - (value + PARAM_NAME_PREFIX_SIZE));
+    if((start != nullptr) && (end != nullptr))
+        return std::string(start + PARAM_NAME_PREFIX_SIZE, end - (start + PARAM_NAME_PREFIX_SIZE));
     else
-        return std::string("value error");
+        throw std::runtime_error("Unable to convert token to parameter name");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::valueToParameterValue(void) const
+std::string Token::toParameterValue(void) const throw(std::runtime_error)
 {
-    if((value != nullptr) && (end != nullptr))
+    if((start != nullptr) && (end != nullptr))
     {
-        std::string paramValue(value + 1, end - value - 2);
+        std::string paramValue(start + 1, end - start - 2);
 
         std::size_t pos = 0;
         while((pos = paramValue.find("\\\"", pos)) != std::string::npos)
@@ -124,14 +160,14 @@ std::string Token::valueToParameterValue(void) const
         return paramValue;
     }
     else
-        return std::string("value error");
+        throw std::runtime_error("Unable to convert token to parameter value");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::valueToTypeName(void) const
+std::string Token::toTypeName(void) const throw(std::runtime_error)
 {
-    if((value != nullptr) && (end != nullptr))
-        return std::string(value + TYPE_NAME_PREFIX_SIZE, end - (value + TYPE_NAME_PREFIX_SIZE) - 1);
+    if((start != nullptr) && (end != nullptr))
+        return std::string(start + TYPE_NAME_PREFIX_SIZE, end - (start + TYPE_NAME_PREFIX_SIZE) - 1);
     else
-        return std::string("value error");
+        throw std::runtime_error("Unable to convert token to type name");
 }

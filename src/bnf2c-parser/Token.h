@@ -8,6 +8,7 @@
 #define _TOKEN_H_
 #include <string>
 #include <ostream>
+#include <stdexcept>
 
 enum class TokenType
 {
@@ -29,24 +30,30 @@ enum class TokenType
     ERROR
 };
 
-struct Token
+class Token
 {
-    TokenType    type;
-    const char * value;
-    const char * end;
-    int          line;
-    int          column;
+    public :
+        Token(void);
+        Token(TokenType type, const char * start, const char * end) throw(std::runtime_error);
 
+        bool operator ==(const Token & token) const;
+        bool operator !=(const Token & token) const;
 
-    long        valueSize(void) const;
+        TokenType     getType(void) const;
+        unsigned long getLength(void) const;
 
-    std::string valueToVerbatim(void) const;
-    std::string valueToComment(void) const;
-    std::string valueToIntermediate(void) const;
-    std::string valueToTerminal(void) const;
-    std::string valueToParameterName(void) const;
-    std::string valueToParameterValue(void) const;
-    std::string valueToTypeName(void) const;
+        std::string toVerbatim(void) const throw(std::runtime_error);
+        std::string toComment(void) const throw(std::runtime_error);
+        std::string toIntermediate(void) const throw(std::runtime_error);
+        std::string toTerminal(void) const throw(std::runtime_error);
+        std::string toParameterName(void) const throw(std::runtime_error);
+        std::string toParameterValue(void) const throw(std::runtime_error);
+        std::string toTypeName(void) const throw(std::runtime_error);
+
+    private :
+        TokenType    type;
+        const char * start;
+        const char * end;
 };
 
 std::ostream & operator<<(std::ostream & os, const TokenType tokenType);

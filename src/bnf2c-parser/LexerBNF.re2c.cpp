@@ -11,7 +11,7 @@
 
 /*!re2c
    re2c:define:YYCTYPE = "unsigned char";
-   re2c:define:YYCURSOR = m_input;
+   re2c:define:YYCURSOR = m_state.input;
    re2c:define:YYMARKER = marker;
    re2c:indent:top = 1;
    re2c:indent:string = "    ";
@@ -22,84 +22,82 @@ const std::string LexerBNF::BNF2C_TOKEN("/*!bnf2c");
 
 ////////////////////////////////////////////////////////////////////////////////
 LexerBNF::LexerBNF(const std::string & input, std::ostream & output)
-: m_input(input.c_str()), m_lastNewLine(input.c_str()), m_line(1), m_tabs(0), m_output(output)
+: m_state(input.c_str()), m_lastState(input.c_str()), m_output(output)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 bool LexerBNF::moveToNextBnf2cBlock(void)
 {
-    const char * start = m_input;
+    const char * start = m_state.input;
 
-    while((m_input[0] != '\0') && (LexerBNF::BNF2C_TOKEN.compare(0, std::string::npos, m_input, LexerBNF::BNF2C_TOKEN.size()) != 0))
+    while((m_state.input[0] != '\0') && (LexerBNF::BNF2C_TOKEN.compare(0, std::string::npos, m_state.input, LexerBNF::BNF2C_TOKEN.size()) != 0))
     {
-        if(m_input[0] == '\n')
+        if(m_state.input[0] == '\n')
         {
-            if(m_input[1] == '\r')
-                m_input++;
+            if(m_state.input[1] == '\r')
+                m_state.input++;
 
-            m_lastNewLine = m_input + 1;
-            m_line++;
+            m_state.addNewline(m_state.input + 1);
         }
-        else if(m_input[0] == '\r')
+        else if(m_state.input[0] == '\r')
         {
-            if(m_input[1] == '\n')
-                m_input++;
+            if(m_state.input[1] == '\n')
+                m_state.input++;
 
-            m_lastNewLine = m_input + 1;
-            m_line++;
+            m_state.addNewline(m_state.input + 1);
         }
 
-        m_input++;
+        m_state.input++;
     }
 
-    m_output.write(start, m_input - start);
-    if(m_input[0] != '\0')
-        m_input += LexerBNF::BNF2C_TOKEN.size();
+    m_output.write(start, m_state.input - start);
+    if(m_state.input[0] != '\0')
+        m_state.input += LexerBNF::BNF2C_TOKEN.size();
 
-    return (m_input[0] != '\0');
+    return (m_state.input[0] != '\0');
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void LexerBNF::nextToken(Token & token)
+Token LexerBNF::nextToken(void)
 {
     const char * marker;
 
     for (;;)
     {
-        token.value  = m_input;
-        token.line   = m_line;
-        token.column = getColumn();
+        m_lastState = m_state;
 
         /*!re2c
         identifier = [a-zA-Z0-9_\-]+;
         paramName  = [a-zA-Z0-9_\-:]+;
         typeName   = [a-zA-Z0-9_\-\.:<>]+;
 
-        [ ]+ { continue; }
-        [\t] { m_tabs++; continue; }
+        [ ]+                    { continue; }
+        [\t]                    { m_state.addTabulation(); continue; }
 
-        "\n\r"|"\r\n"|"\n"|"\r"  { token.type = TokenType::NEW_LINE; m_line++; m_lastNewLine = m_input; m_tabs = 0; break; }
-        "::="                    { token.type = TokenType::AFFECTATION; break; }
-        "|"                      { token.type = TokenType::OR;          break; }
-        "{"                      { token.type = TokenType::BRACE_OPEN;  break; }
-        "}"                      { token.type = TokenType::BRACE_CLOSE; break; }
-        "="                      { token.type = TokenType::EQUAL;       break; }
+        "\n\r"|"\r\n"|"\n"|"\r" { m_state.addNewline(); return newToken(TokenType::NEW_LINE); }
 
-        "<"identifier">"         { token.type = TokenType::INTERMEDIATE; break; }
-        identifier               { token.type = TokenType::TERMINAL  ;   break; }
-        "#"[^\n]*                { token.type = TokenType::COMMENT;      break; }
-        "bnf2c:type<"typeName">" { token.type = TokenType::TYPE_NAME;    break; }
-        "bnf2c:"paramName        { token.type = TokenType::PARAM_NAME;   break; }
-        '"'("\\\""|[^"])*'"'     { token.type = TokenType::PARAM_VALUE;  break; }
+        "::="                    { return newToken(TokenType::AFFECTATION); }
+        "|"                      { return newToken(TokenType::OR); }
+        "{"                      { return newToken(TokenType::BRACE_OPEN); }
+        "}"                      { return newToken(TokenType::BRACE_CLOSE); }
+        "="                      { return newToken(TokenType::EQUAL); }
 
-        "*\/"  {                  token.type = TokenType::END_OF_INPUT; break; }
-        "\000" { m_input--; token.type = TokenType::END_OF_INPUT; break; }
-        [^]    {                  token.type = TokenType::ERROR;        break; }
+        "<"identifier">"         { return newToken(TokenType::INTERMEDIATE); }
+        identifier               { return newToken(TokenType::TERMINAL); }
+        "#"[^\n\r\000]*          { return newToken(TokenType::COMMENT); }
+        "bnf2c:type<"typeName">" { return newToken(TokenType::TYPE_NAME); }
+        "bnf2c:"paramName        { return newToken(TokenType::PARAM_NAME); }
+        '"'("\\\""|[^"])*'"'     { return newToken(TokenType::PARAM_VALUE); }
+
+        "*\/"  {                   return newToken(TokenType::END_OF_INPUT); }
+        "\000" { m_state.input--;  return newToken(TokenType::END_OF_INPUT); }
+
+        [^]    { break; }
         */
     }
 
-    token.end = m_input;
+    return newToken(TokenType::ERROR);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,83 +106,78 @@ bool LexerBNF::readRuleAction(std::string & ruleAction)
     int nBraces = 1;
 
     // Find start of action
-    while((nBraces > 0) && (m_input[0] != '\0'))
+    while((nBraces > 0) && (m_state.input[0] != '\0'))
     {
-        // Skip unix-style new line
-        if(m_input[0] == '\n')
-        {
-            if(m_input[1] == '\r')
-                m_input++;
+        // Skip spaces and tabulations
+        if((m_state.input[0] != ' ') && (m_state.input[0] != '\t'))
+            break;
 
-            m_lastNewLine = m_input + 1;
-            m_line++;
-            m_input++;
+        // Skip unix-style new line
+        if(m_state.input[0] == '\n')
+        {
+            if(m_state.input[1] == '\r')
+                m_state.input++;
+
+            m_state.addNewline(m_state.input + 1);
             break;
         }
         // Skip windows-style new line
-        else if(m_input[0] == '\r')
+        else if(m_state.input[0] == '\r')
         {
-            if(m_input[1] == '\n')
-                m_input++;
+            if(m_state.input[1] == '\n')
+                m_state.input++;
 
-            m_lastNewLine = m_input + 1;
-            m_line++;
-            m_input++;
+            m_state.addNewline(m_state.input + 1);
             break;
         }
-        // Skip spaces and tabulations
-        if((m_input[0] != ' ') && (m_input[0] != '\t'))
-            break;
 
-        m_input++;
+        m_state.input++;
     }
-    const char * start = m_input;
+    const char * start = m_state.input;
 
     // Find end of action (skip trailing spaces, tabulations and new line)
-    const char * end = m_input;
-    while((nBraces > 0) && (m_input[0] != '\0'))
+    const char * end = m_state.input;
+    while((nBraces > 0) && (m_state.input[0] != '\0'))
     {
         // Increase braces count
-        if(m_input[0] == '{')
+        if(m_state.input[0] == '{')
         {
             nBraces++;
-            end = m_input;
+            end = m_state.input;
         }
         // Decrease braces count
-        else if(m_input[0] == '}')
+        else if(m_state.input[0] == '}')
         {
             nBraces--;
             if(nBraces > 0)
-                end = m_input;
+                end = m_state.input;
         }
         // Skip unix-style new line
-        else if(m_input[0] == '\n')
+        else if(m_state.input[0] == '\n')
         {
-            if(m_input[1] == '\r')
-                m_input++;
+            if(m_state.input[1] == '\r')
+                m_state.input++;
 
-            m_lastNewLine = m_input + 1;
-            m_line++;
+            m_state.addNewline(m_state.input + 1);
         }
         // Skip windows-style new line
-        else if(m_input[0] == '\r')
+        else if(m_state.input[0] == '\r')
         {
-            if(m_input[1] == '\n')
-                m_input++;
+            if(m_state.input[1] == '\n')
+                m_state.input++;
 
-            m_lastNewLine = m_input + 1;
-            m_line++;
+            m_state.addNewline(m_state.input + 1);
         }
         // Skip spaces and tabulations
-        else if((m_input[0] != ' ') && (m_input[0] != '\t'))
-            end = m_input;
+        else if((m_state.input[0] != ' ') && (m_state.input[0] != '\t'))
+            end = m_state.input;
 
-        m_input++;
+        m_state.input++;
     }
 
     if(nBraces == 0)
     {
-        m_input--;
+        m_state.input--;
         ruleAction.assign(start, end - start + 1);
         return true;
     }
@@ -193,33 +186,17 @@ bool LexerBNF::readRuleAction(std::string & ruleAction)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-int LexerBNF::getLine(void) const
+const LexerState & LexerBNF::getState(void)
 {
-    return m_line;
+    return m_state;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-int LexerBNF::getColumn(void) const
+const LexerState & LexerBNF::getLastState(void)
 {
-    return m_input - m_lastNewLine + 1;
+    return m_lastState;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-int LexerBNF::getTabulations(void) const
+Token LexerBNF::newToken(const TokenType type)
 {
-    return m_tabs;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-std::string LexerBNF::getCurrentLine(void) const
-{
-    std::string currentLine;
-    const char * endLine = m_lastNewLine;
-
-    while((endLine[0] != '\0') && (endLine[0] != '\n') && (endLine[0] != '\r'))
-        endLine++;
-
-    currentLine.assign(m_lastNewLine, endLine - m_lastNewLine);
-
-    return currentLine;
+    return { type, m_lastState.input, m_state.input };
 }

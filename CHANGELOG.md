@@ -1,3 +1,7 @@
+Unreleased
+----------
+ * Fix unknown option error message
+
 Version 0.4 (2016-08-22)
 ------------------------
 First _official_ release

@@ -12,7 +12,7 @@
     do {\
         std::stringstream ss;\
         ss << message;\
-        errors.list.push_back(ParsingError({m_token.line, m_token.column, m_lexer.getTabulations(), m_lexer.getCurrentLine(), m_token.valueToVerbatim(), ss.str()}));\
+        errors.list.push_back(ParsingError(m_lexer.getLastState(), m_token.getLength(), ss.str()));\
     } while(false)
 
 
@@ -61,22 +61,22 @@ ParserBNF::ParserBNF(LexerBNF & lexer, Grammar & grammar)
 ////////////////////////////////////////////////////////////////////////////////
 void ParserBNF::parseBnf2cBlock(void)
 {
-    m_lexer.nextToken(m_token);
+    m_token = m_lexer.nextToken();
 
     for(;;)
     {
-        switch(m_token.type)
+        switch(m_token.getType())
         {
             // New parsing rule
             case TokenType::INTERMEDIATE :
             {
-                m_lastIntermediate = m_token.valueToIntermediate();
+                m_lastIntermediate = m_token.toIntermediate();
                 Rule rule(m_lastIntermediate);
                 m_grammar.intermediates.insert(m_lastIntermediate);
 
-                m_lexer.nextToken(m_token);
-                if(m_token.type != TokenType::AFFECTATION)
-                    ADD_PARSING_ERROR("Expected " << TokenType::AFFECTATION << " '::=' but got a " << m_token.type);
+                m_token = m_lexer.nextToken();
+                if(m_token.getType() != TokenType::AFFECTATION)
+                    ADD_PARSING_ERROR("Expected " << TokenType::AFFECTATION << " '::=' but got a " << m_token.getType());
 
                 parseRule(rule);
 
@@ -124,12 +124,12 @@ void ParserBNF::parseBnf2cBlock(void)
             case TokenType::BRACE_CLOSE :
             case TokenType::PARAM_VALUE :
             case TokenType::EQUAL :
-                ADD_PARSING_ERROR("Unexpected " << m_token.type);
+                ADD_PARSING_ERROR("Unexpected " << m_token.getType());
                 break;
 
             // Lexer error
             case TokenType::ERROR :
-                ADD_PARSING_ERROR("Unknown '" << m_token.valueToVerbatim() << "'");
+                ADD_PARSING_ERROR("Unknown '" << m_token.toVerbatim() << "'");
                 break;
 
             // End of input
@@ -138,7 +138,7 @@ void ParserBNF::parseBnf2cBlock(void)
                 break;
         }
 
-        m_lexer.nextToken(m_token);
+        m_token = m_lexer.nextToken();
     }
 }
 
@@ -149,20 +149,20 @@ void ParserBNF::parseRule(Rule & rule)
 
     for(;;)
     {
-        m_lexer.nextToken(m_token);
+        m_token = m_lexer.nextToken();
 
-        switch(m_token.type)
+        switch(m_token.getType())
         {
             case TokenType::INTERMEDIATE :
                 if(endOfRule)
                     return;
-                rule.addSymbol(m_grammar.addIntermediate(m_token.valueToIntermediate()));
+                rule.addSymbol(m_grammar.addIntermediate(m_token.toIntermediate()));
                 break;
 
             case TokenType::TERMINAL :
                 if(endOfRule)
                     return;
-                rule.addSymbol(m_grammar.addTerminal(m_token.valueToTerminal()));
+                rule.addSymbol(m_grammar.addTerminal(m_token.toTerminal()));
                 break;
 
             // Rule action
@@ -170,9 +170,9 @@ void ParserBNF::parseRule(Rule & rule)
             {
                 m_lexer.readRuleAction(rule.action);
 
-                m_lexer.nextToken(m_token);
-                if(m_token.type != TokenType::BRACE_CLOSE)
-                    ADD_PARSING_ERROR("Expected " << TokenType::BRACE_CLOSE << " '}' but got " << m_token.type);
+                m_token = m_lexer.nextToken();
+                if(m_token.getType() != TokenType::BRACE_CLOSE)
+                    ADD_PARSING_ERROR("Expected " << TokenType::BRACE_CLOSE << " '}' but got " << m_token.getType());
 
                 endOfRule = true;
 
@@ -184,11 +184,11 @@ void ParserBNF::parseRule(Rule & rule)
                 break;
 
             case TokenType::AFFECTATION :
-                ADD_PARSING_ERROR("Expected terminal or intermediate name but got " << m_token.type);
+                ADD_PARSING_ERROR("Expected terminal or intermediate name but got " << m_token.getType());
                 break;
 
             case TokenType::ERROR :
-                ADD_PARSING_ERROR("Unknown '" << m_token.valueToVerbatim() << "'");
+                ADD_PARSING_ERROR("Unknown '" << m_token.toVerbatim() << "'");
                 break;
 
             default :
@@ -201,23 +201,25 @@ void ParserBNF::parseRule(Rule & rule)
 ////////////////////////////////////////////////////////////////////////////////
 void ParserBNF::parseParameter(void)
 {
-    std::string paramName = m_token.valueToParameterName();
+    std::string paramName = m_token.toParameterName();
+    auto paramNameToken = m_token;
+    auto paramNameLocation = m_lexer.getLastState();
 
     // Equal token
-    m_lexer.nextToken(m_token);
-    while(m_token.type == TokenType::NEW_LINE)
-        m_lexer.nextToken(m_token);
-    if(m_token.type != TokenType::EQUAL)
-        ADD_PARSING_ERROR("Expected " << TokenType::EQUAL << " '=' but got " << m_token.type);
+    m_token = m_lexer.nextToken();
+    while(m_token.getType() == TokenType::NEW_LINE)
+        m_token = m_lexer.nextToken();
+    if(m_token.getType() != TokenType::EQUAL)
+        ADD_PARSING_ERROR("Expected " << TokenType::EQUAL << " '=' but got " << m_token.getType());
 
     // Parameter value
-    m_lexer.nextToken(m_token);
-    while(m_token.type == TokenType::NEW_LINE)
-        m_lexer.nextToken(m_token);
-    if(m_token.type != TokenType::PARAM_VALUE)
-        ADD_PARSING_ERROR("Expected " << TokenType::PARAM_VALUE << " but got " << m_token.type);
+    m_token = m_lexer.nextToken();
+    while(m_token.getType() == TokenType::NEW_LINE)
+        m_token = m_lexer.nextToken();
+    if(m_token.getType() != TokenType::PARAM_VALUE)
+        ADD_PARSING_ERROR("Expected " << TokenType::PARAM_VALUE << " but got " << m_token.getType());
 
-    std::stringstream ss(m_token.valueToParameterValue());
+    std::stringstream ss(m_token.toParameterValue());
 
     // Lookup in parameterized string map
     ParameterizedStringParamMap::iterator itParameterizedString = m_parameterizedStringParams.find(paramName);
@@ -268,23 +270,23 @@ void ParserBNF::parseParameter(void)
         return;
     }
 
-    ADD_PARSING_ERROR("Unknown parameter \"" << paramName << "\"");
+    errors.list.push_back(ParsingError(paramNameLocation, paramNameToken.getLength(), "Unknown parameter \"" + paramName + "\""));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 void ParserBNF::parseIntermediatesTypes(void)
 {
-    std::string type = m_token.valueToTypeName();
+    std::string type = m_token.toTypeName();
 
     for(;;)
     {
-        m_lexer.nextToken(m_token);
+        m_token = m_lexer.nextToken();
 
-        switch(m_token.type)
+        switch(m_token.getType())
         {
             // Intermediate names
             case TokenType::TERMINAL :
-                m_grammar.intermediateTypes[m_token.valueToTerminal()] = type;
+                m_grammar.intermediateTypes[m_token.toTerminal()] = type;
                 break;
 
             default :

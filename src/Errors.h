@@ -9,8 +9,7 @@
 #include <string>
 #include <list>
 
-#include "bnf2c-parser/LexerBNF.h"
-#include "bnf2c-parser/Token.h"
+#include "bnf2c-parser/LexerState.h"
 
 // Command line parsing error
 struct CommandLineParsingError
@@ -21,11 +20,13 @@ struct CommandLineParsingError
 // Parsing error
 struct ParsingError // : public Error
 {
-    int         line;
-    int         column;
-    int         nbTabs;
-    std::string currentLine;
-    std::string value;
+    ParsingError(const LexerState & lexerState, unsigned long tokenLength, std::string && message);
+
+    std::string   lineString;
+    int           line;
+    int           column;
+    int           nTabs;
+    unsigned long tokenLength;
 
     std::string message;
 };

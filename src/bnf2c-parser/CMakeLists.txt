@@ -10,6 +10,7 @@ add_lexer(LexerBNF.re2c.cpp)
 
 set(SOURCES
     Token.cpp
+    LexerState.cpp
     LexerBNF.cpp
     ParserBNF.cpp
 )

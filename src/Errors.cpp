@@ -17,6 +17,11 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////
+ParsingError::ParsingError(const LexerState & lexerState, unsigned long tokenLength, std::string && message)
+: lineString(lexerState.getCurrentLine()), line(lexerState.getLine()), column(lexerState.getColumn()), nTabs(lexerState.getTabulations()), tokenLength(tokenLength), message(std::forward<std::string>(message))
+{ }
+
+////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator <<(std::ostream & os, const CommandLineParsingError & error)
 {
     if(!error.message.empty())
@@ -28,23 +33,14 @@ std::ostream & operator <<(std::ostream & os, const CommandLineParsingError & er
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator <<(std::ostream & os, const ParsingError & error)
 {
-    std::string currentLine = error.currentLine;
-
     os << COLOR_RED COLOR_BOLD "Parsing error" COLOR_RESET COLOR_BOLD " at L" << error.line << ":C" << error.column << " : " << error.message << COLOR_RESET COLOR_NORMAL << std::endl;
-    os << currentLine << std::endl;
-    if(error.value.size() > 1)
-    {
-        for(int i=0; i<error.nbTabs; i++)
-            os << '\t';
-        os << COLOR_GREEN COLOR_BOLD << std::setw(error.column - error.nbTabs) << std::setfill(' ') << std::right << '^';
-        os << std::setw(error.value.size() - 1) << std::setfill('-') << std::right << '^' << std::setfill(' ') << COLOR_RESET COLOR_NORMAL << std::endl;
-    }
-    else
-    {
-        for(int i=0; i<error.nbTabs; i++)
-            os << '\t';
-        os << COLOR_GREEN COLOR_BOLD << std::setw(error.column - error.nbTabs) << std::right << '^' << COLOR_RESET COLOR_NORMAL << std::endl;
-    }
+    os << error.lineString << std::endl;
+    for(int i=0; i<error.nTabs; i++)
+        os << '\t';
+    os << COLOR_GREEN COLOR_BOLD << std::setw(error.column - error.nTabs) << std::setfill(' ') << std::right << '^';
+    if(error.tokenLength > 1)
+        os << std::setw(error.tokenLength - 1) << std::setfill('-') << std::right << '^' << std::setfill(' ') << COLOR_RESET COLOR_NORMAL;
+    os << std::endl;
 
     return os;
 }
