@@ -37,10 +37,6 @@ struct GeneratingError // : public Error
     const std::string message;
 };
 
-std::ostream & operator <<(std::ostream & os, const CommandLineParsingError & error);
-std::ostream & operator <<(std::ostream & os, const ParsingError & error);
-std::ostream & operator <<(std::ostream & os, const GeneratingError & error);
-
 // Errors list
 template<class ErrorType>
 struct Errors
@@ -48,14 +44,5 @@ struct Errors
     std::list<ErrorType> list;
     int                  exitCode;
 };
-
-template<class ErrorType>
-std::ostream & operator <<(std::ostream & os, const Errors<ErrorType> & errors)
-{
-    for(const ErrorType & error : errors.list)
-        os << error;
-
-    return os;
-}
 
 #endif /* _ERRORS_H_ */

@@ -102,6 +102,4 @@ struct Options
         static const std::vector<std::string> OPTIONS_TEXT [];
 };
 
-std::ostream & operator <<(std::ostream & os, const Options & options);
-
 #endif /* _OPTIONS_H_ */

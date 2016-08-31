@@ -6,17 +6,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _PARSERBNF_H_
 #define _PARSERBNF_H_
-#include "LexerBNF.h"
-#include "config/ParameterizedString.h"
+#include "Token.h"
 #include "config/Options.h"
-#include "core/Grammar.h"
-#include "core/Rule.h"
 #include "Errors.h"
 
 #include <string>
-#include <list>
-#include <iostream>
 #include <unordered_map>
+
+class ParameterizedString;
+class LexerBNF;
+class Grammar;
+class Rule;
 
 class ParserBNF
 {

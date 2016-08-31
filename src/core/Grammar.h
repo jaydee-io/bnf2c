@@ -8,14 +8,13 @@
 #define _GRAMMAR_H_
 #include "Rule.h"
 #include "Symbol.h"
-#include "config/Options.h"
 #include "Errors.h"
 
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
-#include <set>
-#include <iostream>
+
+class Options;
 
 class Grammar
 {
@@ -58,7 +57,5 @@ class Grammar
 
         IntermediateTypeDictionary intermediateTypes;
 };
-
-std::ostream & operator <<(std::ostream & os, const Grammar & ruleSet);
 
 #endif /* _GRAMMAR_H_ */

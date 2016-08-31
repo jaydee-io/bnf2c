@@ -4,21 +4,18 @@
 # This file is distributed under the 4-clause Berkeley Software Distribution
 # License. See LICENSE for details.
 ################################################################################
+find_package(RE2C REQUIRED)
 
 set(SOURCES
-    Streams.cpp
-    Errors.cpp
-    main.cpp
+    SymbolPrinter.cpp
+    ItemPrinter.cpp
+    RulePrinter.cpp
+    GrammarPrinter.cpp
+    ParserPrinter.cpp
+    ErrorsPrinter.cpp
+    TokenPrinter.cpp
+    OptionsPrinter.cpp
 )
 
-add_executable(bnf2c ${SOURCES})
+add_library(bnf2c-printer STATIC ${SOURCES})
 
-target_link_libraries(bnf2c
-    bnf2c-parser
-    bnf2c-generator
-    bnf2c-core
-    bnf2c-config
-    bnf2c-printer
-)
-
-install(TARGETS bnf2c DESTINATION bin)

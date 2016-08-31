@@ -7,13 +7,10 @@
 #ifndef _PARSERSTATE_H_
 #define _PARSERSTATE_H_
 #include "Item.h"
-#include "config/Options.h"
 #include "Errors.h"
 
 #include <memory>
-#include <unordered_set>
 #include <list>
-#include <ostream>
 
 class Grammar;
 
@@ -22,6 +19,23 @@ class ParserState
     public :
         using Ptr = std::unique_ptr<ParserState>;
         using ItemList = std::list<Item>;
+
+        struct Action
+        {
+            enum class Type
+            {
+                SHIFT,
+                REDUCE,
+                ACCEPT,
+                ERROR
+            } type;
+
+            union 
+            {
+                const Rule * reduceRule;
+                const ParserState * shiftNextState;
+            };
+        };
 
     public :
         bool contains(const Item & item) const;
@@ -32,8 +46,8 @@ class ParserState
 
         void check(Errors<GeneratingError> & errors) const;
 
-        void printDebugActions (std::ostream & os, const Grammar & grammar, const Options & options) const;
-        void printDebugBranches(std::ostream & os, const Grammar & grammar, std::size_t size) const;
+        Action getAction(const std::string & terminal, const std::string & endOfInputToken) const;
+        const ParserState * getGoto(const std::string & intermediate) const;
 
     public :
         ItemList items;
@@ -44,8 +58,5 @@ class ParserState
 
         SymbolSet symbolsAlreadyClosed;
 };
-
-std::ostream & operator <<(std::ostream & os, const Item & item);
-std::ostream & operator <<(std::ostream & os, const ParserState & itemSet);
 
 #endif /* _PARSERSTATE_H_ */

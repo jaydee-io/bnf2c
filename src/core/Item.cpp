@@ -8,10 +8,6 @@
 #include "Rule.h"
 
 #include <map>
-#include <unordered_set>
-#include <sstream>
-#include <algorithm>
-#include <iomanip>
 
 ////////////////////////////////////////////////////////////////////////////////
 Item::Item(const Rule & rule, SymbolList::const_iterator dottedSymbol, const ParserState * nextState)
@@ -69,40 +65,3 @@ bool Item::isNextSymbolEqualTo(const std::string & name)
     return !isDotAtEnd() && dottedSymbol->name == name;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-std::ostream & operator <<(std::ostream & os, const Item & item)
-{
-    if(item.isReduce())
-        os << "[R" << item.rule.numRule << "] ";
-    else if(item.isShift())
-        os << "[S" << (item.nextState != nullptr ? item.nextState->numState : -1) << "] ";
-
-    os << "<" << item.rule.name << "> ::=";
-
-    for(auto symbolIt = item.rule.symbols.begin(); symbolIt != item.rule.symbols.end(); ++symbolIt)
-    {
-        if(symbolIt == item.dottedSymbol)
-            os << " •" << *symbolIt;
-        else
-            os << " " << *symbolIt;
-    }
-
-    if(item.dottedSymbol == item.rule.symbols.end())
-        os << " •";
-
-    if(!item.lookaheads.empty())
-    {
-        os << ", ";
-        for(auto itSymbol = item.lookaheads.begin(); itSymbol != item.lookaheads.end(); ++itSymbol)
-        {
-            os << *itSymbol;
-
-            auto nextSymbol = itSymbol;
-            ++nextSymbol;
-            if(nextSymbol != item.lookaheads.end())
-                os << '/';
-        }
-    }
-
-    return os;
-}

@@ -8,9 +8,6 @@
 #define _ITEM_H_
 #include "Symbol.h"
 
-#include <unordered_set>
-#include <ostream>
-
 class Rule;
 class ParserState;
 
@@ -43,8 +40,6 @@ struct Item
     bool isDotAtEnd(void) const;
     bool isNextSymbolEqualTo(const std::string & name);
 };
-
-std::ostream & operator <<(std::ostream & os, const Item & item);
 
 #endif /* _ITEM_H_ */
 

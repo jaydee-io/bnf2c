@@ -5,6 +5,11 @@
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
 #include "ParserBNF.h"
+#include "LexerBNF.h"
+#include "core/Grammar.h"
+#include "core/Rule.h"
+#include "config/ParameterizedString.h"
+#include "printer/PrettyPrinters.h"
 
 #include <sstream>
 

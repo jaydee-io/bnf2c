@@ -7,7 +7,6 @@
 #ifndef _TOKEN_H_
 #define _TOKEN_H_
 #include <string>
-#include <ostream>
 #include <stdexcept>
 
 enum class TokenType
@@ -55,8 +54,5 @@ class Token
         const char * start;
         const char * end;
 };
-
-std::ostream & operator<<(std::ostream & os, const TokenType tokenType);
-std::ostream & operator<<(std::ostream & os, const Token & token);
 
 #endif /* _TOKEN_H_ */

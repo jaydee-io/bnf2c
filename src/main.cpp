@@ -14,6 +14,7 @@
 #include "core/LR1/LR1Parser.h"
 #include "core/LALR1/LALR1Parser.h"
 #include "generator/ParserGenerator.h"
+#include "printer/PrettyPrinters.h"
 
 #include <string>
 #include <iostream>
@@ -89,7 +90,10 @@ int main(int argc, char ** argv)
 
     // Debug output
     if(options.debugLevel != DebugLevel::NONE)
-        parser->printDebug(std::cerr);
+    {
+        std::cerr << "Rules :" << std::endl << grammar << std::endl << std::endl;
+        std::cerr << "Parse table :" << std::endl << *parser;
+    }
 
     return 0;
 }

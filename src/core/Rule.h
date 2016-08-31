@@ -8,7 +8,6 @@
 #define _RULE_H_
 #include "Symbol.h"
 
-#include <ostream>
 #include <string>
 
 class Rule
@@ -31,7 +30,5 @@ class Rule
         std::string action;
         int         numRule = -1;
 };
-
-std::ostream & operator <<(std::ostream & os, const Rule & rule);
 
 #endif /* _RULE_H_ */

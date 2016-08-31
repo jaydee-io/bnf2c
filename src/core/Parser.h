@@ -6,15 +6,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef _PARSER_H_
 #define _PARSER_H_
-#include "Grammar.h"
 #include "ParserState.h"
-#include "Symbol.h"
-#include "config/Options.h"
 #include "Errors.h"
 
 #include <list>
 #include <cstdint>
-#include <ostream>
+#include <unordered_map>
+
+class Grammar;
+class Options;
 
 class Parser
 {
@@ -27,9 +27,9 @@ class Parser
         void generateStates(void);
         void check(void);
 
-        void printDebug(std::ostream & os) const;
-
         const States & getStates(void) const;
+        const Grammar & getGrammar(void) const;
+        const Options & getOptions(void) const;
 
     public :
         Errors<GeneratingError> errors;

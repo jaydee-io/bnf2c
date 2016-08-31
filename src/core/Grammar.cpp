@@ -5,9 +5,9 @@
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
 #include "Grammar.h"
+#include "config/Options.h"
+#include "printer/PrettyPrinters.h"
 
-#include <iostream>
-#include <regex>
 #include <sstream>
 
 
@@ -79,7 +79,7 @@ const std::string & Grammar::getIntermediateType(const std::string & name) const
 ////////////////////////////////////////////////////////////////////////////////
 size_t Grammar::getIntermediateIndex(const std::string & name) const
 {
-    return std::distance(intermediates.begin(), std::find(intermediates.begin(), intermediates.end(), name));
+    return std::distance(intermediates.begin(), intermediates.find(name));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ void Grammar::replacePseudoVariables(Options & options)
 void Grammar::check(void)
 {
     // Check start rule
-    if(std::find(intermediates.begin(), intermediates.end(), Grammar::START_RULE) != intermediates.end())
+    if(intermediates.find(Grammar::START_RULE) != intermediates.end())
     {
         Grammar::RuleMap::size_type nbStartsRules = rules.count(Grammar::START_RULE);
 
@@ -204,14 +204,4 @@ void Grammar::check(void)
     for(Dictionary::const_iterator intermediate = intermediates.begin(); intermediate != intermediates.end(); ++intermediate)
         if(intermediateTypes.find(*intermediate) == intermediateTypes.end())
             ADD_GENERATING_ERROR("Intermediate '" + (*intermediate) + "' has no type");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-std::ostream & operator <<(std::ostream & os, const Grammar & grammar)
-{
-    os << "Grammar contains " << grammar.rules.size() << " rules" << std::endl;
-    for(Grammar::RuleMap::const_iterator it = grammar.rules.begin(); it != grammar.rules.end(); ++it)
-        os << it->second << std::endl;
-
-    return os;
 }

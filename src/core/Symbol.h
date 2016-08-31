@@ -7,7 +7,6 @@
 #ifndef _SYMBOL_H_
 #define _SYMBOL_H_
 #include <vector>
-#include <iostream>
 #include <string>
 #include <unordered_set>
 
@@ -31,8 +30,6 @@ struct Symbol
 
 using SymbolList = std::vector<Symbol>;
 using SymbolSet = std::unordered_set<Symbol>;
-
-std::ostream & operator <<(std::ostream & os, const Symbol & symbol);
 
 namespace std {
 

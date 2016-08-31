@@ -45,13 +45,3 @@ bool Rule::operator !=(const Rule & rule) const
     return !(*this == rule);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-std::ostream & operator <<(std::ostream & os, const Rule & rule)
-{
-    os << "<" << rule.name << "> ::=";
-
-    for(SymbolList::const_iterator it = rule.symbols.begin(); it != rule.symbols.end(); ++it)
-        os << " " << *it;
-
-    return os;
-}

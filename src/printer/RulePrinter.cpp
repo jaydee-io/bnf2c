@@ -4,20 +4,16 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#include "Symbol.h"
+#include "PrettyPrinters.h"
+#include "core/Rule.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-bool Symbol::operator ==(const Symbol & symbol) const
+std::ostream & operator <<(std::ostream & os, const Rule & rule)
 {
-    if(&symbol == this)
-       return true;
+    os << "<" << rule.name << "> ::=";
 
-    return (type == symbol.type) && (name == symbol.name);
+    for(SymbolList::const_iterator it = rule.symbols.begin(); it != rule.symbols.end(); ++it)
+        os << " " << *it;
+
+    return os;
 }
-
-////////////////////////////////////////////////////////////////////////////////
-bool Symbol::operator !=(const Symbol & symbol) const
-{
-    return !operator ==(symbol);
-}
-
