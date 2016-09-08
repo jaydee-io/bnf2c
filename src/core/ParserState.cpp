@@ -62,9 +62,9 @@ void ParserState::check(Errors<GeneratingError> & errors) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-ParserState::Action ParserState::getAction(const std::string & terminal, const std::string & endOfInputToken) const
+ParsingAction ParserState::getAction(const std::string & terminal, const std::string & endOfInputToken) const
 {
-    ParserState::Action action = { ParserState::Action::Type::ERROR, nullptr };
+    ParsingAction action = { ParsingAction::Type::ERROR, nullptr };
 
     for(const auto & item : items)
     {
@@ -73,7 +73,7 @@ ParserState::Action ParserState::getAction(const std::string & terminal, const s
             // Shift rule
             if(item.dottedSymbol->name == terminal)
             {
-                action.type = ParserState::Action::Type::SHIFT;
+                action.type = ParsingAction::Type::SHIFT;
                 action.shiftNextState = item.nextState;
                 break;
             }
@@ -81,15 +81,15 @@ ParserState::Action ParserState::getAction(const std::string & terminal, const s
         if(item.isReduce())
         {
             // Reduce rule
-            if(item.rule.numRule > 1)
+            if(item.rule.numRule > 1 && item.isTerminalInLookaheads(terminal))
             {
-                action.type = ParserState::Action::Type::REDUCE;
+                action.type = ParsingAction::Type::REDUCE;
                 action.reduceRule = &item.rule;
             }
             // Accept rule
             else if(terminal == endOfInputToken && item.rule.numRule == 1)
             {
-                action.type = ParserState::Action::Type::ACCEPT;
+                action.type = ParsingAction::Type::ACCEPT;
                 action.reduceRule = nullptr;
                 break;
             }
@@ -110,14 +110,14 @@ const ParserState * ParserState::getGoto(const std::string & intermediate) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool ParserState::symbolNeedsToBeClosed(const Symbol & symbol)
+bool ParserState::isSameActionForAllTerminals(const Grammar & grammar, const std::string & endOfInputToken) const
 {
-    if(symbol.isIntermediate() && symbolsAlreadyClosed.find(symbol) == symbolsAlreadyClosed.end())
-    {
-        symbolsAlreadyClosed.insert(symbol);
-        return true;
-    }
+    const auto firstAction = getAction(endOfInputToken, endOfInputToken);
 
-    return false;
+    for(const auto & terminal :grammar.terminals)
+        if(getAction(terminal, endOfInputToken) != firstAction)
+            return false;
+
+    return true;
 }
 

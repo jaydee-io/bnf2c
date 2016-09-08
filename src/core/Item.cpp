@@ -60,8 +60,13 @@ bool Item::isDotAtEnd(void) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool Item::isNextSymbolEqualTo(const std::string & name)
+bool Item::isNextSymbolEqualTo(const std::string & name) const
 {
     return !isDotAtEnd() && dottedSymbol->name == name;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+bool Item::isTerminalInLookaheads(const std::string & terminal) const
+{
+    return lookaheads.empty() || lookaheads.find({ Symbol::Type::TERMINAL, terminal }) != lookaheads.end();
+}

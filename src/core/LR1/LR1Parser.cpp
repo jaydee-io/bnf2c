@@ -5,6 +5,7 @@
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
 #include "LR1Parser.h"
+#include "config/Options.h"
 
 #include <utility>
 
@@ -13,7 +14,7 @@ ParserState::Ptr LR1Parser::createStartState(void)
 {
     auto startState = std::make_unique<LR1State>();
     auto & startRule = m_grammar.getStartRule();
-    startState->addItem(startRule, startRule.symbols.begin(), { { Symbol::Type::TERMINAL, "$" } });
+    startState->addItem(startRule, startRule.symbols.begin(), { { Symbol::Type::TERMINAL, m_options.endOfInputToken } });
     return std::move(startState);
 }
 

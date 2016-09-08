@@ -32,14 +32,14 @@ std::string concatenateStrings(const Container & strings, const std::string & ex
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void printStateActions(std::ostream & os, const ParserState::Action & action, size_t padding)
+void printStateActions(std::ostream & os, const ParsingAction & action, size_t padding)
 {
     switch(action.type)
     {
-        case ParserState::Action::Type::SHIFT :  os << 'S' << std::setw(padding - 1) << std::left << (action.shiftNextState != nullptr ? action.shiftNextState->numState : -1) << '|'; break;
-        case ParserState::Action::Type::REDUCE : os << 'R' << std::setw(padding - 1) << std::left << (action.reduceRule != nullptr ? action.reduceRule->numRule : -1) << '|'; break;
-        case ParserState::Action::Type::ACCEPT : os << std::setw(padding) << std::left << "ACC" << '|'; break;
-        case ParserState::Action::Type::ERROR :  os << std::setw(padding + 1) << std::right << '|'; break;
+        case ParsingAction::Type::SHIFT :  os << 'S' << std::setw(padding - 1) << std::left << (action.shiftNextState != nullptr ? action.shiftNextState->numState : -1) << '|'; break;
+        case ParsingAction::Type::REDUCE : os << 'R' << std::setw(padding - 1) << std::left << (action.reduceRule != nullptr ? action.reduceRule->numRule : -1) << '|'; break;
+        case ParsingAction::Type::ACCEPT : os << std::setw(padding) << std::left << "ACC" << '|'; break;
+        case ParsingAction::Type::ERROR :  os << std::setw(padding + 1) << std::right << '|'; break;
     };
 }
 

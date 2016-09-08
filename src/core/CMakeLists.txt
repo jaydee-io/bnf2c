@@ -11,6 +11,7 @@ set(SOURCES
     Rule.cpp
     Item.cpp
     Grammar.cpp
+    ParsingAction.cpp
     ParserState.cpp
     Parser.cpp
     LR0/LR0Parser.cpp

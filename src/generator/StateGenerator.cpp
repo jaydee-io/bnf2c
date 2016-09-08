@@ -90,84 +90,68 @@ void StateGenerator::printBranchesTableTo(std::ostream & os) const
 ////////////////////////////////////////////////////////////////////////////////
 void StateGenerator::printActionItemsTo(std::ostream & os) const
 {
-    // If the first action is a reduce (not the accept one) whatever the terminal, don't generate a switch
-    auto & firstItem = m_state.items.front();
-    if(m_state.items.size() >= 1 && firstItem.isReduce() && firstItem.rule.numRule > 1)
+    // If whatever the terminal the action is the same, don't generate a switch
+    if(m_state.isSameActionForAllTerminals(m_grammar, m_options.endOfInputToken))
     {
-        printReduceActionTo(*m_state.items.begin(), os);
-        return;
+        printReduceActionTo(m_state.items.front().rule, os);
     }
-
-    // Regroup all cases of an item
-    std::map<Item, std::set<std::string> > cases;
-    for(const std::string & terminal : m_grammar.terminals)
+    else
     {
-        ParserState::ItemList::const_iterator it;
+        // Regroup all cases of an item
+        std::unordered_map<ParsingAction, std::unordered_set<std::string> > cases;
+        for(const auto & terminal : m_grammar.terminals)
+            cases[m_state.getAction(terminal, m_options.endOfInputToken)].insert(terminal);
+        cases[m_state.getAction(m_options.endOfInputToken, m_options.endOfInputToken)].insert(m_options.endOfInputToken);
 
-        // Shift rule
-        for(it = m_state.items.begin(); it != m_state.items.end(); ++it)
+        // Switch on terminal
+        m_switchOnTerminal.printBeginTo(os);
+        for(const auto & casesOfItem : cases)
         {
-            if(it->isShift() && it->dottedSymbol->name == terminal)
+            // Generate all cases
+            if(casesOfItem.first.type != ParsingAction::Type::ERROR)
             {
-                cases[*it].insert(terminal);
-                break;
+                for(const auto & terminal : casesOfItem.second)
+                {
+                    os << m_options.indent << "case " << m_options.tokenPrefix << terminal << " : ";
+
+                    if(casesOfItem.second.size() > 1)
+                        os << std::endl;
+                }
+            }
+
+            // Generate action
+            switch(casesOfItem.first.type)
+            {
+                case ParsingAction::Type::SHIFT :
+                    if(casesOfItem.second.size() == 1)
+                        printShiftActionTo(casesOfItem.first.shiftNextState, os);
+                    else
+                    {
+                        m_options.indent++;
+                        os << m_options.indent;
+                        printShiftActionTo(casesOfItem.first.shiftNextState, os);
+                        m_options.indent--;
+                    }
+                    break;
+                case ParsingAction::Type::REDUCE :
+                    printReduceActionTo(*casesOfItem.first.reduceRule, os);
+                    break;
+                case ParsingAction::Type::ACCEPT :
+                    os << "return " << m_options.acceptState << ";" << std::endl;
+                    break;
+                case ParsingAction::Type::ERROR :
+                    /* Error case is handled at higher level */
+                    break;
             }
         }
-
-        // Reduce
-        if(it == m_state.items.end() && firstItem.isReduce() && firstItem.rule.numRule > 1)
-            cases[firstItem].insert(terminal);
     }
-
-    // If there is a reduce rule (not the accept one), reduce also when current token is the end of input
-    if(firstItem.isReduce() && firstItem.rule.numRule > 1)
-        cases[firstItem].insert(m_options.endOfInputToken);
-
-    // Switch on terminal
-    m_switchOnTerminal.printBeginTo(os);
-
-    for(const std::pair<const Item, std::set<std::string> > & casesOfItem : cases)
-    {
-        // Generate all cases
-        for(std::set<std::string>::const_iterator it = casesOfItem.second.begin(); it != casesOfItem.second.end(); ++it)
-        {
-            os << m_options.indent << "case " << m_options.tokenPrefix << *it << " : ";
-
-            if(casesOfItem.second.size() > 1)
-                os << std::endl;
-        }
-
-        // Shift action
-        if(casesOfItem.first.isShift() && casesOfItem.first.dottedSymbol->isTerminal())
-        {
-            if(casesOfItem.second.size() == 1)
-                printShiftActionTo(casesOfItem.first, os);
-            else
-            {
-                m_options.indent++;
-                os << m_options.indent;
-                printShiftActionTo(casesOfItem.first, os);
-                m_options.indent--;
-            }
-        }
-        // Reduce action
-        else if(casesOfItem.first.isReduce())
-        {
-            os << std::endl;
-            printReduceActionTo(casesOfItem.first, os);
-        }
-    }
-
-    // Accept rule
-    if(firstItem.isReduce() && firstItem.rule.numRule == 1)
-        os << m_options.indent << "case " << m_options.tokenPrefix << m_options.endOfInputToken << " : return " << m_options.acceptState << ";" << std::endl;
 
     m_switchOnTerminal.printEndTo(os);
     os << m_options.indent << "break;" << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void StateGenerator::printReduceActionTo(const Item & item, std::ostream & os) const
+void StateGenerator::printReduceActionTo(const Rule & reduceRule, std::ostream & os) const
 {
     os << m_options.indent << '{' << std::endl;
     m_options.indent++;
@@ -175,29 +159,29 @@ void StateGenerator::printReduceActionTo(const Item & item, std::ostream & os) c
     // Rule action code
     os << m_options.indent << m_options.valueType << ' ' << Vars::RETURN << ';' << std::endl << std::endl;
 
-    if(item.rule.action.find_first_of("\n\r") == std::string::npos)
+    if(reduceRule.action.find_first_of("\n\r") == std::string::npos)
         os << m_options.indent;
-    os << item.rule.action << std::endl << std::endl;
+    os << reduceRule.action << std::endl << std::endl;
 
     // Values stack
-    os << m_options.indent << m_options.popValues.replaceParam(Vars::NB_VALUES, std::to_string(item.rule.symbols.size()))  << std::endl;
+    os << m_options.indent << m_options.popValues.replaceParam(Vars::NB_VALUES, std::to_string(reduceRule.symbols.size()))  << std::endl;
     os << m_options.indent << m_options.pushValue.replaceParam(Vars::VALUE,     Vars::RETURN)                       << std::endl;
 
     // States stack
-    os << m_options.indent << m_options.popState.replaceParam(Vars::NB_STATES, std::to_string(item.rule.symbols.size())) << std::endl;
+    os << m_options.indent << m_options.popState.replaceParam(Vars::NB_STATES, std::to_string(reduceRule.symbols.size())) << std::endl;
 
     // New state
     if(m_options.useTableForBranches)
-        os << m_options.indent << "return " << m_options.branchFunctionName << "[(" << m_grammar.intermediates.size() << "*" << m_options.topState << ") + " << m_grammar.getIntermediateIndex(item.rule.name) << "];" << std::endl;
+        os << m_options.indent << "return " << m_options.branchFunctionName << "[(" << m_grammar.intermediates.size() << "*" << m_options.topState << ") + " << m_grammar.getIntermediateIndex(reduceRule.name) << "];" << std::endl;
     else
-        os << m_options.indent << "return " << m_options.branchFunctionName << "(" << m_grammar.getIntermediateIndex(item.rule.name) << ");" << std::endl;
+        os << m_options.indent << "return " << m_options.branchFunctionName << "(" << m_grammar.getIntermediateIndex(reduceRule.name) << ");" << std::endl;
 
     m_options.indent--;
     os << m_options.indent << '}' << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void StateGenerator::printShiftActionTo(const Item & item, std::ostream & os) const
+void StateGenerator::printShiftActionTo(const ParserState * nextState, std::ostream & os) const
 {
     // Push token
     os << m_options.pushValue.replaceParam(Vars::VALUE, m_options.tokenName);
@@ -205,8 +189,8 @@ void StateGenerator::printShiftActionTo(const Item & item, std::ostream & os) co
     // Shift
     os << ' ' << m_options.shiftToken;
 
-    if(item.nextState != nullptr)
-        os << " return " << item.nextState->numState << ';' << std::endl;
+    if(nextState != nullptr)
+        os << " return " << nextState->numState << ';' << std::endl;
     else
         os << " return " << m_options.errorState << ';' << std::endl;
 }

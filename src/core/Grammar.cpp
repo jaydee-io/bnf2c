@@ -105,45 +105,6 @@ SymbolSet Grammar::first(const SymbolList & list) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-SymbolSet Grammar::follow(const Symbol & symbol) const
-{
-    SymbolSet followSet;
-
-    if(symbol.isTerminal())
-        return followSet;
-
-    if(symbol.name == Grammar::START_RULE)
-    {
-        followSet.insert({ Symbol::Type::TERMINAL, "$" });
-    }
-    else
-    {
-        for(auto & rulePair : rules)
-        {
-            const auto & rule = rulePair.second;
-            for(auto itSymbol = rule.symbols.begin(); itSymbol != rule.symbols.end(); ++itSymbol)
-            {
-                if(*itSymbol != symbol)
-                    continue;
-
-                if(itSymbol == rule.symbols.end() - 1)
-                {
-                    const auto followIntermediate = follow({ Symbol::Type::INTERMEDIATE, rule.name });
-                    followSet.insert(followIntermediate.begin(), followIntermediate.end());
-                }
-                else
-                {
-                    const auto firstRemaining = first(rule.remainingSymbolsAfter(itSymbol));
-                    followSet.insert(firstRemaining.begin(), firstRemaining.end());
-                }
-            }
-        }
-    }
-
-    return followSet;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 void Grammar::replacePseudoVariables(Options & options)
 {
     for(RuleMap::value_type & pair : rules)

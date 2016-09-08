@@ -8,6 +8,7 @@
 #define _PARSERSTATE_H_
 #include "Item.h"
 #include "Errors.h"
+#include "ParsingAction.h"
 
 #include <memory>
 #include <list>
@@ -20,23 +21,6 @@ class ParserState
         using Ptr = std::unique_ptr<ParserState>;
         using ItemList = std::list<Item>;
 
-        struct Action
-        {
-            enum class Type
-            {
-                SHIFT,
-                REDUCE,
-                ACCEPT,
-                ERROR
-            } type;
-
-            union 
-            {
-                const Rule * reduceRule;
-                const ParserState * shiftNextState;
-            };
-        };
-
     public :
         bool contains(const Item & item) const;
         void assignSuccessors(const std::string & nextSymbol, const ParserState & nextState);
@@ -46,17 +30,14 @@ class ParserState
 
         void check(Errors<GeneratingError> & errors) const;
 
-        Action getAction(const std::string & terminal, const std::string & endOfInputToken) const;
+        ParsingAction getAction(const std::string & terminal, const std::string & endOfInputToken) const;
         const ParserState * getGoto(const std::string & intermediate) const;
+
+        bool isSameActionForAllTerminals(const Grammar & grammar, const std::string & endOfInputToken) const;
 
     public :
         ItemList items;
         int      numState;
-
-    protected :
-        bool symbolNeedsToBeClosed(const Symbol & symbol);
-
-        SymbolSet symbolsAlreadyClosed;
 };
 
 #endif /* _PARSERSTATE_H_ */

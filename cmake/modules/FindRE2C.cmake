@@ -45,6 +45,7 @@ function(add_lexer)
         add_custom_command(
             OUTPUT ${OUTPUT_FILE}
             COMMAND ${RE2C_EXECUTABLE} -i ${CMAKE_CURRENT_SOURCE_DIR}/${LEXER_SRC} > ${OUTPUT_FILE}
+            DEPENDS ${RE2C_EXECUTABLE}
             DEPENDS ${LEXER_SRC}
             COMMENT "Building lexer source ${OUTPUT_FILE}"
         )

@@ -20,6 +20,9 @@ class LR0State : public ParserState
 
     private :
         void addItemsRange(const Grammar::RuleRange & ruleRange);
+        bool symbolNeedsToBeClosed(const Symbol & symbol);
+
+        SymbolSet symbolsAlreadyClosed;
 };
 
 #endif /* _LR0STATE_H_ */

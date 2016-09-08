@@ -24,8 +24,8 @@ class StateGenerator
 
     private :
         void printActionItemsTo (std::ostream & os) const;
-        void printReduceActionTo(const Item & item, std::ostream & os) const;
-        void printShiftActionTo (const Item & item, std::ostream & os) const;
+        void printReduceActionTo(const Rule & reduceRule, std::ostream & os) const;
+        void printShiftActionTo (const ParserState * nextState, std::ostream & os) const;
 
     private :
         const ParserState & m_state;

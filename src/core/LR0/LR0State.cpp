@@ -50,3 +50,16 @@ bool LR0State::isMergeableWith(const ParserState::Ptr & state)
 
     return true;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+bool LR0State::symbolNeedsToBeClosed(const Symbol & symbol)
+{
+    if(symbol.isIntermediate() && symbolsAlreadyClosed.find(symbol) == symbolsAlreadyClosed.end())
+    {
+        symbolsAlreadyClosed.insert(symbol);
+        return true;
+    }
+
+    return false;
+}
+

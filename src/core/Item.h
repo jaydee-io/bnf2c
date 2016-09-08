@@ -38,7 +38,8 @@ struct Item
     bool isReduce(void) const { return getType() == ActionType::REDUCE; }
 
     bool isDotAtEnd(void) const;
-    bool isNextSymbolEqualTo(const std::string & name);
+    bool isNextSymbolEqualTo(const std::string & name) const;
+    bool isTerminalInLookaheads(const std::string & terminal) const;
 };
 
 #endif /* _ITEM_H_ */
