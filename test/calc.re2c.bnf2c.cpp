@@ -170,7 +170,7 @@ TEST(Calc, AddSubMultiplyDivide)
         calc::stateStack.push(calc::parseFunction(calc::token));
 
     EXPECT_EQ(STATE_ACCEPT, calc::stateStack.top()) << "An error has occured while parsing expression";
-    EXPECT_EQ(29, calc::valueStack.back().value);
+    EXPECT_EQ(20, calc::valueStack.back().value);
 }
 
 } /* Namespace calc */
