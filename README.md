@@ -1,4 +1,4 @@
-bnf2c - Backus-Naur Form to C/C++
+bnf2c - Backus-Naur Form to C/C++ [![Build Status](https://travis-ci.org/jaydee-io/bnf2c.svg?branch=master)](https://travis-ci.org/jaydee-io/bnf2c)
 =================================
 
 Overview
