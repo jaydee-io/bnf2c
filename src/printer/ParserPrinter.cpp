@@ -59,8 +59,8 @@ std::ostream & operator <<(std::ostream & os, const Parser & parser)
     std::string strTerminals = concatenateStrings(parser.getGrammar().terminals) + parser.getOptions().endOfInputToken + '|';
     std::string strIntermediates = concatenateStrings(parser.getGrammar().intermediates, parser.getGrammar().START_RULE);
 
-    os << "     |" << CENTER("Actions", std::max(strTerminals.length(), 7u)) << '|';
-    os <<             CENTER("Branchs", std::max(strIntermediates.length(), 7u)) << '|' << std::endl;
+    os << "     |" << CENTER("Actions", std::max(strTerminals.length(), decltype(strTerminals.length())(7))) << '|';
+    os <<             CENTER("Branchs", std::max(strIntermediates.length(), decltype(strIntermediates.length())(7))) << '|' << std::endl;
     os << "State|" << strTerminals << strIntermediates << std::endl;
     os << std::setfill('-') << std::setw(strTerminals.length() + strIntermediates.length() + 6) << '-' << std::setfill(' ') << std::endl;
 
