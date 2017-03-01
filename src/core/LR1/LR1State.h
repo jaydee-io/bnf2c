@@ -14,6 +14,8 @@ class Rule;
 class LR1State : public ParserState
 {
     public :
+        virtual ~LR1State(void) = default;
+
         void addItem(const Rule & rule, const SymbolList::const_iterator dottedSymbol, SymbolSet && lookahead);
         void close(const Grammar & grammar) override;
         bool isMergeableWith(const Ptr & state) override;

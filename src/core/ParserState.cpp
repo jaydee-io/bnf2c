@@ -18,7 +18,7 @@ bool ParserState::contains(const Item & item) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ParserState::assignSuccessors(const std::string & nextSymbol, const ParserState & nextState)
+void ParserState::assignSuccessors(const std::string & nextSymbol, ParserState & nextState)
 {
     for(auto & item : items)
         if(item.isNextSymbolEqualTo(nextSymbol))

@@ -10,13 +10,13 @@
 #include <map>
 
 ////////////////////////////////////////////////////////////////////////////////
-Item::Item(const Rule & rule, SymbolList::const_iterator dottedSymbol, const ParserState * nextState)
+Item::Item(const Rule & rule, SymbolList::const_iterator dottedSymbol, ParserState * nextState)
 : rule(rule), dottedSymbol(dottedSymbol), nextState(nextState)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Item::Item(const Rule & rule, SymbolList::const_iterator dottedSymbol, const ParserState * nextState, SymbolSet && lookaheads)
+Item::Item(const Rule & rule, SymbolList::const_iterator dottedSymbol, ParserState * nextState, SymbolSet && lookaheads)
 : rule(rule), dottedSymbol(dottedSymbol), nextState(nextState), lookaheads(std::forward<SymbolSet>(lookaheads))
 {
 }

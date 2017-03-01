@@ -55,7 +55,25 @@ ParserState::Ptr & Parser::addOrMergeState(ParserState::Ptr && newState)
     else
     {
         (*mergeableSate)->merge(newState);
+
+        // Recusively propagate lookahead of first item to all successors
+        mergeSucessorsLookahead(*(*mergeableSate), newState->items.begin()->lookaheads);
+
         return *mergeableSate;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void Parser::mergeSucessorsLookahead(ParserState & state, SymbolSet & lookaheads)
+{
+    auto firstItemIt = state.items.begin();
+
+    if(firstItemIt != state.items.end())
+    {
+        firstItemIt->lookaheads.insert(lookaheads.begin(), lookaheads.end());
+
+        if(firstItemIt->isShift() && firstItemIt->nextState)
+            mergeSucessorsLookahead(*(firstItemIt->nextState), lookaheads);
     }
 }
 

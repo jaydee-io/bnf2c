@@ -22,13 +22,13 @@ struct Item
 
     const Rule & rule;
     SymbolList::const_iterator dottedSymbol;
-    const ParserState * nextState;
+    ParserState * nextState;
     SymbolSet lookaheads;
 
 
     Item(void) = default;
-    Item(const Rule & rule, SymbolList::const_iterator dot, const ParserState * nextState);
-    Item(const Rule & rule, SymbolList::const_iterator dot, const ParserState * nextState, SymbolSet && lookahead);
+    Item(const Rule & rule, SymbolList::const_iterator dot, ParserState * nextState);
+    Item(const Rule & rule, SymbolList::const_iterator dot, ParserState * nextState, SymbolSet && lookahead);
 
     bool operator ==(const Item & item) const;
     bool operator < (const Item & item) const;

@@ -37,6 +37,7 @@ class Parser
     protected :
         ParserState::Ptr & addNewState(ParserState::Ptr && state);
         ParserState::Ptr & addOrMergeState(ParserState::Ptr && state);
+        void mergeSucessorsLookahead(ParserState & state, SymbolSet & lookaheads);
 
         virtual ParserState::Ptr createStartState(void) = 0;
         virtual std::unordered_map<std::string, ParserState::Ptr> createSuccessorStates(const ParserState::Ptr & state) = 0;

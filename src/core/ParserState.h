@@ -22,8 +22,10 @@ class ParserState
         using ItemList = std::list<Item>;
 
     public :
+        virtual ~ParserState(void) = default;
+
         bool contains(const Item & item) const;
-        void assignSuccessors(const std::string & nextSymbol, const ParserState & nextState);
+        void assignSuccessors(const std::string & nextSymbol, ParserState & nextState);
         virtual void close(const Grammar & grammar) = 0;
         virtual bool isMergeableWith(const Ptr & state) = 0;
         virtual void merge(Ptr & state) { /* By default, do nothing */ }

@@ -1,5 +1,7 @@
 Unreleased
 ----------
+ * Fix issue with lookaheads propagating on state merge
+ * Fix issue in LR1/LALR1 parsing algorithms
  * Fix unknown option error message
 
 Version 0.4 (2016-08-22)

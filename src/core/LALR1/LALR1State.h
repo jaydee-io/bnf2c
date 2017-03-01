@@ -11,6 +11,8 @@
 class LALR1State : public LR1State
 {
     public :
+        virtual ~LALR1State(void) = default;
+
         bool isMergeableWith(const Ptr & state) override;
         void merge(Ptr & state) override;
 };
