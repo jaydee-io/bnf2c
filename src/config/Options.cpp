@@ -66,7 +66,7 @@ std::ostream & operator <<(std::ostream & os, const Indenter & indenter)
 
 ////////////////////////////////////////////////////////////////////////////////
 Options Options::DEFAULT;
-const std::string Options::VERSION            ("0.4");
+const std::string Options::VERSION            ("0.5");
 
 const struct option Options::OPTIONS [] = {
     { "help",                   no_argument,       nullptr, 'h'},
