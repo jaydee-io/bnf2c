@@ -33,7 +33,7 @@ class Token
 {
     public :
         Token(void);
-        Token(TokenType type, const char * start, const char * end) throw(std::runtime_error);
+        Token(TokenType type, const char * start, const char * end);
 
         bool operator ==(const Token & token) const;
         bool operator !=(const Token & token) const;
@@ -41,13 +41,13 @@ class Token
         TokenType     getType(void) const;
         unsigned long getLength(void) const;
 
-        std::string toVerbatim(void) const throw(std::runtime_error);
-        std::string toComment(void) const throw(std::runtime_error);
-        std::string toIntermediate(void) const throw(std::runtime_error);
-        std::string toTerminal(void) const throw(std::runtime_error);
-        std::string toParameterName(void) const throw(std::runtime_error);
-        std::string toParameterValue(void) const throw(std::runtime_error);
-        std::string toTypeName(void) const throw(std::runtime_error);
+        std::string toVerbatim(void) const;
+        std::string toComment(void) const;
+        std::string toIntermediate(void) const;
+        std::string toTerminal(void) const;
+        std::string toParameterName(void) const;
+        std::string toParameterValue(void) const;
+        std::string toTypeName(void) const;
 
     private :
         TokenType    type;

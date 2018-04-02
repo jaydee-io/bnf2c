@@ -1,6 +1,6 @@
 Unreleased
 ----------
-_(nothing)_
+ * Update to gcc 7.2 & clang 6.0
 
 Version 0.5 (2017-03-14)
 ------------------------

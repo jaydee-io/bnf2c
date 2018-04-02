@@ -18,7 +18,7 @@ Token::Token(void)
 { }
 
 ////////////////////////////////////////////////////////////////////////////////
-Token::Token(TokenType type, const char * start, const char * end) throw(std::runtime_error)
+Token::Token(TokenType type, const char * start, const char * end)
 : type(type), start(start), end(end)
 {
     if(!start)
@@ -56,7 +56,7 @@ unsigned long Token::getLength(void) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::toVerbatim(void) const throw(std::runtime_error)
+std::string Token::toVerbatim(void) const
 {
     if((start != nullptr) && (end != nullptr))
         return std::string(start, end - start);
@@ -65,7 +65,7 @@ std::string Token::toVerbatim(void) const throw(std::runtime_error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::toComment(void) const throw(std::runtime_error)
+std::string Token::toComment(void) const
 {
     if((start != nullptr) && (end != nullptr))
         return std::string(start, end - start);
@@ -74,7 +74,7 @@ std::string Token::toComment(void) const throw(std::runtime_error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::toIntermediate(void) const throw(std::runtime_error)
+std::string Token::toIntermediate(void) const
 {
     if((start != nullptr) && (end != nullptr))
         return std::string(start + 1, end - start - 2);
@@ -83,7 +83,7 @@ std::string Token::toIntermediate(void) const throw(std::runtime_error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::toTerminal(void) const throw(std::runtime_error)
+std::string Token::toTerminal(void) const
 {
     if((start != nullptr) && (end != nullptr))
         return std::string(start, end - start);
@@ -92,7 +92,7 @@ std::string Token::toTerminal(void) const throw(std::runtime_error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::toParameterName(void) const throw(std::runtime_error)
+std::string Token::toParameterName(void) const
 {
     if((start != nullptr) && (end != nullptr))
         return std::string(start + PARAM_NAME_PREFIX_SIZE, end - (start + PARAM_NAME_PREFIX_SIZE));
@@ -101,7 +101,7 @@ std::string Token::toParameterName(void) const throw(std::runtime_error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::toParameterValue(void) const throw(std::runtime_error)
+std::string Token::toParameterValue(void) const
 {
     if((start != nullptr) && (end != nullptr))
     {
@@ -118,7 +118,7 @@ std::string Token::toParameterValue(void) const throw(std::runtime_error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::string Token::toTypeName(void) const throw(std::runtime_error)
+std::string Token::toTypeName(void) const
 {
     if((start != nullptr) && (end != nullptr))
         return std::string(start + TYPE_NAME_PREFIX_SIZE, end - (start + TYPE_NAME_PREFIX_SIZE) - 1);

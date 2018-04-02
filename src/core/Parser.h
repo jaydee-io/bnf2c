@@ -23,6 +23,7 @@ class Parser
 
     public :
         Parser(const Grammar & grammar, Options & options);
+        virtual ~Parser(void) = default;
 
         void generateStates(void);
         void check(void);
