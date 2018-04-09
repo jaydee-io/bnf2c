@@ -1,5 +1,6 @@
 Unreleased
 ----------
+ * Added VSCode workspace
  * Fix recursive rule issue
  * Update to gcc 7.2 & clang 6.0
 
