@@ -160,7 +160,7 @@ void Options::parseArguments(int argc, char ** argv)
 
     // Construct short options table
     int nbShortOptions = 0;
-    for(int i=0; i<(ARRAY_SIZE(Options::OPTIONS) - 1); i++)
+    for(size_t i=0; i<(ARRAY_SIZE(Options::OPTIONS) - 1); i++)
     {
         switch(Options::OPTIONS[i].has_arg)
         {
@@ -171,7 +171,7 @@ void Options::parseArguments(int argc, char ** argv)
         }
     }
     char * shortOptions = new char[nbShortOptions];
-    for(int i=0, j=0; i<(ARRAY_SIZE(Options::OPTIONS) - 1); i++)
+    for(size_t i=0, j=0; i<(ARRAY_SIZE(Options::OPTIONS) - 1); i++)
     {
         shortOptions[j++] = Options::OPTIONS[i].val;
         switch(Options::OPTIONS[i].has_arg)
@@ -266,7 +266,7 @@ void Options::parseArguments(int argc, char ** argv)
         for(int max=i + nbOptions; i<max; i++) \
         { \
             std::cout << "  -" << (char) Options::OPTIONS[i].val << ", --" << std::left << std::setw(22) << Options::OPTIONS[i].name  << "    " << Options::OPTIONS_TEXT[i][0] << std::endl; \
-            for(int j=1; j<Options::OPTIONS_TEXT[i].size(); j++) \
+            for(size_t j=1; j<Options::OPTIONS_TEXT[i].size(); j++) \
                 std::cout << std::left << std::setw(34) << ' ' << Options::OPTIONS_TEXT[i][j] << std::endl; \
         } \
     } while(false)

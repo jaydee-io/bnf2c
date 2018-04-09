@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 class Grammar;
-class Options;
+struct Options;
 
 class Parser
 {

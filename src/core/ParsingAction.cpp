@@ -16,15 +16,14 @@ bool ParsingAction::operator ==(const ParsingAction & action) const
     {
         case ParsingAction::Type::SHIFT  :
             return shiftNextState == action.shiftNextState;
-            break;
         case ParsingAction::Type::REDUCE :
             return reduceRule == action.reduceRule;
-            break;
         case ParsingAction::Type::ACCEPT :
         case ParsingAction::Type::ERROR  :
             return true;
-            break;
     }
+
+    return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

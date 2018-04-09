@@ -14,7 +14,7 @@
 #include <unordered_set>
 #include <string>
 
-class Options;
+struct Options;
 
 class Grammar
 {

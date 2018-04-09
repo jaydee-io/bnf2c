@@ -119,7 +119,7 @@ void Grammar::replacePseudoVariables(Options & options)
             .replaceParam(Vars::EXTERNAL_RETURN, replacement.toString());
 
         // Replace pseudo-variables '$1', '$2', ... '$n'
-        for(int i = 1; i <= rule.symbols.size(); i++)
+        for(size_t i = 1; i <= rule.symbols.size(); i++)
         {
             if(rule.symbols[i-1].isIntermediate())
             {

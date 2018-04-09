@@ -26,6 +26,7 @@ add_subdirectory(test)
 add_compile_options(
     -std=c++14
     -Werror
+    -Wall
 )
 
 # All bnf2c modules

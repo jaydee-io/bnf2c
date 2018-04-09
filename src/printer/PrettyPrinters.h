@@ -9,8 +9,8 @@
 #include <ostream>
 
 // Core objects
-class Symbol;
-class Item;
+struct Symbol;
+struct Item;
 class Rule;
 class ParserState;
 class Parser;
@@ -34,11 +34,11 @@ std::ostream & operator<<(std::ostream & os, const Token & token);
 
 
 // Errors
-class CommandLineParsingError;
-class ParsingError;
-class GeneratingError;
+struct CommandLineParsingError;
+struct ParsingError;
+struct GeneratingError;
 template<class ErrorType>
-class Errors;
+struct Errors;
 
 std::ostream & operator <<(std::ostream & os, const CommandLineParsingError & error);
 std::ostream & operator <<(std::ostream & os, const ParsingError & error);
@@ -56,7 +56,7 @@ std::ostream & operator <<(std::ostream & os, const Errors<ErrorType> & errors)
 
 
 // Options
-class Options;
+struct Options;
 
 std::ostream & operator <<(std::ostream & os, const Options & options);
 

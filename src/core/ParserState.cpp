@@ -64,7 +64,7 @@ void ParserState::check(Errors<GeneratingError> & errors) const
 ////////////////////////////////////////////////////////////////////////////////
 ParsingAction ParserState::getAction(const std::string & terminal, const std::string & endOfInputToken) const
 {
-    ParsingAction action = { ParsingAction::Type::ERROR, nullptr };
+    ParsingAction action = { ParsingAction::Type::ERROR };
 
     for(const auto & item : items)
     {
