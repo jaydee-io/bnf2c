@@ -85,16 +85,14 @@ size_t Grammar::getIntermediateIndex(const std::string & name) const
 ////////////////////////////////////////////////////////////////////////////////
 SymbolSet Grammar::first(const SymbolList & list) const
 {
-    SymbolSet firstSet;
-
     if(list[0].isTerminal())
+        return { list[0] };
+
+    SymbolSet firstSet;
+    const auto intermediateRules = rules.equal_range(list[0].name);
+    for(auto itRule = intermediateRules.first; itRule != intermediateRules.second; ++itRule)
     {
-        firstSet.insert(list[0]);
-    }
-    else
-    {
-        const auto intermediateRules = rules.equal_range(list[0].name);
-        for(auto itRule = intermediateRules.first; itRule != intermediateRules.second; ++itRule)
+        if(itRule->second.symbols != list)
         {
             const auto firstIntermediate = first(itRule->second.symbols);
             firstSet.insert(firstIntermediate.begin(), firstIntermediate.end());
