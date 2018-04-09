@@ -10,10 +10,5 @@
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream & operator <<(std::ostream & os, const Rule & rule)
 {
-    os << "<" << rule.name << "> ::=";
-
-    for(SymbolList::const_iterator it = rule.symbols.begin(); it != rule.symbols.end(); ++it)
-        os << " " << *it;
-
-    return os;
+    return os << "<" << rule.name << "> ::= " << separate_elems(rule.symbols, " ");
 }

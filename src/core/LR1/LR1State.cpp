@@ -6,6 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "LR1State.h"
 #include "core/Rule.h"
+#include "utils/Algos.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 void LR1State::addItem(const Rule & rule, const SymbolList::const_iterator dottedSymbol, SymbolSet && lookahead)
@@ -27,8 +28,10 @@ void LR1State::addItem(const Rule & rule, const SymbolList::const_iterator dotte
 ////////////////////////////////////////////////////////////////////////////////
 void LR1State::addItemsRange(const Grammar::RuleRange & ruleRange, SymbolSet && lookahead)
 {
-    for(Grammar::RuleIterator ruleIt = ruleRange.first; ruleIt != ruleRange.second; ++ruleIt)
-        addItem(ruleIt->second, ruleIt->second.symbols.begin(), SymbolSet(lookahead));
+    for_each(ruleRange, [&](const auto & rule)
+    {
+        this->addItem(rule.second, rule.second.symbols.begin(), SymbolSet(lookahead)); // GCC 6.3 bug : need to explicitly use 'this->'
+    });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,14 +72,11 @@ bool LR1State::isMergeableWith(const ParserState::Ptr & state)
     if(items.size() != state->items.size())
         return false;
 
-    for(auto itemThis = items.begin(), itemState = state->items.begin(); itemThis != items.end(); ++itemThis, ++itemState)
+    return all_of_pairs(items, state->items, [](auto & itemThis, auto & itemState)
     {
-        if(itemThis->dottedSymbol != itemState->dottedSymbol ||
-           itemThis->rule         != itemState->rule ||
-           itemThis->lookaheads   != itemState->lookaheads)
-            return false;
-    }
-
-    return true;
+        return itemThis.dottedSymbol == itemState.dottedSymbol
+            && itemThis.rule         == itemState.rule
+            && itemThis.lookaheads   == itemState.lookaheads;
+    });
 }
 

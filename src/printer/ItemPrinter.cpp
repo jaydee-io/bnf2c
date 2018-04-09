@@ -19,6 +19,7 @@ std::ostream & operator <<(std::ostream & os, const Item & item)
 
     os << "<" << item.rule.name << "> ::=";
 
+    // We need an iterator to compare to the dotted symbol
     for(auto symbolIt = item.rule.symbols.begin(); symbolIt != item.rule.symbols.end(); ++symbolIt)
     {
         if(symbolIt == item.dottedSymbol)
@@ -31,18 +32,7 @@ std::ostream & operator <<(std::ostream & os, const Item & item)
         os << " •";
 
     if(!item.lookaheads.empty())
-    {
-        os << ", ";
-        for(auto itSymbol = item.lookaheads.begin(); itSymbol != item.lookaheads.end(); ++itSymbol)
-        {
-            os << *itSymbol;
-
-            auto nextSymbol = itSymbol;
-            ++nextSymbol;
-            if(nextSymbol != item.lookaheads.end())
-                os << '/';
-        }
-    }
+        os << ", " << separate_elems(item.lookaheads, "/");
 
     return os;
 }

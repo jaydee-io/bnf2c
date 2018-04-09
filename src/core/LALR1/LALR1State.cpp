@@ -5,6 +5,7 @@
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
 #include "LALR1State.h"
+#include "utils/Algos.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 bool LALR1State::isMergeableWith(const ParserState::Ptr & state)
@@ -12,21 +13,20 @@ bool LALR1State::isMergeableWith(const ParserState::Ptr & state)
     if(items.size() != state->items.size())
         return false;
 
-    for(auto itemThis = items.begin(), itemState = state->items.begin(); itemThis != items.end(); ++itemThis, ++itemState)
+    return all_of_pairs(items, state->items, [](auto & itemThis, auto & itemState)
     {
-        if(itemThis->dottedSymbol != itemState->dottedSymbol ||
-           itemThis->rule         != itemState->rule)
-            return false;
-    }
-
-    return true;
+            return itemThis.dottedSymbol == itemState.dottedSymbol
+                && itemThis.rule         == itemState.rule;
+        });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 void LALR1State::merge(Ptr & state)
 {
-    for(auto itemThis = items.begin(), itemState = state->items.begin(); itemThis != items.end(); ++itemThis, ++itemState)
-        for(auto && lookahead : itemState->lookaheads)
-            itemThis->lookaheads.insert(std::move(lookahead));
+    for_each_pair(items, state->items, [](auto & itemThis, auto & itemState)
+    {
+        for(auto && lookahead : itemState.lookaheads)
+            itemThis.lookaheads.insert(std::move(lookahead));
+    });
 }
 

@@ -87,7 +87,6 @@ void ParserBNF::parseBnf2cBlock(void)
 
                 m_grammar.addRule(rule);
                 continue;
-                break;
             }
 
             // New alternative to the current parsing rule
@@ -100,7 +99,6 @@ void ParserBNF::parseBnf2cBlock(void)
 
                 m_grammar.addRule(rule);
                 continue;
-                break;
             }
 
             // Intermediate type
@@ -140,7 +138,6 @@ void ParserBNF::parseBnf2cBlock(void)
             // End of input
             case TokenType::END_OF_INPUT :
                 return;
-                break;
         }
 
         m_token = m_lexer.nextToken();
@@ -198,7 +195,6 @@ void ParserBNF::parseRule(Rule & rule)
 
             default :
                 return;
-                break;
         }
     }
 }
@@ -296,7 +292,6 @@ void ParserBNF::parseIntermediatesTypes(void)
 
             default :
                 return;
-                break;
         }
     }
 }

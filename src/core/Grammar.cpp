@@ -7,6 +7,7 @@
 #include "Grammar.h"
 #include "config/Options.h"
 #include "printer/PrettyPrinters.h"
+#include "utils/Algos.h"
 
 #include <sstream>
 
@@ -89,15 +90,14 @@ SymbolSet Grammar::first(const SymbolList & list) const
         return { list[0] };
 
     SymbolSet firstSet;
-    const auto intermediateRules = rules.equal_range(list[0].name);
-    for(auto itRule = intermediateRules.first; itRule != intermediateRules.second; ++itRule)
+    for_each(rules.equal_range(list[0].name), [&](const auto & rule)
     {
-        if(itRule->second.symbols != list)
+        if(rule.second.symbols != list)
         {
-            const auto firstIntermediate = first(itRule->second.symbols);
+            const auto firstIntermediate = this->first(rule.second.symbols); // GCC 6.3 bug : need to explicitly use 'this->'
             firstSet.insert(firstIntermediate.begin(), firstIntermediate.end());
         }
-    }
+    });
 
     return firstSet;
 }
@@ -160,7 +160,7 @@ void Grammar::check(void)
         ADD_GENERATING_ERROR("No start rule '" + Grammar::START_RULE + "' found");
 
     // Check intermediates types
-    for(Dictionary::const_iterator intermediate = intermediates.begin(); intermediate != intermediates.end(); ++intermediate)
-        if(intermediateTypes.find(*intermediate) == intermediateTypes.end())
-            ADD_GENERATING_ERROR("Intermediate '" + (*intermediate) + "' has no type");
+    for(const auto & intermediate : intermediates)
+        if(intermediateTypes.find(intermediate) == intermediateTypes.end())
+            ADD_GENERATING_ERROR("Intermediate '" + intermediate + "' has no type");
 }

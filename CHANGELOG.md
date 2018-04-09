@@ -1,5 +1,6 @@
 Unreleased
 ----------
+ * Some refactoring
  * Activate '-Wall' and fix warnings
  * Added VSCode workspace
  * Fix recursive rule issue
