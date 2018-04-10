@@ -1,5 +1,9 @@
 Unreleased
 ----------
+_(nothing)_
+
+Version 0.6 (2018-04-10)
+------------------------
  * Some refactoring
  * Activate '-Wall' and fix warnings
  * Added VSCode workspace

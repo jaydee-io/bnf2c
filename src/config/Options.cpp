@@ -66,7 +66,7 @@ std::ostream & operator <<(std::ostream & os, const Indenter & indenter)
 
 ////////////////////////////////////////////////////////////////////////////////
 Options Options::DEFAULT;
-const std::string Options::VERSION            ("0.5");
+const std::string Options::VERSION            ("0.6");
 
 const struct option Options::OPTIONS [] = {
     { "help",                   no_argument,       nullptr, 'h'},
@@ -229,7 +229,7 @@ void Options::parseArguments(int argc, char ** argv)
             }
             case 'v' :
                 std::cout << "bnf2c version " << Options::VERSION << std::endl;
-                std::cout << "Copyright © 2013 - 2016, Jérôme DUMESNIL" << std::endl;
+                std::cout << "Copyright © 2013 - 2018, Jérôme DUMESNIL" << std::endl;
                 std::cout << "BSD License" << std::endl;
                 std::cout << "https://github.com/jaydee-io/bnf2c" << std::endl << std::endl;
                 std::cout << "Written by Jérôme DUMESNIL" << std::endl;
@@ -338,4 +338,3 @@ Options & Options::operator <<(const Options & options)
 
     return (*this);
 }
-
