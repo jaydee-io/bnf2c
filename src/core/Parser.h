@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _PARSER_H_
-#define _PARSER_H_
+#ifndef PARSER_H
+#define PARSER_H
 #include "ParserState.h"
 #include "Errors.h"
 
@@ -60,4 +60,4 @@ class Parser
         States          m_states;
 };
 
-#endif /* _PARSER_H_ */
+#endif /* PARSER_H */

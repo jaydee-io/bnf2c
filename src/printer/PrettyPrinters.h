@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _PRETTY_PRINTER_H_
-#define _PRETTY_PRINTER_H_
+#ifndef PRETTY_PRINTER_H
+#define PRETTY_PRINTER_H
 #include <ostream>
 
 // Core objects
@@ -105,5 +105,5 @@ detail::SequenceEmitter<Container> separate_elems(const Container & container, s
     return { container, std::move(separator) };
 }
 
-#endif /* _PRETTY_PRINTER_H_ */
+#endif /* PRETTY_PRINTER_H */
 

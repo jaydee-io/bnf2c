@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _LR1STATE_H_
-#define _LR1STATE_H_
+#ifndef LR1STATE_H
+#define LR1STATE_H
 #include "core/ParserState.h"
 #include "core/Grammar.h"
 
@@ -24,4 +24,4 @@ class LR1State : public ParserState
         void addItemsRange(const Grammar::RuleRange & ruleRange, SymbolSet && lookahead);
 };
 
-#endif /* _LR1STATE_H_ */
+#endif /* LR1STATE_H */

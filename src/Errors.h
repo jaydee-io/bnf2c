@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _ERRORS_H_
-#define _ERRORS_H_
+#ifndef ERRORS_H
+#define ERRORS_H
 #include <string>
 #include <list>
 
@@ -45,4 +45,4 @@ struct Errors
     int                  exitCode;
 };
 
-#endif /* _ERRORS_H_ */
+#endif /* ERRORS_H */

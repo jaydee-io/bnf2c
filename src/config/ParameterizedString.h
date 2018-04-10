@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _PARAMETERIZED_STRING_H_
-#define _PARAMETERIZED_STRING_H_
+#ifndef PARAMETERIZED_STRING_H
+#define PARAMETERIZED_STRING_H
 #include <string>
 
 namespace Vars
@@ -46,5 +46,5 @@ inline std::ostream & operator <<(std::ostream & os, const ParameterizedString &
     return os;
 }
 
-#endif /* _PARAMETERIZED_STRING_H_ */
+#endif /* PARAMETERIZED_STRING_H */
 

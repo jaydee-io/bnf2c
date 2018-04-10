@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _PARSING_ACTION_H_
-#define _PARSING_ACTION_H_
+#ifndef PARSING_ACTION_H
+#define PARSING_ACTION_H
 #include <functional>
 
 class Rule;
@@ -44,5 +44,5 @@ struct hash<ParsingAction>
 
 }
 
-#endif /* _PARSING_ACTION_H_ */
+#endif /* PARSING_ACTION_H */
 

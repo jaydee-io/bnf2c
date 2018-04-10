@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _GRAMMAR_H_
-#define _GRAMMAR_H_
+#ifndef GRAMMAR_H
+#define GRAMMAR_H
 #include "Rule.h"
 #include "Symbol.h"
 #include "Errors.h"
@@ -57,4 +57,4 @@ class Grammar
         IntermediateTypeDictionary intermediateTypes;
 };
 
-#endif /* _GRAMMAR_H_ */
+#endif /* GRAMMAR_H */

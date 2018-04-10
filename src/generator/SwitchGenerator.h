@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _SWITCH_GENERATOR_H_
-#define _SWITCH_GENERATOR_H_
+#ifndef SWITCH_GENERATOR_H
+#define SWITCH_GENERATOR_H
 #include "config/Options.h"
 #include <ostream>
 
@@ -25,5 +25,5 @@ class SwitchGenerator
         const std::string m_defaultCode;
 };
 
-#endif /* _SWITCH_GENERATOR_H_ */
+#endif /* SWITCH_GENERATOR_H */
 

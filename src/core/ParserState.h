@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _PARSERSTATE_H_
-#define _PARSERSTATE_H_
+#ifndef PARSERSTATE_H
+#define PARSERSTATE_H
 #include "Item.h"
 #include "Errors.h"
 #include "ParsingAction.h"
@@ -42,4 +42,4 @@ class ParserState
         int      numState;
 };
 
-#endif /* _PARSERSTATE_H_ */
+#endif /* PARSERSTATE_H */

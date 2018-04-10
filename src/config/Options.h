@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _OPTIONS_H_
-#define _OPTIONS_H_
+#ifndef OPTIONS_H
+#define OPTIONS_H
 #include "ParameterizedString.h"
 #include <string>
 #include <vector>
@@ -102,4 +102,4 @@ struct Options
         static const std::vector<std::string> OPTIONS_TEXT [];
 };
 
-#endif /* _OPTIONS_H_ */
+#endif /* OPTIONS_H */

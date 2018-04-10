@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _STREAMS_H_
-#define _STREAMS_H_
+#ifndef STREAMS_H
+#define STREAMS_H
 #include <string>
 #include <istream>
 #include <ostream>
@@ -24,4 +24,4 @@ class Streams
         std::ofstream m_outputFileStream;
 };
 
-#endif /* _STREAMS_H_ */
+#endif /* STREAMS_H */

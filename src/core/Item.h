@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _ITEM_H_
-#define _ITEM_H_
+#ifndef ITEM_H
+#define ITEM_H
 #include "Symbol.h"
 
 class Rule;
@@ -42,5 +42,5 @@ struct Item
     bool isTerminalInLookaheads(const std::string & terminal) const;
 };
 
-#endif /* _ITEM_H_ */
+#endif /* ITEM_H */
 

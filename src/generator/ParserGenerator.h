@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _PARSER_GENERATOR_H_
-#define _PARSER_GENERATOR_H_
+#ifndef PARSER_GENERATOR_H
+#define PARSER_GENERATOR_H
 #include "core/Parser.h"
 #include "core/Grammar.h"
 #include "config/Options.h"
@@ -39,5 +39,5 @@ class ParserGenerator
         SwitchGenerator             m_switchOnStates;
 };
 
-#endif /* _PARSER_GENERATOR_H_ */
+#endif /* PARSER_GENERATOR_H */
 

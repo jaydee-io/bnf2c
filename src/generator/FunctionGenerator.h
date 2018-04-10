@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _FUNCTION_GENERATOR_H_
-#define _FUNCTION_GENERATOR_H_
+#ifndef FUNCTION_GENERATOR_H
+#define FUNCTION_GENERATOR_H
 #include "config/Options.h"
 #include <ostream>
 
@@ -27,5 +27,5 @@ class FunctionGenerator
         const std::string m_returnExpr;
 };
 
-#endif /* _FUNCTION_GENERATOR_H_ */
+#endif /* FUNCTION_GENERATOR_H */
 

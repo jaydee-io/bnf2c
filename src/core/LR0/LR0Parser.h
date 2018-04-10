@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _LR0PARSER_H_
-#define _LR0PARSER_H_
+#ifndef LR0PARSER_H
+#define LR0PARSER_H
 #include "core/Parser.h"
 #include "LR0State.h"
 
@@ -19,4 +19,4 @@ class LR0Parser : public Parser
         std::unordered_map<std::string, ParserState::Ptr> createSuccessorStates(const ParserState::Ptr & state) override;
 };
 
-#endif /* _LR0PARSER_H_ */
+#endif /* LR0PARSER_H */

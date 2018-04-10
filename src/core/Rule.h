@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _RULE_H_
-#define _RULE_H_
+#ifndef RULE_H
+#define RULE_H
 #include "Symbol.h"
 
 #include <string>
@@ -31,4 +31,4 @@ class Rule
         int         numRule = -1;
 };
 
-#endif /* _RULE_H_ */
+#endif /* RULE_H */

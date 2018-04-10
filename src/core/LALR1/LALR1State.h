@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _LALR1STATE_H_
-#define _LALR1STATE_H_
+#ifndef LALR1STATE_H
+#define LALR1STATE_H
 #include "core/LR1/LR1State.h"
 
 class LALR1State : public LR1State
@@ -17,4 +17,4 @@ class LALR1State : public LR1State
         void merge(Ptr & state) override;
 };
 
-#endif /* _LALR1STATE_H_ */
+#endif /* LALR1STATE_H */

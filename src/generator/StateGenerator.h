@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _STATE_GENERATOR_H_
-#define _STATE_GENERATOR_H_
+#ifndef STATE_GENERATOR_H
+#define STATE_GENERATOR_H
 #include "core/ParserState.h"
 #include "core/Grammar.h"
 #include "config/Options.h"
@@ -35,5 +35,5 @@ class StateGenerator
         SwitchGenerator     m_switchOnTerminal;
 };
 
-#endif /* _STATES_GENERATOR_H_ */
+#endif /* STATES_GENERATOR_H */
 

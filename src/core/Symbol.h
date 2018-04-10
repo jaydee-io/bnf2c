@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _SYMBOL_H_
-#define _SYMBOL_H_
+#ifndef SYMBOL_H
+#define SYMBOL_H
 #include <vector>
 #include <string>
 #include <unordered_set>
@@ -45,4 +45,4 @@ struct hash<Symbol>
 
 }
 
-#endif /* _SYMBOL_H_ */
+#endif /* SYMBOL_H */

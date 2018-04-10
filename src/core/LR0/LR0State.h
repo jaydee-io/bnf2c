@@ -4,8 +4,8 @@
 // This file is distributed under the 4-clause Berkeley Software Distribution
 // License. See LICENSE for details.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _LR0STATE_H_
-#define _LR0STATE_H_
+#ifndef LR0STATE_H
+#define LR0STATE_H
 #include "core/ParserState.h"
 #include "core/Grammar.h"
 
@@ -25,4 +25,4 @@ class LR0State : public ParserState
         SymbolSet symbolsAlreadyClosed;
 };
 
-#endif /* _LR0STATE_H_ */
+#endif /* LR0STATE_H */
