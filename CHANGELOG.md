@@ -1,6 +1,6 @@
 Unreleased
 ----------
-_(nothing)_
+* Debug : print grammar rules in order of declaration
 
 Version 0.6 (2018-04-10)
 ------------------------
