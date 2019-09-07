@@ -8,7 +8,7 @@
 
 #include <sstream>
 #include <iostream>
-#include <iomanip>
+#include <stdexcept>
 
 ////////////////////////////////////////////////////////////////////////////////
 Streams::Streams(const std::string & inputFileName, const std::string & outputFileName)
