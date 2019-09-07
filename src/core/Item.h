@@ -26,7 +26,6 @@ struct Item
     SymbolSet lookaheads;
 
 
-    Item(void) = default;
     Item(const Rule & rule, SymbolList::const_iterator dot, ParserState * nextState);
     Item(const Rule & rule, SymbolList::const_iterator dot, ParserState * nextState, SymbolSet && lookahead);
 
