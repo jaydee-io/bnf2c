@@ -1,63 +1,216 @@
-dist: trusty
-sudo: true
+dist: xenial
 language: cpp
+git:
+  depth: 1
 
 install:
-      - if [[ -n "$CLANG_VERSION" ]]; then export CXX=clang++-$CLANG_VERSION CC=clang-$CLANG_VERSION; fi
-      - if [[ -n "$GCC_VERSION" ]];   then export CXX=g++-$GCC_VERSION       CC=gcc-$GCC_VERSION;     fi
+  - if [[ -n "$CUSTOM_COMPILER" ]]; then eval "${CUSTOM_COMPILER}"; fi
 
 script:
-    - mkdir build && cd build && cmake .. && make && ctest -V
+  - mkdir build
+  - cd build
+  - cmake ..
+  - cmake --build .
+  - ctest -V
 
 matrix:
-    include:
-        # gcc 6.0
-        - os: linux
-          compiler: gcc
-          addons:
-              apt:
-                  sources:
-                      - ubuntu-toolchain-r-test
-                  packages:
-                      - g++-6
-          env: GCC_VERSION=6
-        # gcc 7.2
-        - os: linux
-          compiler: gcc
-          addons:
-              apt:
-                  sources:
-                      - ubuntu-toolchain-r-test
-                  packages:
-                      - g++-7
-          env: GCC_VERSION=7
-        # clang 4.0
-        - os: linux
-          compiler: clang
-          addons:
-              apt:
-                  sources:
-                      - ubuntu-toolchain-r-test
-                      - llvm-toolchain-trusty-4.0
-                  packages:
-                      - clang-4.0
-                      - g++-6
-          env: CLANG_VERSION=4.0
-        # clang 6.0
-        - os: linux
-          compiler: clang
-          addons:
-              apt:
-                  sources:
-                      - ubuntu-toolchain-r-test
-                      - llvm-toolchain-trusty-6.0
-                  packages:
-                      - clang-6.0
-                      - g++-7
-          env: CLANG_VERSION=6.0
-          # osx
-        - os: osx
-          osx_image: xcode8.2
-          before_install:
-              - brew update
-              - brew install re2c
+  include:
+    #################################################################################
+    # Linux / GCC
+    # GCC 4.8 and older doesn't support C++14
+    #################################################################################
+    # gcc 9
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+      env: CUSTOM_COMPILER="CC=gcc-9 && CXX=g++-9"
+    # gcc 8
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+      env: CUSTOM_COMPILER="CC=gcc-8 && CXX=g++-8"
+    # gcc 7
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env: CUSTOM_COMPILER="CC=gcc-7 && CXX=g++-7"
+    # gcc 6
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env: CUSTOM_COMPILER="CC=gcc-6 && CXX=g++-6"
+    # gcc 5
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env: CUSTOM_COMPILER="CC=gcc-5 && CXX=g++-5"
+    # gcc 4.9
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env: CUSTOM_COMPILER="CC=gcc-4.9 && CXX=g++-4.9"
+
+    #################################################################################
+    # Linux / clang
+    #################################################################################
+    # clang 8
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-8
+          packages:
+            - clang-8
+            - g++-9
+      env: CUSTOM_COMPILER="CC=clang-8 && CXX=clang++-8"
+    # clang 7
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-7
+          packages:
+            - clang-7
+            - g++-9
+      env: CUSTOM_COMPILER="CC=clang-7 && CXX=clang++-7"
+    # clang 6.0
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-6.0
+          packages:
+            - clang-6.0
+            - g++-9
+      env: CUSTOM_COMPILER="CC=clang-6.0 && CXX=clang++-6.0"
+    # clang 5.0
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-5.0
+          packages:
+            - clang-5.0
+            - g++-9
+      env: CUSTOM_COMPILER="CC=clang-5.0 && CXX=clang++-5.0"
+    # clang 4.0
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-4.0
+          packages:
+            - clang-4.0
+            - g++-9
+      env: CUSTOM_COMPILER="CC=clang-4.0 && CXX=clang++-4.0"
+    # clang 3.9
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-3.9
+          packages:
+            - clang-3.9
+            - g++-9
+      env: CUSTOM_COMPILER="CC=clang-3.9 && CXX=clang++-3.9"
+    # clang 3.8
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-xenial-3.8
+          packages:
+            - clang-3.8
+            - g++-9
+      env: CUSTOM_COMPILER="CC=clang-3.8 && CXX=clang++-3.8"
+
+    #################################################################################
+    # macosx
+    #################################################################################
+    # osx (xcode 11)
+    - os: osx
+      osx_image: xcode11
+      before_install:
+        - brew update
+        - brew install re2c
+    # osx (xcode 10.3)
+    - os: osx
+      osx_image: xcode10.3
+      before_install:
+        - brew update
+        - brew install re2c
+    # osx (xcode 9.4)
+    - os: osx
+      osx_image: xcode9.4
+      before_install:
+        - brew update
+        - brew install re2c
+    # osx (xcode 8.3)
+    - os: osx
+      osx_image: xcode8.3
+      before_install:
+        - brew update
+        - brew install re2c
+    # osx (xcode 7.3)
+    - os: osx
+      osx_image: xcode7.3
+      before_install:
+        - brew update
+        - brew install re2c
+    # osx (xcode 6.4)
+    - os: osx
+      osx_image: xcode6.4
+      before_install:
+        - brew update
+        - brew install re2c
+
+    #################################################################################
+    # Windows
+    #################################################################################
+    # Windows (Windows server 1803)
+    # Not working for now
+    # - os: windows
