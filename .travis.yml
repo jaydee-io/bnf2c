@@ -1,4 +1,4 @@
-dist: xenial
+dist: focal
 language: cpp
 git:
   depth: 1
@@ -19,6 +19,16 @@ matrix:
     # Linux / GCC
     # GCC 4.8 and older doesn't support C++14
     #################################################################################
+    # gcc 10
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-10
+      env: CUSTOM_COMPILER="CC=gcc-10 && CXX=g++-10"
     # gcc 9
     - os: linux
       compiler: gcc
@@ -51,6 +61,7 @@ matrix:
       env: CUSTOM_COMPILER="CC=gcc-7 && CXX=g++-7"
     # gcc 6
     - os: linux
+      dist: xenial
       compiler: gcc
       addons:
         apt:
@@ -61,6 +72,7 @@ matrix:
       env: CUSTOM_COMPILER="CC=gcc-6 && CXX=g++-6"
     # gcc 5
     - os: linux
+      dist: xenial
       compiler: gcc
       addons:
         apt:
@@ -71,6 +83,7 @@ matrix:
       env: CUSTOM_COMPILER="CC=gcc-5 && CXX=g++-5"
     # gcc 4.9
     - os: linux
+      dist: xenial
       compiler: gcc
       addons:
         apt:
@@ -83,6 +96,42 @@ matrix:
     #################################################################################
     # Linux / clang
     #################################################################################
+    # clang 11
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-focal-11
+          packages:
+            - clang-11
+            - g++-10
+      env: CUSTOM_COMPILER="CC=clang-11 && CXX=clang++-11"
+    # clang 10
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-focal-10
+          packages:
+            - clang-10
+            - g++-10
+      env: CUSTOM_COMPILER="CC=clang-10 && CXX=clang++-10"
+    # clang 9
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-focal-9
+          packages:
+            - clang-9
+            - g++-10
+      env: CUSTOM_COMPILER="CC=clang-9 && CXX=clang++-9"
     # clang 8
     - os: linux
       compiler: clang
@@ -90,7 +139,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-8
+            - llvm-toolchain-focal-8
           packages:
             - clang-8
             - g++-9
@@ -102,7 +151,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-7
+            - llvm-toolchain-focal-7
           packages:
             - clang-7
             - g++-9
@@ -114,13 +163,14 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-6.0
+            - llvm-toolchain-focal-6.0
           packages:
             - clang-6.0
             - g++-9
       env: CUSTOM_COMPILER="CC=clang-6.0 && CXX=clang++-6.0"
     # clang 5.0
     - os: linux
+      dist: xenial
       compiler: clang
       addons:
         apt:
@@ -133,6 +183,7 @@ matrix:
       env: CUSTOM_COMPILER="CC=clang-5.0 && CXX=clang++-5.0"
     # clang 4.0
     - os: linux
+      dist: xenial
       compiler: clang
       addons:
         apt:
@@ -145,6 +196,7 @@ matrix:
       env: CUSTOM_COMPILER="CC=clang-4.0 && CXX=clang++-4.0"
     # clang 3.9
     - os: linux
+      dist: xenial
       compiler: clang
       addons:
         apt:
@@ -157,6 +209,7 @@ matrix:
       env: CUSTOM_COMPILER="CC=clang-3.9 && CXX=clang++-3.9"
     # clang 3.8
     - os: linux
+      dist: xenial
       compiler: clang
       addons:
         apt:
@@ -171,9 +224,15 @@ matrix:
     #################################################################################
     # macosx
     #################################################################################
+    # osx (xcode 12.2)
+    - os: osx
+      osx_image: xcode12.2
+      before_install:
+        - brew update
+        - brew install re2c
     # osx (xcode 11)
     - os: osx
-      osx_image: xcode11
+      osx_image: xcode11.6
       before_install:
         - brew update
         - brew install re2c
@@ -194,19 +253,7 @@ matrix:
       osx_image: xcode8.3
       before_install:
         - brew update
-        - brew install re2c
-    # osx (xcode 7.3)
-    - os: osx
-      osx_image: xcode7.3
-      before_install:
-        - brew update
-        - brew install re2c
-    # osx (xcode 6.4)
-    - os: osx
-      osx_image: xcode6.4
-      before_install:
-        - brew update
-        - brew install re2c
+        - brew install --build-from-source re2c
 
     #################################################################################
     # Windows

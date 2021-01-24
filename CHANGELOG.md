@@ -1,6 +1,13 @@
 Unreleased
 ----------
 * Debug : print grammar rules in order of declaration
+* Update compiler support:
+  * drop xcode 6.4 : no more supported by travis
+  * drop xcode 7.3 : `brew update` issue
+  * update xcode 11.0 to 11.6
+  * add xcode 12.2
+  * add gcc 10
+  * add clang 9.0, 10.0 & 11.0
 
 Version 0.6 (2018-04-10)
 ------------------------
